@@ -2030,6 +2030,34 @@ input:focus-visible {
   flex-shrink: 0;
 }
 
+.shortcut-add-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  width: calc(100% - 32px);
+  margin: 0 16px 20px;
+  padding: 10px 16px;
+  border-radius: 10px;
+  border: 1px dashed var(--border2);
+  background: transparent;
+  color: var(--text-dim);
+  cursor: pointer;
+  font-size: 12px;
+  font-family: var(--sans);
+  transition: background var(--transition), color var(--transition), border-color var(--transition);
+}
+
+.shortcut-add-btn:hover {
+  background: var(--surface2);
+  color: var(--text-muted);
+  border-color: var(--border2);
+}
+
+.shortcut-add-btn:active {
+  transform: scale(0.99);
+}
+
 .home-header-btns {
   display: flex;
   gap: 8px;
