@@ -1,6 +1,6 @@
 {
-  "name": "예방업무 어시스턴트",
-  "short_name": "예방 어시스턴트",
+  "name": "예방GPT",
+  "short_name": "예방GPT",
   "description": "예방업무에 필요한 법적기준과 서류제출 기한 계산에 바로 쓸 수 있는 실무형 도우미",
   "start_url": "./index.html",
   "display": "standalone",

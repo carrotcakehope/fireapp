@@ -4253,24 +4253,20 @@ showScreen("home");
     deferredPrompt = null;
   });
 
-  // ── 헤더 📲 버튼 ──
-  const headerBtn = document.getElementById('pwa-install-btn');
-  if (headerBtn && !isStandalone) {
-    if (isIOS || isPC || isAndroid) headerBtn.style.display = 'flex';
-    headerBtn.addEventListener('click', openInstallModal);
-  }
-
-  // ── 메인 카드 버튼 ──
+  // ── 메인 바로가기 버튼: 앱으로 실행 중이면 숨김 ──
   const cardBtn = document.getElementById('open-install-guide');
   if (cardBtn) {
-    // 설명 텍스트 플랫폼에 맞게
-    const desc = document.getElementById('install-card-desc');
-    if (desc) {
-      if (isIOS)     desc.textContent = '홈 화면에 앱 아이콘 추가하기';
-      else if (isAndroid) desc.textContent = '홈 화면에 앱 설치하기';
-      else           desc.textContent = '바탕화면에 브라우저 바로가기 만들기';
+    if (isStandalone) {
+      cardBtn.style.display = 'none';
+    } else {
+      const desc = document.getElementById('install-card-desc');
+      if (desc) {
+        if (isIOS)          desc.textContent = '홈 화면에 앱 아이콘 추가하기';
+        else if (isAndroid) desc.textContent = '홈 화면에 앱 설치하기';
+        else                desc.textContent = '바탕화면에 브라우저 바로가기 만들기';
+      }
+      cardBtn.addEventListener('click', openInstallModal);
     }
-    cardBtn.addEventListener('click', openInstallModal);
   }
 
   // ── iOS 구버튼 (기존 팝업 연결 유지) ──
