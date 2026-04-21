@@ -86,9 +86,14 @@
       <div class="menu-right" id="home-reminders"></div>
     </div>
 
-    <button id="open-install-guide" class="shortcut-add-btn" type="button">
-      📲 <span id="install-card-desc">바탕화면·홈 화면에 바로가기 추가</span>
-    </button>
+    <div class="home-bottom-btns">
+      <button id="open-install-guide" class="shortcut-add-btn" type="button">
+        📲 <span id="install-card-desc">바로가기 추가</span>
+      </button>
+      <button id="open-guide" class="shortcut-add-btn" type="button">
+        📖 이용 안내
+      </button>
+    </div>
 
     <section class="contact-card" aria-label="문의 안내">
       <div class="contact-inner">
@@ -185,6 +190,86 @@
           <button id="restart-explorer-from-multiuse" class="btn btn-primary" type="button">다시 입력</button>
         </div>
       </section>
+    </div>
+  </section>
+
+  <section id="screen-guide" class="screen">
+    <div class="topbar">
+      <button id="back-from-guide" class="back-btn" type="button">←</button>
+      <span class="tb-title">이용 안내</span>
+    </div>
+    <div class="scroll-content">
+
+      <p class="section-label">기능 소개</p>
+      <div class="guide-feature-list">
+        <div class="guide-feature-item">
+          <div class="guide-feature-icon mc-red">🧯</div>
+          <div class="guide-feature-text">
+            <div class="guide-feature-title">소방시설탐색기</div>
+            <div class="guide-feature-desc">건물 용도·면적·층수 등을 입력하면 현행법 기준으로 설치 의무가 있는 소방시설을 자동으로 도출합니다. 다중이용업소 안전시설도 함께 확인할 수 있습니다.</div>
+          </div>
+        </div>
+        <div class="guide-feature-item">
+          <div class="guide-feature-icon mc-blue">📅</div>
+          <div class="guide-feature-text">
+            <div class="guide-feature-title">날짜 계산기</div>
+            <div class="guide-feature-desc">자체점검 제출기한, 안전관리자 선임 기한, 부적합 조치기한을 자동으로 계산합니다. 결과를 메인화면 알림판에 추가해두면 기한을 놓치지 않을 수 있습니다.</div>
+          </div>
+        </div>
+        <div class="guide-feature-item">
+          <div class="guide-feature-icon mc-amber">🏢</div>
+          <div class="guide-feature-text">
+            <div class="guide-feature-title">작동·종합 대상 판독기</div>
+            <div class="guide-feature-desc">스프링클러 설치 여부, 연면적, 층수 등의 조건에 따라 작동기능점검 또는 종합정밀점검 대상인지를 판정합니다.</div>
+          </div>
+        </div>
+        <div class="guide-feature-item">
+          <div class="guide-feature-icon mc-green">👥</div>
+          <div class="guide-feature-text">
+            <div class="guide-feature-title">다중이용업소 판독기</div>
+            <div class="guide-feature-desc">업종을 선택하고 질문에 답하면 다중이용업소 해당 여부를 판정합니다. 해당 시 설치해야 하는 안전시설도 안내됩니다.</div>
+          </div>
+        </div>
+        <div class="guide-feature-item">
+          <div class="guide-feature-icon mc-amber">🧮</div>
+          <div class="guide-feature-text">
+            <div class="guide-feature-title">수용인원 계산기</div>
+            <div class="guide-feature-desc">건물 용도와 면적을 입력하면 소방관계법령에 따른 법정 수용인원을 자동 산정합니다.</div>
+          </div>
+        </div>
+      </div>
+
+      <p class="section-label">앱처럼 설치하기</p>
+      <div class="info-box blue">
+        <div class="ib-title">📲 바탕화면·홈 화면에 바로가기 추가</div>
+        메인화면 하단의 <strong>바로가기 추가</strong> 버튼을 누르면 기기에 맞는 방법을 안내해 드립니다.<br><br>
+        <strong>PC</strong> — .url 바로가기 파일을 다운로드해서 바탕화면에 놓으면 더블클릭으로 바로 열 수 있습니다.<br>
+        <strong>안드로이드</strong> — Chrome에서 "홈 화면에 추가"하면 앱 아이콘이 생성됩니다.<br>
+        <strong>아이폰</strong> — 사파리 하단 공유버튼 → "홈 화면에 추가"를 탭하세요.
+      </div>
+      <div class="info-box amber">
+        <div class="ib-title">✅ 앱으로 설치하면 좋은 점</div>
+        주소창 없이 전체화면으로 실행되고, 한 번 로딩된 후에는 인터넷이 없어도 기본 기능을 사용할 수 있습니다.
+      </div>
+
+      <p class="section-label">화면 설정</p>
+      <div class="info-box blue">
+        <div class="ib-title">🌙 다크 / ☀️ 라이트 모드</div>
+        화면 우측 상단의 아이콘 버튼으로 다크모드와 라이트모드를 전환할 수 있습니다. 선택한 테마는 기기에 저장됩니다.
+      </div>
+
+      <p class="section-label">메인화면 알림판</p>
+      <div class="info-box blue">
+        <div class="ib-title">📌 날짜 계산 결과 저장</div>
+        날짜 계산기에서 계산 후 <strong>"메인화면에 표시"</strong> 버튼을 누르면 메인화면 오른쪽 알림판에 기한이 표시됩니다. D-day가 7일 이내로 다가오면 빨간색으로 강조됩니다.
+      </div>
+
+      <p class="section-label">참고사항</p>
+      <div class="info-box amber">
+        <div class="ib-title">⚠️ 이 앱은 참고용입니다</div>
+        표시되는 결과는 현행 법령 기준으로 자동 산출한 참고값입니다. 건축허가 연도·지자체 조례·현장 조건 등에 따라 다를 수 있으므로, 반드시 예방과 담당자 또는 관련 법령을 통해 교차검증하세요.
+      </div>
+
     </div>
   </section>
 

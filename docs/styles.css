@@ -2055,6 +2055,63 @@ input:focus-visible {
   flex-shrink: 0;
 }
 
+.home-bottom-btns {
+  display: flex;
+  gap: 8px;
+  padding: 0 16px 20px;
+}
+
+.home-bottom-btns .shortcut-add-btn {
+  width: auto;
+  flex: 1;
+  margin: 0;
+  padding: 10px 12px;
+}
+
+/* ── Guide screen ── */
+.guide-feature-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.guide-feature-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  padding: 14px 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow-sm);
+}
+
+.guide-feature-icon {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  font-size: 20px;
+}
+
+.guide-feature-title {
+  font-size: 14px;
+  font-weight: 700;
+  margin-bottom: 4px;
+  letter-spacing: -0.2px;
+}
+
+.guide-feature-desc {
+  font-size: 12px;
+  color: var(--text-muted);
+  line-height: 1.7;
+  word-break: keep-all;
+}
+
 .shortcut-add-btn {
   display: flex;
   align-items: center;

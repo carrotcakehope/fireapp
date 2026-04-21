@@ -740,6 +740,7 @@ const screens = {
   date: document.getElementById("screen-date"),
   inspection: document.getElementById("screen-inspection"),
   multiuse: document.getElementById("screen-multiuse"),
+  guide: document.getElementById("screen-guide"),
 };
 
 const questionElements = {
@@ -3939,6 +3940,8 @@ document.getElementById("back-from-occupancy").addEventListener("click", () => s
 document.getElementById("back-from-inspection").addEventListener("click", () => showScreen("home"));
 document.getElementById("back-from-explorer").addEventListener("click", () => showScreen("home"));
 document.getElementById("back-from-date").addEventListener("click", () => showScreen("home"));
+document.getElementById("back-from-guide").addEventListener("click", () => showScreen("home"));
+document.getElementById("open-guide").addEventListener("click", () => showScreen("guide"));
 document.getElementById("prev-step").addEventListener("click", () => moveStep(-1));
 document.getElementById("next-step").addEventListener("click", () => {
   const activeSteps = getActiveSteps();
@@ -4246,6 +4249,17 @@ showScreen("home");
     } else {
       window.addEventListener("load", setup);
     }
+  }
+
+  // 웹 브라우저 뒤로가기 (Android Chrome / 일반 브라우저)
+  if (!window.Capacitor) {
+    // 페이지 진입 시 더미 state 추가 → 뒤로가기 = popstate
+    history.pushState({ app: true }, "");
+    window.addEventListener("popstate", function () {
+      // 즉시 다시 state 추가 → 앱에서 벗어나지 않도록
+      history.pushState({ app: true }, "");
+      handleBack();
+    });
   }
 })();
 
