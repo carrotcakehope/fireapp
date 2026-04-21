@@ -2723,6 +2723,7 @@ function restartExplorer() {
 
 function renderDateCalculator() {
   const root = document.getElementById("date-content");
+  const prevLeftScroll = root.querySelector(".date-left")?.scrollTop ?? 0;
   const mode = CALC_MODES[state.dateCalc.mode];
   const baseDate = parseDate(state.dateCalc.baseDate);
   const modeIntroBody = mode.kind === "inspect_report"
@@ -2963,6 +2964,9 @@ function renderDateCalculator() {
       });
     });
   }
+
+  const newLeft = root.querySelector(".date-left");
+  if (newLeft && prevLeftScroll > 0) newLeft.scrollTop = prevLeftScroll;
 
   root.querySelectorAll("[data-mode]").forEach((button) => {
     button.addEventListener("click", () => {
