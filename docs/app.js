@@ -3384,7 +3384,7 @@ const multiuseNodes = {
     title: "내부계단으로 연결된 복층구조 영업장인가요?",
     help: "복층구조(내부계단 연결)이면 층수·출입구 조건에 관계없이 다중이용업소에 해당합니다.",
     options: [
-      { label: "예 (복층 + 내부계단 연결)", next: { result: "yes", type: "휴게음식점·제과점·일반음식점", law: "시행령 제2조제1호가목", reason: "내부계단으로 연결된 복층구조 영업장은 층수·출입구 제외 규정이 적용되지 않으므로 다중이용업소에 해당합니다." } },
+      { label: "예 (복층 + 내부계단 연결)", info: "하나의 영업장이 2개 층에 걸쳐 있고, 층 사이를 영업장 내부 계단으로 오르내리는 구조입니다.\n예) 1층과 2층이 모두 같은 음식점이고, 손님이 내부 계단으로 2층을 이용하는 구조", next: { result: "yes", type: "휴게음식점·제과점·일반음식점", law: "시행령 제2조제1호가목", reason: "내부계단으로 연결된 복층구조 영업장은 층수·출입구 제외 규정이 적용되지 않으므로 다중이용업소에 해당합니다." } },
       { label: "아니오 (단층 또는 외부계단)", next: "food_floor" },
     ],
   },
@@ -3434,7 +3434,7 @@ const multiuseNodes = {
     title: "내부계단으로 연결된 복층구조 영업장인가요?",
     help: "",
     options: [
-      { label: "예 (복층 + 내부계단 연결)", next: { result: "yes", type: "공유주방 운영업", law: "시행령 제2조제1호의2", reason: "내부계단으로 연결된 복층구조 영업장은 층수·출입구 제외 규정이 적용되지 않으므로 다중이용업소에 해당합니다." } },
+      { label: "예 (복층 + 내부계단 연결)", info: "하나의 영업장이 2개 층에 걸쳐 있고, 층 사이를 영업장 내부 계단으로 오르내리는 구조입니다.\n예) 1층과 2층이 모두 같은 공유주방이고, 내부 계단으로 연결된 구조", next: { result: "yes", type: "공유주방 운영업", law: "시행령 제2조제1호의2", reason: "내부계단으로 연결된 복층구조 영업장은 층수·출입구 제외 규정이 적용되지 않으므로 다중이용업소에 해당합니다." } },
       { label: "아니오", next: "shared_floor" },
     ],
   },
@@ -3499,7 +3499,7 @@ const multiuseNodes = {
     title: "내부계단으로 연결된 복층구조 영업장인가요?",
     help: "복층구조(내부계단 연결)이면 층수·출입구 조건에 관계없이 다중이용업소에 해당합니다.",
     options: [
-      { label: "예 (복층 + 내부계단 연결)", next: { result: "yes", type: "게임제공업·인터넷컴퓨터게임시설제공업", law: "시행령 제2조제5호", reason: "내부계단으로 연결된 복층구조 영업장은 층수·출입구 제외 규정이 적용되지 않으므로 다중이용업소에 해당합니다." } },
+      { label: "예 (복층 + 내부계단 연결)", info: "하나의 영업장이 2개 층에 걸쳐 있고, 층 사이를 영업장 내부 계단으로 오르내리는 구조입니다.\n예) 1층과 2층이 모두 같은 PC방이고, 내부 계단으로 2층을 이용하는 구조", next: { result: "yes", type: "게임제공업·인터넷컴퓨터게임시설제공업", law: "시행령 제2조제5호", reason: "내부계단으로 연결된 복층구조 영업장은 층수·출입구 제외 규정이 적용되지 않으므로 다중이용업소에 해당합니다." } },
       { label: "아니오 (단층 또는 외부계단)", next: "game_floor" },
     ],
   },
@@ -3619,7 +3619,27 @@ function renderMultiuse() {
     const btn = document.createElement("button");
     btn.type = "button";
     btn.className = "choice-button";
-    btn.innerHTML = `<strong>${option.label}</strong>${option.sub ? `<span>${option.sub}</span>` : ""}`;
+    if (option.info) {
+      const labelWrap = document.createElement("div");
+      labelWrap.style.cssText = "display:flex;align-items:center;gap:8px;";
+      const strong = document.createElement("strong");
+      strong.textContent = option.label;
+      const infoBtn = document.createElement("span");
+      infoBtn.className = "calc-mode-info";
+      infoBtn.textContent = "i";
+      infoBtn.setAttribute("data-floating-tooltip", option.info);
+      infoBtn.addEventListener("click", (e) => e.stopPropagation());
+      labelWrap.appendChild(strong);
+      labelWrap.appendChild(infoBtn);
+      btn.appendChild(labelWrap);
+      if (option.sub) {
+        const span = document.createElement("span");
+        span.textContent = option.sub;
+        btn.appendChild(span);
+      }
+    } else {
+      btn.innerHTML = `<strong>${option.label}</strong>${option.sub ? `<span>${option.sub}</span>` : ""}`;
+    }
     btn.addEventListener("click", () => multiuseSelect(option));
     list.appendChild(btn);
   });
@@ -3637,6 +3657,7 @@ function renderMultiuse() {
   }
 
   root.appendChild(card);
+  initFloatingTooltips(card);
 }
 
 function multiuseSelect(option) {
