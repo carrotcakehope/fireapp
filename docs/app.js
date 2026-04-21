@@ -3946,6 +3946,22 @@ document.getElementById("back-from-explorer").addEventListener("click", () => sh
 document.getElementById("back-from-date").addEventListener("click", () => showScreen("home"));
 document.getElementById("back-from-guide").addEventListener("click", () => showScreen("home"));
 document.getElementById("open-guide").addEventListener("click", () => showScreen("guide"));
+
+// 메일 링크: 모바일은 mailto 그대로, PC는 Gmail 웹 작성 페이지로
+(function initMailLink() {
+  const mailLink = document.querySelector(".contact-right-link");
+  if (!mailLink) return;
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+  if (!isMobile) {
+    mailLink.addEventListener("click", (e) => {
+      e.preventDefault();
+      window.open(
+        "https://mail.google.com/mail/?view=cm&fs=1&to=carrotcakehope%40gmail.com&su=%EC%98%88%EB%B0%A9GPT%20%EA%B1%B4%EC%9D%98%EC%82%AC%ED%95%AD",
+        "_blank"
+      );
+    });
+  }
+})();
 document.getElementById("prev-step").addEventListener("click", () => moveStep(-1));
 document.getElementById("next-step").addEventListener("click", () => {
   const activeSteps = getActiveSteps();
