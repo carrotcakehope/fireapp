@@ -567,8 +567,15 @@ input:focus-visible {
 
 .choice-button .choice-label-wrap .calc-mode-info {
   flex-shrink: 0;
-  opacity: 0.75;
   pointer-events: auto;
+  color: var(--blue);
+  border-color: var(--blue);
+  opacity: 0.85;
+}
+
+.choice-button.selected .choice-label-wrap .calc-mode-info {
+  color: var(--red-soft);
+  border-color: var(--red-soft);
 }
 
 .choice-button span {
