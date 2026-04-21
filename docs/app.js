@@ -4228,53 +4228,130 @@ showScreen("home");
   }
 })();
 
-// ── PWA 홈 화면 추가 ─────────────────────────────────────
-(function initPWAInstall() {
-  // 이미 설치돼서 앱으로 실행 중이면 버튼 숨김
+// ── 바로가기 추가 ─────────────────────────────────────
+(function initInstall() {
+  if (window.Capacitor) return; // APK 환경에서는 불필요
+
+  const APP_URL = 'https://carrotcakehope.github.io/fireapp/';
+  const APP_NAME = '예방업무 어시스턴트';
+
+  const isIOS     = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  const isAndroid = /Android/.test(navigator.userAgent);
+  const isPC      = !isIOS && !isAndroid;
   const isStandalone =
     window.matchMedia('(display-mode: standalone)').matches ||
     window.navigator.standalone === true;
-  if (isStandalone) return;
 
-  // Capacitor(APK) 환경에서는 불필요
-  if (window.Capacitor) return;
+  let deferredPrompt = null;
 
-  const btn = document.getElementById('pwa-install-btn');
+  // Android / PC Chrome: 설치 프롬프트 대기
+  window.addEventListener('beforeinstallprompt', function (e) {
+    e.preventDefault();
+    deferredPrompt = e;
+  });
+  window.addEventListener('appinstalled', function () {
+    deferredPrompt = null;
+  });
+
+  // ── 헤더 📲 버튼 ──
+  const headerBtn = document.getElementById('pwa-install-btn');
+  if (headerBtn && !isStandalone) {
+    if (isIOS || isPC || isAndroid) headerBtn.style.display = 'flex';
+    headerBtn.addEventListener('click', openInstallModal);
+  }
+
+  // ── 메인 카드 버튼 ──
+  const cardBtn = document.getElementById('open-install-guide');
+  if (cardBtn) {
+    // 설명 텍스트 플랫폼에 맞게
+    const desc = document.getElementById('install-card-desc');
+    if (desc) {
+      if (isIOS)     desc.textContent = '홈 화면에 앱 아이콘 추가하기';
+      else if (isAndroid) desc.textContent = '홈 화면에 앱 설치하기';
+      else           desc.textContent = '바탕화면에 브라우저 바로가기 만들기';
+    }
+    cardBtn.addEventListener('click', openInstallModal);
+  }
+
+  // ── iOS 구버튼 (기존 팝업 연결 유지) ──
   const iosGuide = document.getElementById('ios-install-guide');
   const iosClose = document.getElementById('ios-guide-close');
-  if (!btn) return;
+  if (iosClose) iosClose.addEventListener('click', () => iosGuide.classList.add('hidden'));
+  if (iosGuide) iosGuide.addEventListener('click', e => { if (e.target === iosGuide) iosGuide.classList.add('hidden'); });
 
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  // ── 통합 모달 ──
+  const modal       = document.getElementById('install-modal');
+  const modalTitle  = document.getElementById('install-modal-title');
+  const modalBody   = document.getElementById('install-modal-body');
+  const modalAction = document.getElementById('install-modal-action');
+  const modalClose  = document.getElementById('install-modal-close');
 
-  if (isIOS) {
-    // iOS: 버튼 노출 → 탭 시 안내 팝업
-    btn.style.display = 'flex';
-    btn.addEventListener('click', function () {
-      iosGuide.classList.remove('hidden');
-    });
-    iosClose.addEventListener('click', function () {
-      iosGuide.classList.add('hidden');
-    });
-    iosGuide.addEventListener('click', function (e) {
-      if (e.target === iosGuide) iosGuide.classList.add('hidden');
-    });
-  } else {
-    // Android / PC Chrome: beforeinstallprompt 이벤트 대기
-    let deferredPrompt = null;
-    window.addEventListener('beforeinstallprompt', function (e) {
-      e.preventDefault();
-      deferredPrompt = e;
-      btn.style.display = 'flex';
-    });
-    btn.addEventListener('click', async function () {
-      if (!deferredPrompt) return;
-      deferredPrompt.prompt();
-      await deferredPrompt.userChoice;
-      deferredPrompt = null;
-      btn.style.display = 'none';
-    });
-    window.addEventListener('appinstalled', function () {
-      btn.style.display = 'none';
-    });
+  if (modalClose) modalClose.addEventListener('click', closeModal);
+  if (modal)      modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
+
+  function closeModal() { modal.classList.add('hidden'); }
+
+  function openInstallModal() {
+    if (!modal) return;
+    modalAction.style.display = 'none';
+    modalAction.onclick = null;
+
+    if (isIOS) {
+      modalTitle.textContent = '홈 화면에 추가 (iPhone)';
+      modalBody.innerHTML =
+        '<p class="ios-guide-desc">사파리에서 아래 순서로 진행하세요.</p>' +
+        '<div class="ios-guide-steps">' +
+          step(1, '하단 가운데 <strong>공유 버튼</strong> 탭 (□↑)') +
+          step(2, '스크롤 내려서 <strong>홈 화면에 추가</strong> 탭') +
+          step(3, '오른쪽 위 <strong>추가</strong> 탭') +
+        '</div>';
+    } else if (isAndroid) {
+      if (deferredPrompt) {
+        modalTitle.textContent = '홈 화면에 설치';
+        modalBody.innerHTML = '<p class="ios-guide-desc">아래 버튼을 누르면 홈 화면에 앱 아이콘이 추가됩니다.</p>';
+        modalAction.textContent = '📲 홈 화면에 추가';
+        modalAction.style.display = '';
+        modalAction.onclick = async function () {
+          deferredPrompt.prompt();
+          await deferredPrompt.userChoice;
+          deferredPrompt = null;
+          closeModal();
+        };
+      } else {
+        modalTitle.textContent = '홈 화면에 추가';
+        modalBody.innerHTML =
+          '<p class="ios-guide-desc">Chrome 메뉴에서 직접 추가할 수 있습니다.</p>' +
+          '<div class="ios-guide-steps">' +
+            step(1, 'Chrome 주소창 오른쪽 <strong>⋮ 메뉴</strong> 탭') +
+            step(2, '<strong>홈 화면에 추가</strong> 선택') +
+          '</div>';
+      }
+    } else {
+      // PC
+      modalTitle.textContent = '바탕화면 바로가기 추가';
+      modalBody.innerHTML =
+        '<p class="ios-guide-desc">바로가기 파일을 다운로드해서<br>바탕화면에 옮겨두세요.</p>' +
+        '<div class="ios-guide-steps">' +
+          step(1, '아래 <strong>다운로드</strong> 버튼 클릭') +
+          step(2, '다운로드된 <strong>.url 파일</strong>을 바탕화면으로 이동') +
+          step(3, '더블클릭하면 바로 열립니다') +
+        '</div>';
+      modalAction.textContent = '⬇️ 바로가기 파일 다운로드';
+      modalAction.style.display = '';
+      modalAction.onclick = function () {
+        var content = '[InternetShortcut]\r\nURL=' + APP_URL + '\r\n';
+        var blob = new Blob([content], { type: 'text/plain' });
+        var a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = APP_NAME + '.url';
+        a.click();
+      };
+    }
+
+    modal.classList.remove('hidden');
+  }
+
+  function step(n, text) {
+    return '<div class="ios-guide-step"><span class="ios-step-num">' + n + '</span><span>' + text + '</span></div>';
   }
 })();
