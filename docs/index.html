@@ -5,7 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
   <title>예방업무 어시스턴트</title>
   <link rel="stylesheet" href="./styles.css">
+  <link rel="manifest" href="./manifest.json">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="예방 어시스턴트">
+  <link rel="apple-touch-icon" href="./icon-192.png">
+  <meta name="theme-color" content="#d93025">
   <script>(function(){var t=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',t);})();</script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', function() {
+        navigator.serviceWorker.register('./sw.js');
+      });
+    }
+  </script>
 </head>
 <body>
   <section id="screen-home" class="screen active">
@@ -16,7 +29,10 @@
         <div class="home-meta">v1.0.0 / 최종 수정 2026-04-20</div>
       </div>
       <div class="home-header-right">
-        <button id="theme-toggle" class="theme-toggle-btn" type="button" aria-label="테마 전환"></button>
+        <div class="home-header-btns">
+          <button id="theme-toggle" class="theme-toggle-btn" type="button" aria-label="테마 전환"></button>
+          <button id="pwa-install-btn" class="theme-toggle-btn" type="button" aria-label="홈 화면에 추가" title="홈 화면에 추가" style="display:none;">📲</button>
+        </div>
         <p class="home-desc">예방업무에 필요한 법적기준과<br>서류제출 기한 계산에 바로 쓸 수 있는 실무형 도우미</p>
       </div>
     </div>
@@ -214,6 +230,29 @@
       <p class="result-reason"></p>
     </article>
   </template>
+
+  <!-- iOS 홈 화면 추가 안내 -->
+  <div id="ios-install-guide" class="ios-guide-overlay hidden">
+    <div class="ios-guide-box">
+      <div class="ios-guide-title">홈 화면에 추가하기</div>
+      <p class="ios-guide-desc">사파리에서 아래 순서로 하면<br>앱처럼 바탕화면에 추가됩니다.</p>
+      <div class="ios-guide-steps">
+        <div class="ios-guide-step">
+          <span class="ios-step-num">1</span>
+          <span>하단 가운데 <strong>공유 버튼</strong> 탭 (□↑)</span>
+        </div>
+        <div class="ios-guide-step">
+          <span class="ios-step-num">2</span>
+          <span>스크롤 내려서 <strong>홈 화면에 추가</strong> 탭</span>
+        </div>
+        <div class="ios-guide-step">
+          <span class="ios-step-num">3</span>
+          <span>오른쪽 위 <strong>추가</strong> 탭</span>
+        </div>
+      </div>
+      <button id="ios-guide-close" class="btn btn-primary" type="button" style="width:100%;margin-top:16px;">확인</button>
+    </div>
+  </div>
 
   <div id="reminder-modal" class="reminder-modal-overlay hidden">
     <div class="reminder-modal-box">

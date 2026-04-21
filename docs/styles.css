@@ -2030,6 +2030,86 @@ input:focus-visible {
   flex-shrink: 0;
 }
 
+.home-header-btns {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+/* ── iOS 홈 화면 추가 안내 팝업 ── */
+.ios-guide-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.65);
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 20px;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.ios-guide-overlay.hidden {
+  display: none !important;
+}
+
+.ios-guide-box {
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: var(--radius);
+  padding: 24px;
+  width: 100%;
+  max-width: 360px;
+  box-shadow: var(--shadow-lg);
+  animation: fadeUp 0.2s ease;
+  margin-bottom: 16px;
+}
+
+.ios-guide-title {
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+  margin-bottom: 8px;
+}
+
+.ios-guide-desc {
+  margin: 0 0 16px;
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1.6;
+}
+
+.ios-guide-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ios-guide-step {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.ios-step-num {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--red-dim2);
+  border: 1px solid rgba(217, 48, 37, 0.3);
+  color: var(--red-soft);
+  font-size: 12px;
+  font-weight: 700;
+  font-family: var(--mono);
+}
+
 /* ══════════════════════════════════════════════
    LIGHT THEME
    ══════════════════════════════════════════════ */

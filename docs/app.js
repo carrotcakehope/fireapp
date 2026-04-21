@@ -4227,3 +4227,54 @@ showScreen("home");
     }
   }
 })();
+
+// ── PWA 홈 화면 추가 ─────────────────────────────────────
+(function initPWAInstall() {
+  // 이미 설치돼서 앱으로 실행 중이면 버튼 숨김
+  const isStandalone =
+    window.matchMedia('(display-mode: standalone)').matches ||
+    window.navigator.standalone === true;
+  if (isStandalone) return;
+
+  // Capacitor(APK) 환경에서는 불필요
+  if (window.Capacitor) return;
+
+  const btn = document.getElementById('pwa-install-btn');
+  const iosGuide = document.getElementById('ios-install-guide');
+  const iosClose = document.getElementById('ios-guide-close');
+  if (!btn) return;
+
+  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+
+  if (isIOS) {
+    // iOS: 버튼 노출 → 탭 시 안내 팝업
+    btn.style.display = 'flex';
+    btn.addEventListener('click', function () {
+      iosGuide.classList.remove('hidden');
+    });
+    iosClose.addEventListener('click', function () {
+      iosGuide.classList.add('hidden');
+    });
+    iosGuide.addEventListener('click', function (e) {
+      if (e.target === iosGuide) iosGuide.classList.add('hidden');
+    });
+  } else {
+    // Android / PC Chrome: beforeinstallprompt 이벤트 대기
+    let deferredPrompt = null;
+    window.addEventListener('beforeinstallprompt', function (e) {
+      e.preventDefault();
+      deferredPrompt = e;
+      btn.style.display = 'flex';
+    });
+    btn.addEventListener('click', async function () {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      await deferredPrompt.userChoice;
+      deferredPrompt = null;
+      btn.style.display = 'none';
+    });
+    window.addEventListener('appinstalled', function () {
+      btn.style.display = 'none';
+    });
+  }
+})();
