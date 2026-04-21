@@ -3621,7 +3621,7 @@ function renderMultiuse() {
     btn.className = "choice-button";
     if (option.info) {
       const labelWrap = document.createElement("div");
-      labelWrap.style.cssText = "display:flex;align-items:center;gap:8px;";
+      labelWrap.className = "choice-label-wrap";
       const strong = document.createElement("strong");
       strong.textContent = option.label;
       const infoBtn = document.createElement("span");

@@ -553,6 +553,24 @@ input:focus-visible {
   text-wrap: balance;
 }
 
+.choice-button .choice-label-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.choice-button .choice-label-wrap strong {
+  display: inline;
+  margin-bottom: 0;
+  flex: 1;
+}
+
+.choice-button .choice-label-wrap .calc-mode-info {
+  flex-shrink: 0;
+  opacity: 0.75;
+  pointer-events: auto;
+}
+
 .choice-button span {
   display: block;
   margin-top: 5px;
