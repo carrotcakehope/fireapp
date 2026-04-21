@@ -327,6 +327,21 @@ input:focus-visible {
   min-width: 140px;
 }
 
+.contact-right-link {
+  text-decoration: none;
+  color: inherit;
+  transition: background var(--transition);
+  cursor: pointer;
+}
+
+.contact-right-link:hover {
+  background: rgba(217,48,37,0.10);
+}
+
+.contact-right-link:active {
+  background: rgba(217,48,37,0.16);
+}
+
 .contact-label {
   font-size: 10px;
   color: var(--text-dim);
