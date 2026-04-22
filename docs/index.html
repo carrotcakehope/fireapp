@@ -51,7 +51,7 @@
             <div class="mt-num" style="display:flex;align-items:center;gap:6px;">
               <span class="test-badge">테스트중</span>
             </div>
-            <div class="mt-title">소방시설탐색기<br><span style="font-size:12px;opacity:0.7;">(연도별)</span></div>
+            <div class="mt-title">소방시설탐색기<br><span style="font-size:12px;opacity:0.7;">(연도별_테스트중)</span></div>
             <div class="mt-desc">연도별 기준 적용 소방시설 도출</div>
           </div>
         </button>
@@ -125,18 +125,59 @@
   <section id="screen-explorer-year" class="screen">
     <div class="topbar">
       <button id="back-from-explorer-year" class="back-btn" type="button">←</button>
-      <span class="tb-title">소방시설탐색기 (연도별)</span>
+      <span class="tb-title">소방시설탐색기 (연도별_테스트중)</span>
       <span class="test-badge" style="margin-left:8px;">테스트중</span>
     </div>
-    <div class="scroll-content" style="padding:24px 16px;">
-      <p style="color:var(--text-dim);text-align:center;margin-top:40px;">연도별 기준 적용 버전 준비중입니다.</p>
+
+    <div id="year-prog-wrap" class="wiz-prog-wrap">
+      <div class="wiz-step-info">
+        <span id="year-progress-text">1 / 10</span>
+        <span id="year-progress-percent">10%</span>
+      </div>
+      <div class="wiz-prog-bar">
+        <div id="year-progress-bar" class="wiz-prog-fill" style="width:10%;"></div>
+      </div>
+    </div>
+
+    <div class="scroll-content">
+      <section id="year-question-card" class="wq-card">
+        <p id="year-question-kicker" class="wq-label">QUESTION 1</p>
+        <h2 id="year-question-title" class="wq-title"></h2>
+        <p id="year-question-help" class="wq-sub"></p>
+        <div id="year-question-input"></div>
+        <div class="w-nav">
+          <button id="year-prev-btn" class="btn btn-ghost" type="button">이전</button>
+          <button id="year-next-btn" class="btn btn-primary" type="button">다음</button>
+        </div>
+      </section>
+
+      <section id="year-result-card" class="result-card hidden">
+        <div class="rc-grade g-sp">판정 결과 (연도별)</div>
+        <div id="year-result-summary" class="info-box blue"></div>
+        <div class="info-box amber">
+          <div class="ib-title">참고</div>
+          건축허가일 기준으로 시행 중이던 법령을 적용한 참고 결과입니다. 실제 적용은 소방관계법규 및 현장 확인을 통한 면밀한 검토가 필요합니다.
+        </div>
+        <div class="result-two-col">
+          <div class="result-col-a">
+            <p class="section-label">설치 필요한 소방시설</p>
+            <div id="year-required-list" style="display:flex;flex-direction:column;gap:6px;"></div>
+          </div>
+          <div class="result-col-b">
+            <p class="section-label">소방시설 설치 이유</p>
+            <div id="year-criteria-list"></div>
+          </div>
+        </div>
+        <button id="year-restart-btn" class="btn-restart" type="button">다시 입력</button>
+      </section>
     </div>
   </section>
 
   <section id="screen-explorer" class="screen">
     <div class="topbar">
       <button id="back-from-explorer" class="back-btn" type="button">←</button>
-      <span class="tb-title">소방시설탐색기</span>
+      <span id="explorer-title" class="tb-title">소방시설탐색기</span>
+      <span id="explorer-mode-badge" class="test-badge hidden" style="margin-left:8px;">연도별_테스트중</span>
     </div>
 
     <div class="wiz-prog-wrap">

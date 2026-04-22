@@ -464,6 +464,10 @@ input:focus-visible {
   padding: 14px 16px 0;
 }
 
+.year-static-progress .wiz-prog-fill {
+  width: 10%;
+}
+
 .wiz-step-info {
   display: flex;
   justify-content: space-between;
@@ -639,6 +643,23 @@ input:focus-visible {
   color: var(--red-soft);
 }
 
+.year-static-choice {
+  cursor: default;
+}
+
+.year-static-choice:hover {
+  background: var(--surface2);
+  border-color: var(--border);
+}
+
+.year-static-choice.year-static-choice-disabled {
+  opacity: 0.92;
+}
+
+.year-static-choice.year-static-choice-disabled span {
+  color: var(--text-dim);
+}
+
 /* ── Inputs ── */
 .question-input input,
 .calc-input,
@@ -728,6 +749,14 @@ input:focus-visible {
 .btn-primary:hover {
   background: #e8352a;
   box-shadow: 0 4px 14px rgba(217, 48, 37, 0.45);
+}
+
+.year-static-next {
+  pointer-events: none;
+}
+
+.year-static-info {
+  margin-top: 16px;
 }
 
 #open-multiuse-safety {
@@ -1578,6 +1607,7 @@ input:focus-visible {
 
   /* ── Tool screens: fixed viewport height ── */
   #screen-explorer,
+  #screen-explorer-year,
   #screen-date,
   #screen-inspection,
   #screen-multiuse,

@@ -751,6 +751,20 @@ const questionElements = {
   input: document.getElementById("question-input"),
 };
 
+const explorerRuntime = {
+  mode: "default", // "default" | "year"
+};
+
+const explorerTitleEl = document.getElementById("explorer-title");
+const explorerModeBadgeEl = document.getElementById("explorer-mode-badge");
+
+function applyExplorerModeUI() {
+  if (!explorerTitleEl || !explorerModeBadgeEl) return;
+  const isYearMode = explorerRuntime.mode === "year";
+  explorerTitleEl.textContent = isYearMode ? "소방시설탐색기 (연도별_테스트중)" : "소방시설탐색기";
+  explorerModeBadgeEl.classList.toggle("hidden", !isYearMode);
+}
+
 const questionCard = document.getElementById("question-card");
 const resultCard = document.getElementById("result-card");
 const multiuseSafetyCard = document.getElementById("multiuse-safety-card");
@@ -1188,7 +1202,11 @@ function renderCurrentStep() {
 
   questionElements.input.appendChild(node);
   document.getElementById("prev-step").disabled = state.currentStep === 0;
-  document.getElementById("next-step").textContent = state.currentStep === activeSteps.length - 1 ? "결과 보기" : "다음";
+  if (state.currentStep === activeSteps.length - 1) {
+    document.getElementById("next-step").textContent = explorerRuntime.mode === "year" ? "결과 준비중" : "결과 보기";
+  } else {
+    document.getElementById("next-step").textContent = "다음";
+  }
   updateProgress();
 }
 
@@ -2234,7 +2252,8 @@ function renderResultGroup(targetId, items, excludedNames, allowedNames) {
   const excluded = new Set(excludedNames || []);
   const allowed = allowedNames ? new Set(allowedNames) : null;
   // criteria-list에서는 해당 없음(notRequired) 항목, 설치 제외 항목, 좌측 목록에 없는 항목 제외
-  const filtered = targetId === "criteria-list"
+  const isCriteriaTarget = targetId === "criteria-list" || targetId === "year-criteria-list";
+  const filtered = isCriteriaTarget
     ? items.filter((item) => item.status !== "notRequired" && !excluded.has(item.name) && (!allowed || allowed.has(item.name)))
     : items;
   filtered.forEach((item) => {
@@ -3690,6 +3709,8 @@ function multiuseRestart() {
 // ─────────────────────────────────────────────────────────────────────────────
 
 document.getElementById("open-explorer").addEventListener("click", () => {
+  explorerRuntime.mode = "default";
+  applyExplorerModeUI();
   showScreen("explorer");
   restartExplorer();
 });
@@ -3944,8 +3965,757 @@ document.getElementById("open-occupancy-calculator").addEventListener("click", (
 document.getElementById("back-from-occupancy").addEventListener("click", () => showScreen("home"));
 document.getElementById("back-from-inspection").addEventListener("click", () => showScreen("home"));
 document.getElementById("back-from-explorer").addEventListener("click", () => showScreen("home"));
+// =============================================
+// 연도별 탐색기 (Year-based Explorer)
+// =============================================
+
+const YD = {
+  D20040530: 20040530,
+  D20061207: 20061207,
+  D20120914: 20120914,
+  D20180128: 20180128,
+  D20180627: 20180627,
+  D20190806: 20190806,
+  D20220225: 20220225,
+  D20221201: 20221201,
+  D20240517: 20240517,
+  D20241231: 20241231,
+  D20251201: 20251201,
+};
+
+const yearState = {
+  currentStep: 0,
+  answers: {
+    yOccupancyType: "neighborhood",
+    yPermitDate: "",
+    yTotalArea: "",
+    yAboveGroundFloors: "",
+    yBasementFloors: "",
+    yBasementAreaSum: "",
+    yHasWindowlessFloor: "no",
+    yWindowlessArea: "",
+    yHasLargeTargetFloor: "no",
+    yHasLargeFloorFor1000: "no",
+    yNeighborhoodArea: "",
+    yFacilitySubtype: "general",
+    yIsPostpartum: "no",
+    yPostpartumAreaRange: "under600",
+    yIsClinicWithInpatient: "no",
+    yHasHemodialysis: "no",
+    yHas24HourStaff: "no",
+    yFirstSecondFloorArea: "",
+    yIndoorParkingArea: "",
+    yMechanicalParkingCapacity: "",
+    yElectricalRoomArea: "",
+    ySmokeControlArea: "",
+    yHasSmallUndergroundParking: "no",
+  },
+};
+
+function yPermitDateInt() {
+  const d = yearState.answers.yPermitDate;
+  if (!d) return 0;
+  return parseInt(d.replace(/-/g, ""), 10);
+}
+
+const yearSteps = [
+  {
+    key: "yOccupancyType",
+    type: "ychoice",
+    title: "어떤 용도를 탐색할까요?",
+    help: "현재는 근린생활시설만 탐색 가능합니다.",
+    options: [
+      { value: "neighborhood", label: "근린생활시설", description: "일반 상가·식당·사무실·의원 등" },
+    ],
+  },
+  {
+    key: "yPermitDate",
+    type: "ydate",
+    title: "건축허가일자를 입력하세요",
+    help: "건축허가일 기준으로 당시 시행 중이던 소방시설 설치 기준을 적용합니다.",
+  },
+  {
+    key: "yTotalArea",
+    type: "ynumber",
+    title: "건축물 연면적(㎡)",
+    help: "지하층을 포함한 건물 전체 바닥면적 합계입니다.",
+    placeholder: "예: 1500",
+    min: 0,
+    step: 0.1,
+  },
+  {
+    key: "yAboveGroundFloors",
+    type: "ynumber",
+    title: "지상 층수는 몇 층입니까?",
+    help: "지하층을 제외한 지상 층수를 입력하세요.",
+    placeholder: "예: 5",
+    min: 1,
+    step: 1,
+  },
+  {
+    key: "yBasementSet",
+    type: "ycompound",
+    title: "지하층 정보를 입력하세요",
+    help: "지하층이 없으면 0을 입력하세요.",
+  },
+  {
+    key: "yWindowlessSet",
+    type: "ycompound",
+    title: "무창층 정보를 입력하세요",
+    help: "무창층이란 채광·환기 조건 등을 충족하지 못하는 층입니다.",
+  },
+  {
+    key: "yHasLargeTargetFloor",
+    type: "ychoice",
+    title: "지하층·무창층·4층 이상 층 중 바닥면적 300㎡ 이상인 층이 있습니까?",
+    help: "옥내소화전설비 설치 여부를 판단하는 조건입니다.",
+    options: [
+      { value: "yes", label: "예", description: "해당 층이 있음" },
+      { value: "no", label: "아니오", description: "해당 층이 없음" },
+    ],
+  },
+  {
+    key: "yHasLargeFloorFor1000",
+    type: "ychoice",
+    title: "지하층·무창층·4층 이상 층 중 바닥면적 1,000㎡ 이상인 층이 있습니까?",
+    help: "허가일 당시(2018년 1월 이전) 스프링클러설비 설치 여부를 판단합니다.",
+    options: [
+      { value: "yes", label: "예", description: "해당 층이 있음" },
+      { value: "no", label: "아니오", description: "해당 층이 없음" },
+    ],
+    condition: (ya, pd) => pd >= YD.D20040530 && pd < YD.D20180128,
+  },
+  {
+    key: "yNeighborhoodArea",
+    type: "ynumber",
+    title: "근린생활시설로 사용하는 부분의 바닥면적 합계(㎡)",
+    help: "건물 내 근린생활시설 용도로 쓰이는 모든 층 면적을 합산하세요. 건물 전체가 근린생활시설이면 연면적과 같습니다.",
+    placeholder: "예: 1200",
+    min: 0,
+    step: 0.1,
+    condition: (ya, pd) => pd >= YD.D20061207,
+  },
+  {
+    key: "yFacilitySubtype",
+    type: "ychoice",
+    title: "해당 근린생활시설이 일반목욕장(욕탕)입니까?",
+    help: "일반목욕장은 자동화재탐지설비 기준 면적이 다릅니다(600㎡ → 1,000㎡).",
+    options: [
+      { value: "general", label: "일반 근린생활시설", description: "상가, 식당, 사무실, 의원 등" },
+      { value: "bathhouse", label: "일반목욕장(욕탕)", description: "목욕장으로 쓰이는 경우" },
+    ],
+  },
+  {
+    key: "yIsPostpartum",
+    type: "ychoice",
+    title: "해당 근린생활시설이 조산원 또는 산후조리원입니까?",
+    help: "2022년 2월 25일 이후부터 조산원·산후조리원에 별도 설치 기준이 신설됩니다.",
+    options: [
+      { value: "yes", label: "예", description: "조산원 또는 산후조리원에 해당함" },
+      { value: "no", label: "아니오", description: "해당 없음" },
+    ],
+    condition: (ya, pd) => pd >= YD.D20220225,
+  },
+  {
+    key: "yPostpartumAreaRange",
+    type: "ychoice",
+    title: "조산원·산후조리원의 바닥면적 합계는 얼마입니까?",
+    help: "600㎡를 기준으로 스프링클러 또는 간이스프링클러 대상이 달라집니다.",
+    options: [
+      { value: "under600", label: "600㎡ 미만", description: "소규모 산후조리원" },
+      { value: "over600", label: "600㎡ 이상", description: "대형 산후조리원" },
+    ],
+    condition: (ya, pd) => pd >= YD.D20220225 && ya.yIsPostpartum === "yes",
+  },
+  {
+    key: "yIsClinicWithInpatient",
+    type: "ychoice",
+    title: "입원실이 있는 의원·치과의원·한의원입니까?",
+    help: "2018년 6월 27일 이후부터 입원실 있는 의원급은 면적 불문 간이스프링클러 설치 대상입니다.",
+    options: [
+      { value: "yes", label: "예", description: "입원실이 있는 의원급" },
+      { value: "no", label: "아니오", description: "해당 없음" },
+    ],
+    condition: (ya, pd) => pd >= YD.D20180627 && ya.yIsPostpartum !== "yes",
+  },
+  {
+    key: "yHasHemodialysis",
+    type: "ychoice",
+    title: "인공신장실(혈액투석실)이 있는 의원·치과의원·한의원입니까?",
+    help: "2024년 12월 31일 이후부터 인공신장실 있는 의원급도 면적 불문 간이스프링클러 대상입니다.",
+    options: [
+      { value: "yes", label: "예", description: "인공신장실이 있는 의원급" },
+      { value: "no", label: "아니오", description: "해당 없음" },
+    ],
+    condition: (ya, pd) => pd >= YD.D20241231 && ya.yIsClinicWithInpatient === "no" && ya.yIsPostpartum !== "yes",
+  },
+  {
+    key: "yHas24HourStaff",
+    type: "ychoice",
+    title: "24시간 상주 근무자가 있습니까?",
+    help: "24시간 상주 시 자동화재속보설비 면제 여부를 검토합니다.",
+    options: [
+      { value: "yes", label: "예", description: "24시간 상주함" },
+      { value: "no", label: "아니오", description: "상주하지 않음" },
+    ],
+    condition: (ya, pd, autoDispatch) => autoDispatch,
+  },
+  // ── 세부 질문 (뒤쪽) ──
+  {
+    key: "yFirstSecondFloorArea",
+    type: "ynumber",
+    title: "지상 1층·2층 바닥면적 합계(㎡)",
+    help: "옥외소화전 설치 여부를 판단합니다. 해당 없으면 0을 입력하세요.",
+    placeholder: "예: 0",
+    min: 0,
+    step: 0.1,
+  },
+  {
+    key: "yParkingElecSet",
+    type: "ycompound",
+    title: "주차장·전기실 정보를 입력하세요",
+    help: "물분무등소화설비 판단에 사용됩니다. 해당 없으면 0을 입력하세요.",
+  },
+  {
+    key: "ySmokeControlArea",
+    type: "ynumber",
+    title: "지하층·무창층 내 근린생활시설 사용 바닥면적 합계(㎡)",
+    help: "제연설비 설치 여부를 판단합니다. 해당 없으면 0을 입력하세요.",
+    placeholder: "예: 0",
+    min: 0,
+    step: 0.1,
+  },
+  {
+    key: "yHasSmallUndergroundParking",
+    type: "ychoice",
+    title: "지하 차고·주차장 바닥면적 합계가 200㎡ 미만입니까?",
+    help: "2024년 5월 17일 이후부터 소규모 지하주차장도 연결살수설비 설치 대상입니다.",
+    options: [
+      { value: "yes", label: "예", description: "200㎡ 미만 지하주차장 있음" },
+      { value: "no", label: "아니오", description: "해당 없음" },
+    ],
+    condition: (ya, pd) => pd >= YD.D20240517,
+  },
+];
+
+function yearGetActiveSteps() {
+  const ya = yearState.answers;
+  const pd = yPermitDateInt();
+  const clinicApplicable = pd >= YD.D20190806 && ya.yIsClinicWithInpatient === "yes";
+  const hemApplicable = pd >= YD.D20241231 && ya.yHasHemodialysis === "yes";
+  const postpartumApplicable = pd >= YD.D20220225 && ya.yIsPostpartum === "yes";
+  const autoDispatch = clinicApplicable || hemApplicable || postpartumApplicable;
+  return yearSteps.filter((step) => !step.condition || step.condition(ya, pd, autoDispatch));
+}
+
+function makeYearField(labelText, name, value, extra = {}) {
+  const wrapper = document.createElement("div");
+  wrapper.className = "calc-form-row";
+  const label = document.createElement("label");
+  label.textContent = labelText;
+  const input = document.createElement("input");
+  input.className = "calc-input";
+  input.type = "number";
+  input.min = String(extra.min ?? 0);
+  input.step = String(extra.step ?? 1);
+  input.placeholder = extra.placeholder ?? "";
+  input.value = value ?? "";
+  input.addEventListener("input", (e) => { yearState.answers[name] = e.target.value; });
+  wrapper.appendChild(label);
+  wrapper.appendChild(input);
+  return wrapper;
+}
+
+function makeYearBinaryField(labelText, name) {
+  const wrapper = document.createElement("div");
+  wrapper.className = "calc-form-row";
+  const label = document.createElement("label");
+  label.textContent = labelText;
+  wrapper.appendChild(label);
+  const buttons = document.createElement("div");
+  buttons.className = "choice-list";
+  [{ value: "yes", label: "예" }, { value: "no", label: "아니오" }].forEach((opt) => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "choice-button";
+    if (yearState.answers[name] === opt.value) btn.classList.add("selected");
+    btn.innerHTML = `<strong>${opt.label}</strong>`;
+    btn.addEventListener("click", () => { yearState.answers[name] = opt.value; yearRenderCurrentStep(); });
+    buttons.appendChild(btn);
+  });
+  wrapper.appendChild(buttons);
+  return wrapper;
+}
+
+function yearRenderChoiceStep(step) {
+  const wrapper = document.createElement("div");
+  wrapper.className = "choice-list";
+  step.options.forEach((option) => {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "choice-button";
+    if (String(yearState.answers[step.key]) === option.value) btn.classList.add("selected");
+    btn.innerHTML = `<strong>${option.label}</strong><span>${option.description}</span>`;
+    btn.addEventListener("click", () => { yearState.answers[step.key] = option.value; yearRenderCurrentStep(); });
+    wrapper.appendChild(btn);
+  });
+  return wrapper;
+}
+
+function yearRenderNumberStep(step) {
+  const input = document.createElement("input");
+  input.className = "calc-input";
+  input.type = "number";
+  input.min = String(step.min ?? 0);
+  input.step = String(step.step ?? 1);
+  input.placeholder = step.placeholder ?? "";
+  input.value = yearState.answers[step.key] ?? "";
+  input.addEventListener("input", (e) => { yearState.answers[step.key] = e.target.value; });
+  return input;
+}
+
+function yearRenderDateStep() {
+  const input = document.createElement("input");
+  input.className = "calc-input";
+  input.type = "date";
+  input.value = yearState.answers.yPermitDate ?? "";
+  input.addEventListener("change", (e) => { yearState.answers.yPermitDate = e.target.value; });
+  return input;
+}
+
+function yearRenderCompoundStep(step) {
+  const wrapper = document.createElement("div");
+  wrapper.className = "choice-list";
+  const ya = yearState.answers;
+
+  if (step.key === "yBasementSet") {
+    wrapper.appendChild(makeYearField("지하층수", "yBasementFloors", ya.yBasementFloors, { min: 0, step: 1, placeholder: "없으면 0" }));
+    wrapper.appendChild(makeYearField("지하층 바닥면적 합계(㎡)", "yBasementAreaSum", ya.yBasementAreaSum, { min: 0, step: 0.1, placeholder: "없으면 0" }));
+  }
+
+  if (step.key === "yWindowlessSet") {
+    wrapper.appendChild(makeYearBinaryField("무창층이 있습니까?", "yHasWindowlessFloor"));
+    if (ya.yHasWindowlessFloor === "yes") {
+      wrapper.appendChild(makeYearField("무창층 바닥면적(㎡)", "yWindowlessArea", ya.yWindowlessArea, { min: 0, step: 0.1, placeholder: "예: 150" }));
+    }
+  }
+
+  if (step.key === "yParkingElecSet") {
+    wrapper.appendChild(makeYearField("건물 내부 차고·주차장 바닥면적(㎡)", "yIndoorParkingArea", ya.yIndoorParkingArea, { min: 0, step: 0.1, placeholder: "없으면 0" }));
+    wrapper.appendChild(makeYearField("기계식 주차 대수(대)", "yMechanicalParkingCapacity", ya.yMechanicalParkingCapacity, { min: 0, step: 1, placeholder: "없으면 0" }));
+    wrapper.appendChild(makeYearField("전기실·발전실·변전실·전산실 바닥면적(㎡)", "yElectricalRoomArea", ya.yElectricalRoomArea, { min: 0, step: 0.1, placeholder: "없으면 0" }));
+  }
+
+  return wrapper;
+}
+
+function yearRenderCurrentStep() {
+  const activeSteps = yearGetActiveSteps();
+  const step = activeSteps[yearState.currentStep];
+  document.getElementById("year-question-kicker").textContent = `QUESTION ${yearState.currentStep + 1}`;
+  document.getElementById("year-question-title").textContent = step.title;
+  document.getElementById("year-question-help").textContent = step.help;
+  const inputEl = document.getElementById("year-question-input");
+  inputEl.innerHTML = "";
+
+  let node;
+  if (step.type === "ychoice") node = yearRenderChoiceStep(step);
+  else if (step.type === "ycompound") node = yearRenderCompoundStep(step);
+  else if (step.type === "ydate") node = yearRenderDateStep();
+  else node = yearRenderNumberStep(step);
+  inputEl.appendChild(node);
+
+  const prevBtn = document.getElementById("year-prev-btn");
+  const nextBtn = document.getElementById("year-next-btn");
+  prevBtn.disabled = yearState.currentStep === 0;
+  nextBtn.textContent = yearState.currentStep === activeSteps.length - 1 ? "결과 보기" : "다음";
+  yearUpdateProgress();
+}
+
+function yearUpdateProgress() {
+  const activeSteps = yearGetActiveSteps();
+  const total = activeSteps.length;
+  const current = yearState.currentStep + 1;
+  const pct = Math.round((current / total) * 100);
+  document.getElementById("year-progress-text").textContent = `${current} / ${total}`;
+  document.getElementById("year-progress-percent").textContent = `${pct}%`;
+  document.getElementById("year-progress-bar").style.width = `${pct}%`;
+}
+
+function yearCurrentStepIsValid() {
+  const step = yearGetActiveSteps()[yearState.currentStep];
+  if (step.type === "ynumber") {
+    const v = yearState.answers[step.key];
+    return v !== "" && !Number.isNaN(Number(v));
+  }
+  if (step.type === "ydate") {
+    return !!yearState.answers.yPermitDate;
+  }
+  return true;
+}
+
+function yearScrollToTop() {
+  const el = document.querySelector("#screen-explorer-year .scroll-content");
+  if (el) el.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function yearMoveStep(direction) {
+  if (!yearCurrentStepIsValid()) {
+    showToast("현재 질문의 값을 먼저 입력해 주세요.");
+    return;
+  }
+  const activeSteps = yearGetActiveSteps();
+  yearState.currentStep = Math.max(0, Math.min(yearState.currentStep + direction, activeSteps.length - 1));
+  yearRenderCurrentStep();
+  yearScrollToTop();
+}
+
+function yearNormalizeAnswers() {
+  const ya = yearState.answers;
+  const pd = yPermitDateInt();
+  const bf = parseInt(ya.yBasementFloors) || 0;
+  const ba = parseFloat(ya.yBasementAreaSum) || 0;
+  const wlArea = parseFloat(ya.yWindowlessArea) || 0;
+  return {
+    pd,
+    totalArea: parseFloat(ya.yTotalArea) || 0,
+    aboveGroundFloors: parseInt(ya.yAboveGroundFloors) || 0,
+    basementFloors: bf,
+    basementAreaSum: ba,
+    hasWindowlessFloor: ya.yHasWindowlessFloor === "yes",
+    windowlessArea: wlArea,
+    hasLargeTargetFloor: ya.yHasLargeTargetFloor === "yes",
+    hasLargeFloorFor1000: ya.yHasLargeFloorFor1000 === "yes",
+    neighborhoodArea: parseFloat(ya.yNeighborhoodArea) || 0,
+    facilitySubtype: ya.yFacilitySubtype,
+    isPostpartum: ya.yIsPostpartum === "yes",
+    postpartumAreaRange: ya.yPostpartumAreaRange,
+    isClinicWithInpatient: ya.yIsClinicWithInpatient === "yes",
+    hasHemodialysis: ya.yHasHemodialysis === "yes",
+    has24HourStaff: ya.yHas24HourStaff === "yes",
+    firstSecondFloorArea: parseFloat(ya.yFirstSecondFloorArea) || 0,
+    indoorParkingArea: parseFloat(ya.yIndoorParkingArea) || 0,
+    mechanicalParkingCapacity: parseInt(ya.yMechanicalParkingCapacity) || 0,
+    electricalRoomArea: parseFloat(ya.yElectricalRoomArea) || 0,
+    smokeControlArea: parseFloat(ya.ySmokeControlArea) || 0,
+    hasSmallUndergroundParking: ya.yHasSmallUndergroundParking === "yes",
+    basementAvg: bf > 0 ? ba / bf : 0,
+    totalFloors: (parseInt(ya.yAboveGroundFloors) || 0) + bf,
+  };
+}
+
+function yearEvaluateNeighborhood(inp) {
+  const results = [];
+  const { pd } = inp;
+
+  // ── 소화기 ──
+  results.push(makeResult(categories.extinguishing, "소화기구", "",
+    inp.totalArea >= 33 ? "required" : "notRequired",
+    inp.totalArea >= 33 ? "연면적이 33㎡ 이상입니다." : "연면적이 33㎡ 미만입니다.", ""));
+
+  // ── 옥내소화전 (기준 동일) ──
+  const indoorHydrantReq = inp.totalArea >= 1500 || inp.hasLargeTargetFloor;
+  results.push(makeResult(categories.extinguishing, "옥내소화전설비", "",
+    indoorHydrantReq ? "required" : "notRequired",
+    inp.totalArea >= 1500 ? "연면적이 1,500㎡ 이상입니다." :
+      inp.hasLargeTargetFloor ? "지하층·무창층 또는 4층 이상 층 중 바닥면적 300㎡ 이상인 층이 있습니다." :
+      "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
+
+  // ── 스프링클러 ──
+  let sprinklerReq = false;
+  let sprinklerReason = "";
+  if (pd >= YD.D20040530 && pd < YD.D20180128) {
+    sprinklerReq = inp.aboveGroundFloors >= 11 || inp.hasLargeFloorFor1000;
+    sprinklerReason = inp.aboveGroundFloors >= 11 ? "층수가 11층 이상으로 전층 설치 대상입니다." :
+      inp.hasLargeFloorFor1000 ? "지하층·무창층·4층 이상 층 중 바닥면적 1,000㎡ 이상인 층이 있어 해당 층에 설치 대상입니다." :
+      "현재 입력 기준으로는 설치 대상이 아닙니다.";
+  } else if (pd >= YD.D20180128 && pd < YD.D20220225) {
+    sprinklerReq = inp.aboveGroundFloors >= 6;
+    sprinklerReason = inp.aboveGroundFloors >= 6 ? "층수가 6층 이상으로 전층 설치 대상입니다." :
+      "현재 입력 기준으로는 설치 대상이 아닙니다.";
+  } else if (pd >= YD.D20220225) {
+    const postpartumBig = inp.isPostpartum && inp.postpartumAreaRange === "over600";
+    sprinklerReq = inp.aboveGroundFloors >= 6 || postpartumBig;
+    sprinklerReason = inp.aboveGroundFloors >= 6 ? "층수가 6층 이상으로 전층 설치 대상입니다." :
+      postpartumBig ? "조산원·산후조리원이고 바닥면적이 600㎡ 이상입니다." :
+      "현재 입력 기준으로는 설치 대상이 아닙니다.";
+  }
+  results.push(makeResult(categories.extinguishing, "스프링클러설비", "",
+    sprinklerReq ? "required" : "notRequired", sprinklerReason, ""));
+
+  // ── 간이스프링클러 ──
+  let simpleSprinklerReq = false;
+  let simpleSprinklerReason = "";
+  if (sprinklerReq) {
+    simpleSprinklerReason = "스프링클러설비 전층 설치 대상이므로 간이스프링클러설비는 제외됩니다.";
+  } else if (pd >= YD.D20040530 && pd < YD.D20061207) {
+    simpleSprinklerReq = inp.totalArea >= 1000;
+    simpleSprinklerReason = inp.totalArea >= 1000 ?
+      "주용도 근린생활시설로서 연면적이 1,000㎡ 이상입니다." :
+      "현재 입력 기준으로는 설치 대상이 아닙니다.";
+  } else if (pd >= YD.D20061207 && pd < YD.D20180627) {
+    simpleSprinklerReq = inp.neighborhoodArea >= 1000;
+    simpleSprinklerReason = inp.neighborhoodArea >= 1000 ?
+      "근린생활시설로 사용하는 바닥면적 합계가 1,000㎡ 이상입니다." :
+      "현재 입력 기준으로는 설치 대상이 아닙니다.";
+  } else if (pd >= YD.D20180627 && pd < YD.D20221201) {
+    simpleSprinklerReq = inp.neighborhoodArea >= 1000 || inp.isClinicWithInpatient;
+    simpleSprinklerReason = inp.neighborhoodArea >= 1000 ? "근린생활시설로 사용하는 바닥면적 합계가 1,000㎡ 이상입니다." :
+      inp.isClinicWithInpatient ? "입원실이 있는 의원·치과의원·한의원입니다." :
+      "현재 입력 기준으로는 설치 대상이 아닙니다.";
+  } else if (pd >= YD.D20221201 && pd < YD.D20241231) {
+    const smallPostpartum = inp.isPostpartum && inp.postpartumAreaRange === "under600";
+    simpleSprinklerReq = inp.neighborhoodArea >= 1000 || inp.isClinicWithInpatient || smallPostpartum;
+    simpleSprinklerReason = inp.neighborhoodArea >= 1000 ? "근린생활시설로 사용하는 바닥면적 합계가 1,000㎡ 이상입니다." :
+      inp.isClinicWithInpatient ? "입원실이 있는 의원·치과의원·한의원입니다." :
+      smallPostpartum ? "조산원·산후조리원이고 바닥면적이 600㎡ 미만입니다." :
+      "현재 입력 기준으로는 설치 대상이 아닙니다.";
+  } else if (pd >= YD.D20241231) {
+    const smallPostpartum = inp.isPostpartum && inp.postpartumAreaRange === "under600";
+    const clinicReq = inp.isClinicWithInpatient || inp.hasHemodialysis;
+    simpleSprinklerReq = inp.neighborhoodArea >= 1000 || clinicReq || smallPostpartum;
+    simpleSprinklerReason = inp.neighborhoodArea >= 1000 ? "근린생활시설로 사용하는 바닥면적 합계가 1,000㎡ 이상입니다." :
+      inp.isClinicWithInpatient ? "입원실이 있는 의원·치과의원·한의원입니다." :
+      inp.hasHemodialysis ? "인공신장실이 있는 의원·치과의원·한의원입니다." :
+      smallPostpartum ? "조산원·산후조리원이고 바닥면적이 600㎡ 미만입니다." :
+      "현재 입력 기준으로는 설치 대상이 아닙니다.";
+  }
+  results.push(makeResult(categories.extinguishing, "간이스프링클러설비", "",
+    sprinklerReq ? "notRequired" : (simpleSprinklerReq ? "required" : "notRequired"),
+    sprinklerReq ? simpleSprinklerReason : (simpleSprinklerReason || "현재 입력 기준으로는 설치 대상이 아닙니다."), ""));
+
+  // ── 물분무등소화설비 (기준 동일) ──
+  const waterSprayReq = inp.indoorParkingArea >= 200 || inp.mechanicalParkingCapacity >= 20 || inp.electricalRoomArea >= 300;
+  results.push(makeResult(categories.extinguishing, "물분무등소화설비", "",
+    waterSprayReq ? "required" : "notRequired",
+    buildWaterSprayReason(0, inp.indoorParkingArea, inp.mechanicalParkingCapacity, inp.electricalRoomArea), ""));
+
+  // ── 옥외소화전 (기준 동일) ──
+  results.push(makeResult(categories.extinguishing, "옥외소화전설비", "",
+    inp.firstSecondFloorArea >= 9000 ? "required" : "notRequired",
+    inp.firstSecondFloorArea >= 9000 ? "지상 1층과 2층의 바닥면적 합계가 9,000㎡ 이상입니다." :
+      "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
+
+  // ── 비상경보설비 ──
+  const bsmtAvg150 = inp.basementFloors > 0 && inp.basementAvg >= 150;
+  const wlss150 = inp.hasWindowlessFloor && inp.windowlessArea >= 150;
+  let emergAlarmReq = inp.totalArea >= 400 || bsmtAvg150 || wlss150;
+  let emergAlarmReason = inp.totalArea >= 400 ? "연면적이 400㎡ 이상입니다." :
+    bsmtAvg150 ? "지하층 평균 면적이 150㎡ 이상입니다." :
+    wlss150 ? "무창층 면적이 150㎡ 이상입니다." :
+    "현재 입력 기준으로는 설치 대상이 아닙니다.";
+  if (pd >= YD.D20251201 && inp.hasSmallUndergroundParking) {
+    emergAlarmReq = true;
+    emergAlarmReason = "지하 차고·주차장이 200㎡ 미만으로 건물 전층에 설치 대상입니다.";
+  }
+  results.push(makeResult(categories.alarm, "비상경보설비", "",
+    emergAlarmReq ? "required" : "notRequired", emergAlarmReason, ""));
+
+  // ── 자동화재탐지설비 ──
+  let autoDetReq = false;
+  let autoDetReason = "";
+  const detThreshold = inp.facilitySubtype === "bathhouse" ? 1000 : 600;
+  if (pd >= YD.D20040530 && pd < YD.D20220225) {
+    autoDetReq = inp.totalArea >= detThreshold;
+    autoDetReason = autoDetReq ?
+      (inp.facilitySubtype === "bathhouse" ? "목욕장이며 연면적이 1,000㎡ 이상입니다." : "연면적이 600㎡ 이상입니다.") :
+      "현재 입력 기준으로는 설치 대상이 아닙니다.";
+  } else if (pd >= YD.D20220225) {
+    const floorTrig = inp.aboveGroundFloors >= 6;
+    const areaTrig = inp.totalArea >= detThreshold;
+    const postpartumTrig = inp.isPostpartum;
+    autoDetReq = floorTrig || areaTrig || postpartumTrig;
+    autoDetReason = floorTrig ? "층수가 6층 이상으로 모든 층에 설치 대상입니다." :
+      areaTrig ? (inp.facilitySubtype === "bathhouse" ? "목욕장이며 연면적이 1,000㎡ 이상입니다." : "연면적이 600㎡ 이상입니다.") :
+      postpartumTrig ? "조산원·산후조리원으로 면적에 관계없이 설치 대상입니다." :
+      "현재 입력 기준으로는 설치 대상이 아닙니다.";
+  }
+  results.push(makeResult(categories.alarm, "자동화재탐지설비", "",
+    autoDetReq ? "required" : "notRequired", autoDetReason, ""));
+
+  // ── 시각경보기 ──
+  results.push(makeResult(categories.alarm, "시각경보기", "",
+    autoDetReq ? "required" : "notRequired",
+    autoDetReq ? "자동화재탐지설비 설치 대상이므로 함께 설치해야 합니다." :
+      "자동화재탐지설비 설치 대상이 아니므로 해당 없습니다.", ""));
+
+  // ── 비상방송설비 (기준 동일) ──
+  const broadcastReq = inp.totalArea >= 3500 || inp.aboveGroundFloors >= 11 || inp.basementFloors >= 3;
+  results.push(makeResult(categories.alarm, "비상방송설비", "",
+    broadcastReq ? "required" : "notRequired",
+    inp.totalArea >= 3500 ? "연면적이 3,500㎡ 이상입니다." :
+      inp.aboveGroundFloors >= 11 ? "지상층수가 11층 이상입니다." :
+      inp.basementFloors >= 3 ? "지하층수가 3층 이상입니다." :
+      "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
+
+  // ── 자동화재속보설비 ──
+  if (pd < YD.D20190806) {
+    results.push(makeResult(categories.alarm, "자동화재속보설비", "", "notRequired",
+      "허가일 기준 당시 근린생활시설에 대한 자동화재속보설비 설치 기준이 없었습니다.", ""));
+  } else {
+    const clinicApply = inp.isClinicWithInpatient || (pd >= YD.D20241231 && inp.hasHemodialysis);
+    const postpartumApply = pd >= YD.D20220225 && inp.isPostpartum;
+    const autoDispatchTarget = clinicApply || postpartumApply;
+    if (autoDispatchTarget) {
+      const dispatchReason = inp.isClinicWithInpatient ? "입원실이 있는 의원급에 해당합니다." :
+        (pd >= YD.D20241231 && inp.hasHemodialysis) ? "인공신장실이 있는 의원급에 해당합니다." :
+        "조산원·산후조리원에 해당합니다.";
+      results.push(makeResult(categories.alarm, "자동화재속보설비", "",
+        inp.has24HourStaff ? "review" : "required",
+        inp.has24HourStaff ? "24시간 상주 근무자가 있어 면제 검토가 필요합니다." : dispatchReason, ""));
+    } else {
+      results.push(makeResult(categories.alarm, "자동화재속보설비", "", "notRequired",
+        "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
+    }
+  }
+
+  // ── 피난기구 (기준 동일) ──
+  results.push(makeResult(categories.evacuation, "피난기구", "",
+    inp.aboveGroundFloors >= 3 ? "required" : "notRequired",
+    inp.aboveGroundFloors >= 3 ? "건축물 3층 이상 층에 설치합니다." :
+      "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
+
+  // ── 유도등 (기준 동일) ──
+  results.push(makeResult(categories.evacuation, "유도등 및 유도표지", "", "required",
+    "기본적으로 건물 전체에 설치합니다.", ""));
+
+  // ── 비상조명등 (기준 동일) ──
+  const bsmtAvg450 = inp.basementFloors > 0 && inp.basementAvg >= 450;
+  const wlss450 = inp.hasWindowlessFloor && inp.windowlessArea >= 450;
+  const emLightReq = (inp.totalFloors >= 5 && inp.totalArea >= 3000) || bsmtAvg450 || wlss450;
+  results.push(makeResult(categories.evacuation, "비상조명등", "",
+    emLightReq ? "required" : "notRequired",
+    inp.totalFloors >= 5 && inp.totalArea >= 3000 ? "전체 층수가 5층 이상이고 연면적이 3,000㎡ 이상입니다." :
+      bsmtAvg450 ? "지하층 평균 면적이 450㎡ 이상입니다." :
+      wlss450 ? "무창층 면적이 450㎡ 이상입니다." :
+      "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
+
+  // ── 상수도소화용수설비 (기준 동일) ──
+  results.push(makeResult(categories.waterSupply, "상수도소화용수설비", "",
+    inp.totalArea >= 5000 ? "required" : "notRequired",
+    inp.totalArea >= 5000 ? "연면적이 5,000㎡ 이상입니다." :
+      "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
+
+  // ── 제연설비 (기준 동일) ──
+  results.push(makeResult(categories.fireSupport, "제연설비", "",
+    inp.smokeControlArea >= 1000 ? "required" : "notRequired",
+    inp.smokeControlArea >= 1000 ? "지하층·무창층 내 근린생활시설 바닥면적 합계가 1,000㎡ 이상입니다." :
+      "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
+
+  // ── 연결송수관 (기준 동일) ──
+  const standpipeReq = (inp.totalFloors >= 5 && inp.totalArea >= 6000) || inp.totalFloors >= 7 ||
+    (inp.basementFloors >= 3 && inp.basementAreaSum >= 1000);
+  results.push(makeResult(categories.fireSupport, "연결송수관설비", "",
+    standpipeReq ? "required" : "notRequired",
+    inp.totalFloors >= 5 && inp.totalArea >= 6000 ? "전체 층수가 5층 이상이고 연면적이 6,000㎡ 이상입니다." :
+      inp.totalFloors >= 7 ? "전체 층수가 7층 이상입니다." :
+      inp.basementFloors >= 3 && inp.basementAreaSum >= 1000 ? "지하층이 3층 이상이고 지하층 바닥면적 합계가 1,000㎡ 이상입니다." :
+      "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
+
+  // ── 연결살수설비 ──
+  let connSprayReq = inp.basementAreaSum >= 150;
+  let connSprayReason = inp.basementAreaSum >= 150 ? "지하층 바닥면적 합계가 150㎡ 이상입니다." :
+    "현재 입력 기준으로는 설치 대상이 아닙니다.";
+  if (pd >= YD.D20240517 && inp.hasSmallUndergroundParking && !connSprayReq) {
+    connSprayReq = true;
+    connSprayReason = "지하 차고·주차장 바닥면적이 200㎡ 미만인 소규모 주차장이 있어 설치 대상입니다.";
+  }
+  results.push(makeResult(categories.fireSupport, "연결살수설비", "",
+    connSprayReq ? "required" : "notRequired", connSprayReason, ""));
+
+  // ── 비상콘센트 (기준 동일) ──
+  const emConsentReq = inp.aboveGroundFloors >= 11 || (inp.basementFloors >= 3 && inp.basementAreaSum >= 1000);
+  results.push(makeResult(categories.fireSupport, "비상콘센트설비", "",
+    emConsentReq ? "required" : "notRequired",
+    inp.aboveGroundFloors >= 11 ? "지상층수가 11층 이상입니다." :
+      inp.basementFloors >= 3 && inp.basementAreaSum >= 1000 ? "지하층이 3층 이상이고 지하층 바닥면적 합계가 1,000㎡ 이상입니다." :
+      "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
+
+  // ── 무선통신보조설비 ──
+  const radioBase = inp.basementAreaSum >= 3000 || (inp.basementFloors >= 3 && inp.basementAreaSum >= 1000);
+  const radioHigh = pd >= YD.D20120914 && inp.aboveGroundFloors >= 30;
+  results.push(makeResult(categories.fireSupport, "무선통신보조설비", "",
+    radioBase || radioHigh ? "required" : "notRequired",
+    inp.basementAreaSum >= 3000 ? "지하층 바닥면적 합계가 3,000㎡ 이상입니다." :
+      inp.basementFloors >= 3 && inp.basementAreaSum >= 1000 ? "지하층이 3층 이상이고 지하층 바닥면적 합계가 1,000㎡ 이상입니다." :
+      radioHigh ? "지상층수가 30층 이상으로 16층 이상 부분에 설치 대상입니다." :
+      "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
+
+  return results;
+}
+
+function yearShowResults() {
+  if (!yearCurrentStepIsValid()) {
+    showToast("현재 질문의 값을 먼저 입력해 주세요.");
+    return;
+  }
+  const pd = yPermitDateInt();
+  if (pd < YD.D20040530) {
+    showToast("이 도구는 2004년 5월 30일 이후 건축허가 건물만 분석 가능합니다.");
+    return;
+  }
+  const inp = yearNormalizeAnswers();
+  const results = yearEvaluateNeighborhood(inp);
+  const requiredItems = results.filter((r) => r.status === "required" || r.status === "review");
+
+  const permitStr = yearState.answers.yPermitDate;
+  document.getElementById("year-result-summary").innerHTML =
+    `<div class="ib-title">입력값 기준</div>근린생활시설, 건축허가일 ${permitStr}, 연면적 ${inp.totalArea}㎡, 지상 ${inp.aboveGroundFloors}층, 지하 ${inp.basementFloors}층`;
+
+  renderSimpleRequiredList(requiredItems, "year-required-list");
+  renderResultGroup("year-criteria-list", results, [], requiredItems.map((i) => i.name));
+
+  document.getElementById("year-question-card").classList.add("hidden");
+  document.getElementById("year-result-card").classList.remove("hidden");
+  document.getElementById("year-prog-wrap").classList.add("hidden");
+  yearScrollToTop();
+}
+
+function yearWizardRestart() {
+  yearState.currentStep = 0;
+  const ya = yearState.answers;
+  ya.yOccupancyType = "neighborhood";
+  ya.yPermitDate = "";
+  ya.yTotalArea = "";
+  ya.yAboveGroundFloors = "";
+  ya.yBasementFloors = "";
+  ya.yBasementAreaSum = "";
+  ya.yHasWindowlessFloor = "no";
+  ya.yWindowlessArea = "";
+  ya.yHasLargeTargetFloor = "no";
+  ya.yHasLargeFloorFor1000 = "no";
+  ya.yNeighborhoodArea = "";
+  ya.yFacilitySubtype = "general";
+  ya.yIsPostpartum = "no";
+  ya.yPostpartumAreaRange = "under600";
+  ya.yIsClinicWithInpatient = "no";
+  ya.yHasHemodialysis = "no";
+  ya.yHas24HourStaff = "no";
+  ya.yFirstSecondFloorArea = "";
+  ya.yIndoorParkingArea = "";
+  ya.yMechanicalParkingCapacity = "";
+  ya.yElectricalRoomArea = "";
+  ya.ySmokeControlArea = "";
+  ya.yHasSmallUndergroundParking = "no";
+
+  document.getElementById("year-question-card").classList.remove("hidden");
+  document.getElementById("year-result-card").classList.add("hidden");
+  document.getElementById("year-prog-wrap").classList.remove("hidden");
+  yearRenderCurrentStep();
+}
+
 document.getElementById("back-from-explorer-year").addEventListener("click", () => showScreen("home"));
-document.getElementById("open-explorer-year").addEventListener("click", () => showScreen("explorerYear"));
+document.getElementById("open-explorer-year").addEventListener("click", () => {
+  showScreen("explorerYear");
+  yearWizardRestart();
+});
+document.getElementById("year-prev-btn").addEventListener("click", () => yearMoveStep(-1));
+document.getElementById("year-next-btn").addEventListener("click", () => {
+  const activeSteps = yearGetActiveSteps();
+  if (yearState.currentStep === activeSteps.length - 1) yearShowResults();
+  else yearMoveStep(1);
+});
+document.getElementById("year-restart-btn").addEventListener("click", () => yearWizardRestart());
 document.getElementById("back-from-date").addEventListener("click", () => showScreen("home"));
 document.getElementById("back-from-guide").addEventListener("click", () => showScreen("home"));
 document.getElementById("open-guide").addEventListener("click", () => showScreen("guide"));
@@ -3969,11 +4739,23 @@ document.getElementById("prev-step").addEventListener("click", () => moveStep(-1
 document.getElementById("next-step").addEventListener("click", () => {
   const activeSteps = getActiveSteps();
   const currentStep = activeSteps[state.currentStep];
+  if (explorerRuntime.mode === "year" && state.currentStep === activeSteps.length - 1) {
+    showToast("연도별_테스트중은 아직 결과 계산을 준비 중입니다. 질문 흐름만 테스트할 수 있습니다.");
+    return;
+  }
   if (currentStep?.key === "hasMultiuseBusiness" && state.answers.hasMultiuseBusiness === "no") {
+    if (explorerRuntime.mode === "year") {
+      showToast("연도별_테스트중은 아직 결과 계산을 준비 중입니다. 질문 흐름만 테스트할 수 있습니다.");
+      return;
+    }
     showResults();
     return;
   }
   if (currentStep?.key === "lodgingHasMultiuseBusiness" && state.answers.lodgingHasMultiuseBusiness === "no") {
+    if (explorerRuntime.mode === "year") {
+      showToast("연도별_테스트중은 아직 결과 계산을 준비 중입니다. 질문 흐름만 테스트할 수 있습니다.");
+      return;
+    }
     showResults();
     return;
   }
@@ -4210,6 +4992,19 @@ showScreen("home");
         window.Capacitor.Plugins.App.exitApp();
       }
       return;
+    }
+
+    // 연도별 탐색기
+    if (current === "explorerYear") {
+      const yearResultCard = document.getElementById("year-result-card");
+      if (yearResultCard && !yearResultCard.classList.contains("hidden")) {
+        document.getElementById("year-restart-btn").click();
+        return;
+      }
+      if (yearState.currentStep > 0) {
+        yearMoveStep(-1);
+        return;
+      }
     }
 
     // 소방시설탐색기
