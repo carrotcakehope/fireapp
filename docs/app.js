@@ -737,6 +737,7 @@ const CALC_MODES = {
 const screens = {
   home: document.getElementById("screen-home"),
   explorer: document.getElementById("screen-explorer"),
+  explorerYear: document.getElementById("screen-explorer-year"),
   date: document.getElementById("screen-date"),
   inspection: document.getElementById("screen-inspection"),
   multiuse: document.getElementById("screen-multiuse"),
@@ -3943,6 +3944,8 @@ document.getElementById("open-occupancy-calculator").addEventListener("click", (
 document.getElementById("back-from-occupancy").addEventListener("click", () => showScreen("home"));
 document.getElementById("back-from-inspection").addEventListener("click", () => showScreen("home"));
 document.getElementById("back-from-explorer").addEventListener("click", () => showScreen("home"));
+document.getElementById("back-from-explorer-year").addEventListener("click", () => showScreen("home"));
+document.getElementById("open-explorer-year").addEventListener("click", () => showScreen("explorerYear"));
 document.getElementById("back-from-date").addEventListener("click", () => showScreen("home"));
 document.getElementById("back-from-guide").addEventListener("click", () => showScreen("home"));
 document.getElementById("open-guide").addEventListener("click", () => showScreen("guide"));
