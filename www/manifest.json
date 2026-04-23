@@ -1,0 +1,24 @@
+{
+  "name": "예방GPT",
+  "short_name": "예방GPT",
+  "description": "예방업무에 필요한 법적기준과 서류제출 기한 계산에 바로 쓸 수 있는 실무형 도우미",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0d0d0d",
+  "theme_color": "#d93025",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

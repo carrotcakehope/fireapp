@@ -1,5 +1,7 @@
-const CACHE = 'fireapp-v28';
-const FILES = [
+const CACHE = 'fireapp-v30';
+
+// ASCII ?Œì¼ëª…ë§Œ pre-cache (?œê? ?Œì¼ëª…ì? ?°í???ìºì‹œë¡?ì²˜ë¦¬)
+const PRECACHE_FILES = [
   './index.html',
   './styles.css',
   './app.js',
@@ -9,21 +11,11 @@ const FILES = [
   './report-guide.pdf',
   './pdf.min.js',
   './pdf.worker.min.js',
-  './image/?¥ë‚´?Œí™”??png',
-  './image/?¤í”„ë§í´?¬ì„¤ë¹?png',
-  './image/?ë™?”ì¬?ì??¤ë¹„.png',
-  './image/page 1/page1-full.png',
-  './image/page 1/page1-?ê?ì¢…ë¥˜.png',
-  './image/page 1/page1-?€?ë¬¼?¤ëª….png',
-  './image/page 1/page1-?ê?ê¸°ê°„.png',
-  './image/page 1/page1-?ê???png',
-  './image/page 1/page1-?ê??¸ë ¥.png',
-  './image/page 1/page1-? ì§œ?œëª….png',
 ];
 
 self.addEventListener('install', e => {
   e.waitUntil(
-    caches.open(CACHE).then(c => c.addAll(FILES))
+    caches.open(CACHE).then(c => c.addAll(PRECACHE_FILES))
   );
   self.skipWaiting();
 });
@@ -39,6 +31,15 @@ self.addEventListener('activate', e => {
 
 self.addEventListener('fetch', e => {
   e.respondWith(
-    caches.match(e.request).then(cached => cached || fetch(e.request))
+    caches.match(e.request).then(function(cached) {
+      if (cached) return cached;
+      return fetch(e.request).then(function(response) {
+        // image ?´ë” ?Œì¼?€ ?°í???ìºì‹œ???€??        if (e.request.url.includes('/image/')) {
+          var clone = response.clone();
+          caches.open(CACHE).then(function(c) { c.put(e.request, clone); });
+        }
+        return response;
+      });
+    })
   );
 });

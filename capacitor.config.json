@@ -1,0 +1,12 @@
+{
+  "appId": "com.firesafety.assistant",
+  "appName": "예방업무 어시스턴트",
+  "webDir": "www",
+  "server": {
+    "url": "https://carrotcakehope.github.io/fireapp",
+    "cleartext": false
+  },
+  "android": {
+    "minWebViewVersion": 60
+  }
+}
