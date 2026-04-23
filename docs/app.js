@@ -6559,10 +6559,10 @@ function renderReportGuide() {
 
   // ── 탭 바 ──
   var tabDefs = [
-    { id: 'overview',  main: '1-2페이지', sub: '보고서 개요' },
-    { id: 'checklist', main: '3-4페이지', sub: '소방시설 현황' },
-    { id: 'sections',  main: '5-8페이지', sub: '점검표' },
-    { id: 'writing',   main: '작성방법',  sub: '9-10페이지' },
+    { id: 'page1',    main: '1페이지',   sub: '보고서 표지' },
+    { id: 'page2',    main: '2페이지',   sub: '대상물 정보' },
+    { id: 'checklist',main: '3페이지',   sub: '소방시설 선택' },
+    { id: 'sections', main: '4-8페이지', sub: '점검표' },
   ];
 
   var tabBar = document.createElement('div');
@@ -6589,10 +6589,10 @@ function renderReportGuide() {
   var content = document.createElement('div');
   content.className = 'rg-content';
 
-  if (rgState.tab === 'overview')  renderRgOverview(content);
+  if (rgState.tab === 'page1')     renderRgPage1(content);
+  if (rgState.tab === 'page2')     renderRgPage2(content);
   if (rgState.tab === 'checklist') renderRgChecklist(content);
   if (rgState.tab === 'sections')  renderRgSections(content);
-  if (rgState.tab === 'writing')   renderRgWriting(content);
 
   root.appendChild(content);
 }
@@ -6779,35 +6779,34 @@ function rgPageBlock(imgSrc, altText) {
   return wrap;
 }
 
-function renderRgOverview(c) {
-  // ── 1페이지 ──
+function renderRgPage1(c) {
   c.appendChild(rgInfoBox('blue', '📄 1페이지 — 보고서 표지',
     '점검 기본 정보를 기재하는 페이지입니다. 각 항목을 클릭하면 작성 방법을 확인할 수 있습니다.'));
   c.appendChild(rgPageBlock('./image/page 1/page1-full.png', '1페이지 전체'));
 
-  var acc1Label = document.createElement('div');
-  acc1Label.className = 'rg-section-label';
-  acc1Label.textContent = '항목별 작성 방법';
-  c.appendChild(acc1Label);
+  var accLabel = document.createElement('div');
+  accLabel.className = 'rg-section-label';
+  accLabel.textContent = '항목별 작성 방법';
+  c.appendChild(accLabel);
   RG_PAGE1_SECTIONS.forEach(function (s) { c.appendChild(createRgAccordion(s)); });
+}
 
-  // ── 2페이지 ──
+function renderRgPage2(c) {
   c.appendChild(rgInfoBox('blue', '📄 2페이지 — 특정소방대상물 정보',
-    '대상물의 소방안전 현황과 건축물 정보를 기재하는 페이지입니다.'));
+    '대상물의 소방안전 현황과 건축물 정보를 기재하는 페이지입니다. 각 항목을 클릭하면 작성 방법을 확인할 수 있습니다.'));
   c.appendChild(rgPageBlock('./image/page 2/page2-full.png', '2페이지 전체'));
 
-  var acc2Label = document.createElement('div');
-  acc2Label.className = 'rg-section-label';
-  acc2Label.textContent = '항목별 작성 방법';
-  c.appendChild(acc2Label);
+  var accLabel = document.createElement('div');
+  accLabel.className = 'rg-section-label';
+  accLabel.textContent = '항목별 작성 방법';
+  c.appendChild(accLabel);
   RG_PAGE2_SECTIONS.forEach(function (s) { c.appendChild(createRgAccordion(s)); });
 }
 
 function renderRgChecklist(c) {
   c.appendChild(rgInfoBox('blue', '✅ 소방시설 현황',
-    '3~4페이지를 참고하여 대상물에 설치된 소방시설을 선택하세요. 선택한 설비에 해당하는 점검표만 다음 탭에 표시됩니다.'));
+    '3페이지를 참고하여 대상물에 설치된 소방시설을 선택하세요. 선택한 설비에 해당하는 점검표만 다음 탭에 표시됩니다.'));
   appendRgPage(c, 3);
-  appendRgPage(c, 4);
 
   c.appendChild(rgSectionLabel('설치된 소방시설 선택'));
 
@@ -6907,14 +6906,17 @@ function renderRgSections(c) {
     return rgState.selected.has(item.id);
   });
 
+  // 4페이지: 소방시설 현황표 (선택 여부와 무관하게 항상 표시)
+  appendRgPage(c, 4);
+
   if (selectedFlat.length === 0) {
     c.appendChild(rgInfoBox('amber', '⚠️ 선택된 설비 없음',
-      '이전 탭(소방시설 현황)에서 해당 설비를 먼저 선택해 주세요.'));
+      '이전 탭(소방시설 선택)에서 해당 설비를 먼저 선택해 주세요.'));
     var backBtn = document.createElement('button');
     backBtn.type = 'button';
     backBtn.className = 'btn btn-ghost';
     backBtn.style.cssText = 'width:100%;margin-top:8px;';
-    backBtn.textContent = '← 소방시설 현황으로';
+    backBtn.textContent = '← 소방시설 선택으로';
     backBtn.addEventListener('click', function () {
       rgState.tab = 'checklist';
       renderReportGuide();
@@ -6922,6 +6924,8 @@ function renderRgSections(c) {
     c.appendChild(backBtn);
     return;
   }
+
+  c.appendChild(rgSectionLabel('선택한 설비 점검표'));
 
   selectedFlat.forEach(function (item) {
     // 구분 라벨
@@ -6949,15 +6953,8 @@ function renderRgSections(c) {
   });
 }
 
-function renderRgWriting(c) {
-  c.appendChild(rgInfoBox('blue', '📝 작성 방법',
-    '10페이지 12번 항목에 작성 방법이 안내되어 있습니다.'));
-  appendRgPage(c, 9);
-  appendRgPage(c, 10);
-}
-
 document.getElementById('open-report-guide').addEventListener('click', function () {
-  rgState.tab = 'overview';
+  rgState.tab = 'page1';
   showScreen('reportGuide');
   renderReportGuide();
 });
