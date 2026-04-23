@@ -1,4 +1,4 @@
-const CACHE = 'fireapp-v37';
+const CACHE = 'fireapp-v38';
 
 // ?�치 ??캐시???�심 ?�일 (?�고 빠른 것만)
 const PRECACHE_FILES = [

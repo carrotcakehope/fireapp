@@ -2734,3 +2734,58 @@ html[data-theme="light"] .rg-tab-bar {
   color: var(--text);
   font-weight: 600;
 }
+
+/* ── 등급 선택 ── */
+.rg-grade-selector {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.rg-grade-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 12px 10px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border2);
+  background: var(--surface2);
+  color: var(--text);
+  cursor: pointer;
+  transition: background var(--transition), border-color var(--transition), color var(--transition);
+}
+
+.rg-grade-btn:hover:not(:disabled) {
+  background: var(--surface3);
+  border-color: var(--text-dim);
+}
+
+.rg-grade-btn.active {
+  border-color: var(--red);
+  background: var(--red-dim);
+  color: var(--red-soft);
+}
+
+.rg-grade-btn.preparing {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.rg-grade-main {
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: -0.3px;
+}
+
+.rg-grade-note {
+  font-size: 11px;
+  color: var(--text-muted);
+  font-family: var(--mono);
+}
+
+.rg-grade-btn.active .rg-grade-note {
+  color: var(--red-soft);
+  opacity: 0.8;
+}
