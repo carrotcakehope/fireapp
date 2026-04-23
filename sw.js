@@ -1,4 +1,4 @@
-const CACHE = 'fireapp-v17';
+const CACHE = 'fireapp-v18';
 const FILES = [
   './index.html',
   './styles.css',
