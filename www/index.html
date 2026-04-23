@@ -17,9 +17,14 @@
       window.addEventListener('load', function() {
         navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' })
           .then(function(reg) {
-            // 앱 시작마다 SW 업데이트 강제 확인
-            reg.update();
+            reg.update(); // 앱 시작마다 업데이트 확인
           });
+        // 새 SW가 활성화되면 자동 새로고침
+        navigator.serviceWorker.addEventListener('message', function(e) {
+          if (e.data && e.data.type === 'SW_UPDATED') {
+            window.location.reload();
+          }
+        });
       });
     }
   </script>
