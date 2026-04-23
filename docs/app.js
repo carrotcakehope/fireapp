@@ -3994,7 +3994,7 @@ const yearState = {
   currentStep: 0,
   answers: {
     yOccupancyType: "neighborhood",
-    yPermitDate: "",
+    yPermitDate: "2019-02-18",
     yTotalArea: "1500",
     yAboveGroundFloors: "4",
     yBasementFloors: "0",
@@ -5046,12 +5046,10 @@ function yearEvaluateLodging(inp) {
   } else if (pd >= YD.D20040530 && pd < YD.D20130210) {
     simpleSprinklerReason = "현재 입력 기준으로는 설치 대상이 아닙니다.";
   } else if (pd >= YD.D20130210 && pd < YD.D20221201) {
-    // 생활형 숙박시설 600㎡ 이상만 대상
-    simpleSprinklerReason = "이 시기에는 생활형 숙박시설로서 바닥면적 600㎡ 이상인 경우에만 설치 대상입니다. (일반 여관·모텔은 제외)";
-    simpleSprinklerReq = false; // 생활형 여부는 별도 판단 불가이므로 review 처리
-    results.push(makeResult(categories.extinguishing, "간이스프링클러설비", "", "review",
-      "생활형 숙박시설(취사 가능 레지던스 등)로서 바닥면적 합계가 600㎡ 이상인 경우 설치 대상입니다. 해당 시설이 생활형 숙박시설인지 확인이 필요합니다.", ""));
-    // 별도 push했으므로 아래 공통 push 건너뜀
+    simpleSprinklerReason = "현재 입력 기준으로는 설치 대상이 아닙니다.";
+    simpleSprinklerReq = false;
+    results.push(makeResult(categories.extinguishing, "간이스프링클러설비", "", "notRequired",
+      simpleSprinklerReason, ""));
     // 물분무 이하 계속
     const waterSprayReq = inp.lodgingIndoorParkingArea >= 200 || inp.lodgingMechanicalParkingCapacity >= 20 || inp.lodgingElectricalRoomArea >= 300;
     results.push(makeResult(categories.extinguishing, "물분무등소화설비", "",
@@ -5579,51 +5577,51 @@ function yearWizardRestart() {
   yearState.currentStep = 0;
   const ya = yearState.answers;
   ya.yOccupancyType = "neighborhood";
-  ya.yPermitDate = "";
-  ya.yTotalArea = "";
-  ya.yAboveGroundFloors = "";
-  ya.yBasementFloors = "";
-  ya.yBasementAreaSum = "";
+  ya.yPermitDate = "2019-02-18";
+  ya.yTotalArea = "1500";
+  ya.yAboveGroundFloors = "4";
+  ya.yBasementFloors = "0";
+  ya.yBasementAreaSum = "0";
   ya.yHasWindowlessFloor = "no";
   ya.yWindowlessArea = "";
   ya.yHasLargeTargetFloor = "no";
   ya.yHasLargeFloorFor1000 = "no";
-  ya.yNeighborhoodArea = "";
+  ya.yNeighborhoodArea = "1500";
   ya.yFacilitySubtype = "general";
   ya.yIsPostpartum = "no";
   ya.yPostpartumAreaRange = "under600";
   ya.yIsClinicWithInpatient = "no";
   ya.yHasHemodialysis = "no";
   ya.yHas24HourStaff = "no";
-  ya.yFirstSecondFloorArea = "";
+  ya.yFirstSecondFloorArea = "750";
   ya.yIndoorParkingArea = "";
   ya.yMechanicalParkingCapacity = "";
   ya.yElectricalRoomArea = "";
-  ya.ySmokeControlArea = "";
+  ya.ySmokeControlArea = "0";
   ya.yHasSmallUndergroundParking = "no";
   // 숙박시설 전용
-  ya.yLodgingArea = "";
+  ya.yLodgingArea = "1500";
   ya.yLodgingIsTouristHotel = "no";
   ya.yLodgingHasLargeFloorFor1000 = "no";
   ya.yLodgingHasGasFacility = "no";
-  ya.yLodgingFirstSecondFloorArea = "";
+  ya.yLodgingFirstSecondFloorArea = "750";
   ya.yLodgingIndoorParkingArea = "";
   ya.yLodgingMechanicalParkingCapacity = "";
   ya.yLodgingElectricalRoomArea = "";
-  ya.yLodgingBasementAreaForSmoke = "";
+  ya.yLodgingBasementAreaForSmoke = "0";
   // 노유자시설 전용
   ya.yElderlySubtype = "general";
-  ya.yElderlyArea = "";
+  ya.yElderlyArea = "1500";
   ya.yElderlyHasLargeTargetFloor = "no";
   ya.yElderlyHasGrillWindow = "no";
   ya.yElderlyHasGasFacility = "no";
   ya.yElderlyHasFloor500Plus = "no";
   ya.yElderlyHas24HourStaff = "no";
-  ya.yElderlyFirstSecondFloorArea = "";
+  ya.yElderlyFirstSecondFloorArea = "750";
   ya.yElderlyIndoorParkingArea = "";
   ya.yElderlyMechanicalParkingCapacity = "";
   ya.yElderlyElectricalRoomArea = "";
-  ya.yElderlyBasementAreaForSmoke = "";
+  ya.yElderlyBasementAreaForSmoke = "0";
   ya.yElderlyHasSmallUndergroundParking = "no";
 
   document.getElementById("year-question-card").classList.remove("hidden");
