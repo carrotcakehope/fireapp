@@ -2406,3 +2406,201 @@ html[data-theme="light"] .cal-day.holiday {
   color: #6a30cc;
   box-shadow: inset 0 0 0 1.5px rgba(106, 48, 204, 0.4);
 }
+
+/* ══════════════════════════════════════════════
+   REPORT GUIDE
+   ══════════════════════════════════════════════ */
+#screen-report-guide {
+  height: 100vh;
+  min-height: unset;
+  overflow: hidden;
+}
+
+.rg-outer {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.rg-tab-bar {
+  display: flex;
+  flex-shrink: 0;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.rg-tab-bar::-webkit-scrollbar {
+  display: none;
+}
+
+.rg-tab-btn {
+  flex: 1;
+  min-width: 76px;
+  padding: 10px 6px 9px;
+  border: none;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  transition: color var(--transition), border-color var(--transition), background var(--transition);
+}
+
+.rg-tab-btn:hover {
+  background: var(--surface2);
+  color: var(--text);
+}
+
+.rg-tab-btn.active {
+  color: var(--red-soft);
+  border-bottom-color: var(--red);
+}
+
+.rg-tab-main {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+  white-space: nowrap;
+}
+
+.rg-tab-sub {
+  font-size: 10px;
+  font-family: var(--mono);
+  opacity: 0.65;
+  white-space: nowrap;
+}
+
+.rg-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+}
+
+.rg-pdf-wrapper {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--surface2);
+  margin-bottom: 4px;
+}
+
+.rg-pdf-loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 180px;
+  color: var(--text-dim);
+  font-size: 12px;
+  font-family: var(--mono);
+  letter-spacing: 0.3px;
+}
+
+.rg-pdf-canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.rg-pdf-iframe {
+  display: block;
+  width: 100%;
+  height: 600px;
+  border: none;
+}
+
+/* ── 그룹 헤더 ── */
+.rg-group-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 14px;
+  margin-top: 10px;
+  border-radius: 10px 10px 0 0;
+  background: var(--surface3);
+  border: 1px solid var(--border2);
+  border-bottom: none;
+  cursor: pointer;
+}
+
+.rg-group-cb {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+  accent-color: var(--red);
+  cursor: pointer;
+}
+
+.rg-group-name {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: -0.2px;
+}
+
+.rg-group-sub {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text-dim);
+  border: 1px solid var(--border2);
+  border-radius: 4px;
+  padding: 1px 6px;
+}
+
+/* ── 개별 항목 그리드 ── */
+.rg-item-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--border);
+  border: 1px solid var(--border2);
+  border-top: none;
+  border-radius: 0 0 10px 10px;
+  overflow: hidden;
+  margin-bottom: 2px;
+}
+
+.rg-item-label {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 10px 12px;
+  font-size: 13px;
+  cursor: pointer;
+  background: var(--surface2);
+  transition: background var(--transition), color var(--transition);
+  word-break: keep-all;
+}
+
+.rg-item-label:hover {
+  background: var(--surface3);
+}
+
+.rg-item-label:has(input:checked) {
+  background: var(--red-dim);
+  color: var(--red-soft);
+}
+
+.rg-item-label input[type="checkbox"] {
+  width: 15px;
+  height: 15px;
+  flex-shrink: 0;
+  accent-color: var(--red);
+  cursor: pointer;
+}
+
+@media (min-width: 900px) {
+  .rg-content {
+    padding: 18px 28px 24px;
+  }
+}
+
+html[data-theme="light"] .rg-tab-bar {
+  background: var(--bg);
+}

@@ -56,6 +56,15 @@
           </div>
         </button>
 
+        <button id="open-report-guide" class="menu-card" type="button">
+          <div class="menu-icon mc-amber">📋</div>
+          <div class="menu-text">
+            <div class="mt-num">06</div>
+            <div class="mt-title">보고서 읽는법</div>
+            <div class="mt-desc">자체점검 실시결과 보고서 작성·읽기 안내</div>
+          </div>
+        </button>
+
         <button id="open-date-calculator" class="menu-card" type="button">
           <div class="menu-icon mc-blue">📅</div>
           <div class="menu-text">
@@ -256,6 +265,14 @@
     </div>
   </section>
 
+  <section id="screen-report-guide" class="screen">
+    <div class="topbar">
+      <button id="back-from-report-guide" class="back-btn" type="button">←</button>
+      <span class="tb-title">보고서 읽는법</span>
+    </div>
+    <div id="report-guide-content" class="rg-outer"></div>
+  </section>
+
   <section id="screen-guide" class="screen">
     <div class="topbar">
       <button id="back-from-guide" class="back-btn" type="button">←</button>
@@ -429,6 +446,7 @@
     </div>
   </div>
 
+  <script src="./pdf.min.js"></script>
   <script src="./app.js"></script>
 </body>
 </html>

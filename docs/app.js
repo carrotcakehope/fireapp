@@ -742,6 +742,7 @@ const screens = {
   inspection: document.getElementById("screen-inspection"),
   multiuse: document.getElementById("screen-multiuse"),
   guide: document.getElementById("screen-guide"),
+  reportGuide: document.getElementById("screen-report-guide"),
 };
 
 const questionElements = {
@@ -5204,3 +5205,368 @@ showScreen("home");
     return '<div class="ios-guide-step"><span class="ios-step-num">' + n + '</span><span>' + text + '</span></div>';
   }
 })();
+
+// ── 자체점검 보고서 읽는법 ────────────────────────────────────────
+
+pdfjsLib.GlobalWorkerOptions.workerSrc = './pdf.worker.min.js';
+
+let _pdfDocCache = null;
+
+function getPdfDoc() {
+  if (_pdfDocCache) return Promise.resolve(_pdfDocCache);
+  return fetch('./report-guide.pdf')
+    .then(function (res) {
+      if (!res.ok) throw new Error('report-guide.pdf 파일을 찾을 수 없습니다 (HTTP ' + res.status + ')');
+      return res.arrayBuffer();
+    })
+    .then(function (buf) {
+      return pdfjsLib.getDocument({ data: new Uint8Array(buf) }).promise;
+    })
+    .then(function (doc) {
+      _pdfDocCache = doc;
+      return doc;
+    });
+}
+
+function renderPdfPageToCanvas(canvas, pageNum) {
+  var wrapper = canvas.parentElement;
+  return getPdfDoc()
+    .then(function (pdf) { return pdf.getPage(pageNum); })
+    .then(function (page) {
+      var containerWidth = wrapper.clientWidth || window.innerWidth - 32;
+      var dpr = window.devicePixelRatio || 1;
+      var base = page.getViewport({ scale: 1 });
+      var scale = containerWidth / base.width;
+      var vp = page.getViewport({ scale: scale * dpr });
+      canvas.width = vp.width;
+      canvas.height = vp.height;
+      canvas.style.width = containerWidth + 'px';
+      canvas.style.height = (base.height * scale) + 'px';
+      return page.render({ canvasContext: canvas.getContext('2d'), viewport: vp }).promise;
+    });
+}
+
+function createPdfBlock(pageNum) {
+  var wrapper = document.createElement('div');
+  wrapper.className = 'rg-pdf-wrapper';
+
+  var loading = document.createElement('div');
+  loading.className = 'rg-pdf-loading';
+  loading.textContent = pageNum + '페이지 불러오는 중…';
+  wrapper.appendChild(loading);
+
+  var canvas = document.createElement('canvas');
+  canvas.className = 'rg-pdf-canvas';
+  canvas.style.display = 'none';
+  wrapper.appendChild(canvas);
+
+  requestAnimationFrame(function () {
+    renderPdfPageToCanvas(canvas, pageNum)
+      .then(function () {
+        loading.remove();
+        canvas.style.display = 'block';
+      })
+      .catch(function (err) {
+        console.error('PDF load error (page ' + pageNum + '):', err);
+        // PDF.js 실패 시 iframe fallback
+        canvas.remove();
+        loading.remove();
+        var iframe = document.createElement('iframe');
+        iframe.className = 'rg-pdf-iframe';
+        iframe.src = './report-guide.pdf#page=' + pageNum;
+        wrapper.appendChild(iframe);
+      });
+  });
+  return wrapper;
+}
+
+function rgInfoBox(type, title, body) {
+  var box = document.createElement('div');
+  box.className = 'info-box ' + type;
+  box.innerHTML = '<div class="ib-title">' + title + '</div>' + body;
+  return box;
+}
+
+function rgSectionLabel(text) {
+  var el = document.createElement('p');
+  el.className = 'section-label';
+  el.textContent = text;
+  return el;
+}
+
+function appendRgPage(container, pageNum) {
+  container.appendChild(rgSectionLabel(pageNum + '페이지'));
+  container.appendChild(createPdfBlock(pageNum));
+}
+
+const RG_FACILITY_GROUPS = [
+  {
+    id: 'water', sectionLabel: '3-3', page: 5, name: '수계소화설비',
+    items: [
+      { id: 'w01', label: '소화기구' },
+      { id: 'w02', label: '자동소화장치' },
+      { id: 'w03', label: '옥내소화전설비' },
+      { id: 'w04', label: '스프링클러설비' },
+      { id: 'w05', label: '간이스프링클러설비' },
+      { id: 'w06', label: '화재조기진압용 스프링클러설비' },
+      { id: 'w07', label: '물분무소화설비' },
+      { id: 'w08', label: '미분무소화설비' },
+      { id: 'w09', label: '포소화설비' },
+      { id: 'w10', label: '강화액소화설비' },
+      { id: 'w11', label: '옥외소화전설비' },
+    ],
+  },
+  {
+    id: 'gas', sectionLabel: '3-4', page: 5, name: '가스계·분말소화설비',
+    items: [
+      { id: 'g01', label: '이산화탄소소화설비' },
+      { id: 'g02', label: '할론소화설비' },
+      { id: 'g03', label: '할로겐화합물 및 불활성기체소화설비' },
+      { id: 'g04', label: '분말소화설비' },
+    ],
+  },
+  {
+    id: 'alarm', sectionLabel: '3-5', page: 6, name: '경보설비',
+    items: [
+      { id: 'a01', label: '단독경보형감지기' },
+      { id: 'a02', label: '비상경보설비' },
+      { id: 'a03', label: '비상방송설비' },
+      { id: 'a04', label: '누전경보기' },
+      { id: 'a05', label: '자동화재탐지설비' },
+      { id: 'a06', label: '자동화재속보설비' },
+      { id: 'a07', label: '통합감시시설' },
+      { id: 'a08', label: '가스누설경보기' },
+      { id: 'a09', label: '화재알림설비' },
+      { id: 'a10', label: '시각경보기' },
+    ],
+  },
+  {
+    id: 'escape', sectionLabel: '3-6', page: 6, name: '피난구조설비',
+    items: [
+      { id: 'e01', label: '피난기구' },
+      { id: 'e02', label: '인명구조기구' },
+      { id: 'e03', label: '유도등' },
+      { id: 'e04', label: '비상조명등' },
+      { id: 'e05', label: '휴대용 비상조명등' },
+    ],
+  },
+  {
+    id: 'wsupply', sectionLabel: '3-7', page: 6, name: '소화용수설비',
+    items: [
+      { id: 's01', label: '상수도소화용수설비' },
+      { id: 's02', label: '소화수조 및 저수조' },
+    ],
+  },
+  {
+    id: 'activity', sectionLabel: '3-8', page: 7, name: '소화활동설비',
+    items: [
+      { id: 'ac01', label: '제연설비' },
+      { id: 'ac02', label: '연결송수관설비' },
+      { id: 'ac03', label: '연결살수설비' },
+      { id: 'ac04', label: '비상콘센트설비' },
+      { id: 'ac05', label: '무선통신보조설비' },
+      { id: 'ac06', label: '연소방지설비' },
+    ],
+  },
+];
+
+const rgState = {
+  tab: 'overview',
+  selected: new Set(),
+};
+
+function renderReportGuide() {
+  var root = document.getElementById('report-guide-content');
+  root.innerHTML = '';
+
+  // ── 탭 바 ──
+  var tabDefs = [
+    { id: 'overview',  main: '1-2페이지', sub: '보고서 개요' },
+    { id: 'checklist', main: '3-4페이지', sub: '소방시설 현황' },
+    { id: 'sections',  main: '5-8페이지', sub: '점검표' },
+    { id: 'writing',   main: '작성방법',  sub: '9-10페이지' },
+  ];
+
+  var tabBar = document.createElement('div');
+  tabBar.className = 'rg-tab-bar';
+
+  tabDefs.forEach(function (t) {
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'rg-tab-btn' + (rgState.tab === t.id ? ' active' : '');
+    btn.innerHTML =
+      '<span class="rg-tab-main">' + t.main + '</span>' +
+      '<span class="rg-tab-sub">'  + t.sub  + '</span>';
+    btn.addEventListener('click', function () {
+      if (rgState.tab !== t.id) {
+        rgState.tab = t.id;
+        renderReportGuide();
+      }
+    });
+    tabBar.appendChild(btn);
+  });
+  root.appendChild(tabBar);
+
+  // ── 콘텐츠 ──
+  var content = document.createElement('div');
+  content.className = 'rg-content';
+
+  if (rgState.tab === 'overview')  renderRgOverview(content);
+  if (rgState.tab === 'checklist') renderRgChecklist(content);
+  if (rgState.tab === 'sections')  renderRgSections(content);
+  if (rgState.tab === 'writing')   renderRgWriting(content);
+
+  root.appendChild(content);
+}
+
+function renderRgOverview(c) {
+  c.appendChild(rgInfoBox('blue', '📄 보고서 개요',
+    '1~2페이지는 점검 기본 정보와 결과 총괄이 담겨 있습니다.'));
+  appendRgPage(c, 1);
+  appendRgPage(c, 2);
+}
+
+function renderRgChecklist(c) {
+  c.appendChild(rgInfoBox('blue', '✅ 소방시설 현황',
+    '3~4페이지를 참고하여 대상물에 설치된 소방시설을 선택하세요. 선택한 설비에 해당하는 점검표만 다음 탭에 표시됩니다.'));
+  appendRgPage(c, 3);
+  appendRgPage(c, 4);
+
+  c.appendChild(rgSectionLabel('설치된 소방시설 선택'));
+
+  RG_FACILITY_GROUPS.forEach(function (group) {
+    var allItems = group.items;
+
+    // ── 그룹 헤더 ──
+    var header = document.createElement('div');
+    header.className = 'rg-group-header';
+
+    var groupCb = document.createElement('input');
+    groupCb.type = 'checkbox';
+    groupCb.className = 'rg-group-cb';
+    var allChecked = allItems.every(function (i) { return rgState.selected.has(i.id); });
+    var anyChecked = allItems.some(function (i) { return rgState.selected.has(i.id); });
+    groupCb.checked = allChecked;
+    groupCb.indeterminate = anyChecked && !allChecked;
+
+    var groupName = document.createElement('span');
+    groupName.className = 'rg-group-name';
+    groupName.textContent = group.name;
+
+    var groupSub = document.createElement('span');
+    groupSub.className = 'rg-group-sub';
+    groupSub.textContent = group.sectionLabel;
+
+    header.appendChild(groupCb);
+    header.appendChild(groupName);
+    header.appendChild(groupSub);
+    c.appendChild(header);
+
+    // ── 개별 항목 그리드 ──
+    var grid = document.createElement('div');
+    grid.className = 'rg-item-grid';
+
+    var itemCbs = [];
+
+    allItems.forEach(function (item) {
+      var lbl = document.createElement('label');
+      lbl.className = 'rg-item-label';
+
+      var cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.checked = rgState.selected.has(item.id);
+      itemCbs.push(cb);
+
+      cb.addEventListener('change', function () {
+        rgState.selected[cb.checked ? 'add' : 'delete'](item.id);
+        var a2 = allItems.every(function (i) { return rgState.selected.has(i.id); });
+        var b2 = allItems.some(function (i) { return rgState.selected.has(i.id); });
+        groupCb.checked = a2;
+        groupCb.indeterminate = b2 && !a2;
+      });
+
+      var span = document.createElement('span');
+      span.textContent = item.label;
+
+      lbl.appendChild(cb);
+      lbl.appendChild(span);
+      grid.appendChild(lbl);
+    });
+
+    groupCb.addEventListener('change', function () {
+      allItems.forEach(function (item, idx) {
+        if (groupCb.checked) rgState.selected.add(item.id);
+        else rgState.selected.delete(item.id);
+        itemCbs[idx].checked = groupCb.checked;
+      });
+      groupCb.indeterminate = false;
+    });
+
+    c.appendChild(grid);
+  });
+
+  var goBtn = document.createElement('button');
+  goBtn.type = 'button';
+  goBtn.className = 'btn btn-primary';
+  goBtn.style.cssText = 'width:100%;margin-top:16px;';
+  goBtn.textContent = '선택한 설비 점검표 보기 →';
+  goBtn.addEventListener('click', function () {
+    rgState.tab = 'sections';
+    renderReportGuide();
+  });
+  c.appendChild(goBtn);
+}
+
+function renderRgSections(c) {
+  var activeGroups = RG_FACILITY_GROUPS.filter(function (g) {
+    return g.items.some(function (i) { return rgState.selected.has(i.id); });
+  });
+
+  if (activeGroups.length === 0) {
+    c.appendChild(rgInfoBox('amber', '⚠️ 선택된 설비 없음',
+      '이전 탭(소방시설 현황)에서 해당 설비를 먼저 선택해 주세요.'));
+    var backBtn = document.createElement('button');
+    backBtn.type = 'button';
+    backBtn.className = 'btn btn-ghost';
+    backBtn.style.cssText = 'width:100%;margin-top:8px;';
+    backBtn.textContent = '← 소방시설 현황으로';
+    backBtn.addEventListener('click', function () {
+      rgState.tab = 'checklist';
+      renderReportGuide();
+    });
+    c.appendChild(backBtn);
+    return;
+  }
+
+  // 페이지별로 묶어서 표시 (같은 페이지 중복 방지)
+  var shownPages = new Set();
+  [5, 6, 7].forEach(function (page) {
+    var groupsOnPage = activeGroups.filter(function (g) { return g.page === page; });
+    if (groupsOnPage.length === 0) return;
+    shownPages.add(page);
+    var label = groupsOnPage.map(function (g) { return g.name + ' (' + g.sectionLabel + ')'; }).join(' / ');
+    c.appendChild(rgSectionLabel(page + '페이지 — ' + label));
+    c.appendChild(createPdfBlock(page));
+  });
+
+  // 8페이지: 선택된 설비가 있으면 항상 표시
+  c.appendChild(rgSectionLabel('8페이지 — 소방시설등 불량 세부사항 (4.)'));
+  c.appendChild(createPdfBlock(8));
+}
+
+function renderRgWriting(c) {
+  c.appendChild(rgInfoBox('blue', '📝 작성 방법',
+    '10페이지 12번 항목에 작성 방법이 안내되어 있습니다.'));
+  appendRgPage(c, 9);
+  appendRgPage(c, 10);
+}
+
+document.getElementById('open-report-guide').addEventListener('click', function () {
+  rgState.tab = 'overview';
+  showScreen('reportGuide');
+  renderReportGuide();
+});
+
+document.getElementById('back-from-report-guide').addEventListener('click', function () {
+  showScreen('home');
+});
