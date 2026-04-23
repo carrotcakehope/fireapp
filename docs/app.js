@@ -4530,12 +4530,57 @@ function yearRenderNumberStep(step) {
 }
 
 function yearRenderDateStep() {
-  const input = document.createElement("input");
-  input.className = "calc-input";
-  input.type = "date";
-  input.value = yearState.answers.yPermitDate ?? "";
-  input.addEventListener("change", (e) => { yearState.answers.yPermitDate = e.target.value; });
-  return input;
+  const wrapper = document.createElement("div");
+  wrapper.style.cssText = "display:flex;gap:8px;align-items:center;";
+
+  const existing = yearState.answers.yPermitDate || "";
+  const parts = existing.split("-");
+  const ey = parts[0] || "";
+  const em = parts[1] || "";
+  const ed = parts[2] || "";
+
+  function syncDate() {
+    const y = yInp.value.trim();
+    const m = String(mInp.value.trim()).padStart(2, "0");
+    const d = String(dInp.value.trim()).padStart(2, "0");
+    if (y && mInp.value.trim() && dInp.value.trim()) {
+      yearState.answers.yPermitDate = y + "-" + m + "-" + d;
+    } else {
+      yearState.answers.yPermitDate = "";
+    }
+  }
+
+  const yInp = document.createElement("input");
+  yInp.className = "calc-input";
+  yInp.type = "number";
+  yInp.placeholder = "년 (예: 2024)";
+  yInp.min = "1900"; yInp.max = "2100"; yInp.step = "1";
+  yInp.style.cssText = "flex:3;min-width:0;";
+  yInp.value = ey;
+  yInp.addEventListener("input", syncDate);
+
+  const mInp = document.createElement("input");
+  mInp.className = "calc-input";
+  mInp.type = "number";
+  mInp.placeholder = "월";
+  mInp.min = "1"; mInp.max = "12"; mInp.step = "1";
+  mInp.style.cssText = "flex:1;min-width:0;";
+  mInp.value = em ? String(parseInt(em, 10)) : "";
+  mInp.addEventListener("input", syncDate);
+
+  const dInp = document.createElement("input");
+  dInp.className = "calc-input";
+  dInp.type = "number";
+  dInp.placeholder = "일";
+  dInp.min = "1"; dInp.max = "31"; dInp.step = "1";
+  dInp.style.cssText = "flex:1;min-width:0;";
+  dInp.value = ed ? String(parseInt(ed, 10)) : "";
+  dInp.addEventListener("input", syncDate);
+
+  wrapper.appendChild(yInp);
+  wrapper.appendChild(mInp);
+  wrapper.appendChild(dInp);
+  return wrapper;
 }
 
 function yearRenderCompoundStep(step) {
