@@ -1,4 +1,4 @@
-const CACHE = 'fireapp-v31';
+const CACHE = 'fireapp-v32';
 
 // ASCII ?Œì¼ëª…ë§Œ pre-cache (?œê? ?Œì¼ëª…ì? ?°í???ìºì‹œë¡?ì²˜ë¦¬)
 const PRECACHE_FILES = [
