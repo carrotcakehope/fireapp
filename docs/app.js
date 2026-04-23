@@ -4106,7 +4106,7 @@ const yearSteps = [
       { value: "yes", label: "예", description: "해당 층이 있음" },
       { value: "no", label: "아니오", description: "해당 층이 없음" },
     ],
-    condition: (ya) => ya.yOccupancyType === "neighborhood",
+    condition: (ya) => ya.yOccupancyType === "neighborhood" && (parseFloat(ya.yTotalArea) || 0) < 1500,
   },
   {
     key: "yHasLargeFloorFor1000",
@@ -4339,7 +4339,7 @@ const yearSteps = [
       { value: "yes", label: "예", description: "해당 층이 있음" },
       { value: "no", label: "아니오", description: "해당 층이 없음" },
     ],
-    condition: (ya) => ya.yOccupancyType === "elderly",
+    condition: (ya) => ya.yOccupancyType === "elderly" && (parseFloat(ya.yTotalArea) || 0) < 1500,
   },
   {
     key: "yElderlyHasGrillWindow",
@@ -4548,6 +4548,20 @@ function yearRenderDateStep() {
     } else {
       yearState.answers.yPermitDate = "";
     }
+    // 2004년 5월 30일 이전이면 경고 표시
+    const pd = yPermitDateInt();
+    let warn = wrapper.parentNode && wrapper.parentNode.querySelector(".year-date-warn");
+    if (pd > 0 && pd < YD.D20040530) {
+      if (!warn) {
+        warn = document.createElement("div");
+        warn.className = "year-date-warn info-box amber";
+        warn.style.marginTop = "10px";
+        wrapper.insertAdjacentElement("afterend", warn);
+      }
+      warn.innerHTML = "<div class=\"ib-title\">⚠️ 분석 불가 날짜</div>이 도구는 <strong>2004년 5월 30일 이후</strong> 건축허가 건물만 분석할 수 있습니다. 허가일을 다시 확인해 주세요.";
+    } else {
+      if (warn) warn.remove();
+    }
   }
 
   const yInp = document.createElement("input");
@@ -4675,6 +4689,15 @@ function yearMoveStep(direction) {
   if (direction > 0 && !yearCurrentStepIsValid()) {
     showToast("현재 질문의 값을 먼저 입력해 주세요.");
     return;
+  }
+  // 허가일 입력 단계에서 2004-05-30 이전이면 진행 차단
+  if (direction > 0) {
+    const activeSteps = yearGetActiveSteps();
+    const curStep = activeSteps[yearState.currentStep];
+    if (curStep && curStep.key === "yPermitDate" && yPermitDateInt() < YD.D20040530) {
+      showToast("이 도구는 2004년 5월 30일 이후 건축허가 건물만 분석 가능합니다.");
+      return;
+    }
   }
   const activeSteps = yearGetActiveSteps();
   yearState.currentStep = Math.max(0, Math.min(yearState.currentStep + direction, activeSteps.length - 1));
@@ -5533,6 +5556,105 @@ function yearEvaluateElderly(inp) {
   return results;
 }
 
+// ── 연도별 탐색기: 제외·대체 항목 계산 ──
+
+function yearBuildLodgingExceptionItems(results, inp) {
+  const exceptionItems = [];
+  const autoDetection = results.find((r) => r.name === "자동화재탐지설비");
+  const emergencyAlarm = results.find((r) => r.name === "비상경보설비");
+  const singleDetector = results.find((r) => r.name === "단독경보형 감지기");
+  const sprinkler = results.find((r) => r.name === "스프링클러설비");
+  const simpleSprinkler = results.find((r) => r.name === "간이스프링클러설비");
+  const drencher = results.find((r) => r.name === "연결살수설비");
+  const waterSpray = results.find((r) => r.name === "물분무등소화설비");
+  const emLight = results.find((r) => r.name === "비상조명등");
+  const portableLight = results.find((r) => r.name === "휴대용비상조명등");
+  const parkingCondition = inp.lodgingIndoorParkingArea >= 200 || inp.lodgingMechanicalParkingCapacity >= 20;
+
+  if (sprinkler && sprinkler.status === "required" && simpleSprinkler && simpleSprinkler.status === "notRequired") {
+    exceptionItems.push({ category: "설치 제외", name: "간이스프링클러설비", status: "review", reason: "스프링클러설비가 전층 설치 대상이므로 간이스프링클러설비는 제외됩니다." });
+  }
+  if (sprinkler && sprinkler.status === "required" && drencher && drencher.status === "required") {
+    exceptionItems.push({ category: "설치 제외", name: "연결살수설비", status: "review", reason: "스프링클러설비가 설치 대상이면 연결살수설비는 설치 제외 대상입니다." });
+  }
+  if (autoDetection && autoDetection.status === "required" && emergencyAlarm && emergencyAlarm.status === "required") {
+    exceptionItems.push({ category: "설치 제외", name: "비상경보설비", status: "review", reason: "자동화재탐지설비가 설치되면 비상경보설비는 면제 관계로 검토할 수 있습니다." });
+  }
+  if (autoDetection && autoDetection.status === "required" && singleDetector && singleDetector.status === "required") {
+    exceptionItems.push({ category: "설치 제외", name: "단독경보형 감지기", status: "review", reason: "자동화재탐지설비가 설치되면 단독경보형 감지기는 중복 설치가 불필요합니다." });
+  }
+  if (emLight && emLight.status === "required" && portableLight && portableLight.status === "required") {
+    exceptionItems.push({ category: "설치 제외", name: "휴대용비상조명등", status: "review", reason: "숙박시설 복도에 비상조명등이 설치되면 객실에 설치하는 휴대용비상조명등은 제외됩니다." });
+  }
+  if (waterSpray && waterSpray.status === "required" && parkingCondition) {
+    exceptionItems.push({ category: "대체설비", name: "주차장 관련 스프링클러설비 대체 가능", status: "review", reason: "주차 관련 공간은 물분무등소화설비 기준이 적용되나, 대체설비로 스프링클러설비를 설치할 수 있습니다." });
+  }
+  if (!exceptionItems.length) {
+    exceptionItems.push({ category: "안내", name: "설치 제외·대체 없음", status: "notRequired", reason: "현재 입력값 기준으로 별도 면제 또는 대체로 표시할 항목이 없습니다." });
+  }
+  return exceptionItems;
+}
+
+function yearBuildElderlyExceptionItems(results, inp) {
+  const exceptionItems = [];
+  const autoDetection = results.find((r) => r.name === "자동화재탐지설비");
+  const emergencyAlarm = results.find((r) => r.name === "비상경보설비");
+  const singleDetector = results.find((r) => r.name === "단독경보형 감지기");
+  const sprinkler = results.find((r) => r.name === "스프링클러설비");
+  const simpleSprinkler = results.find((r) => r.name === "간이스프링클러설비");
+  const drencher = results.find((r) => r.name === "연결살수설비");
+  const waterSpray = results.find((r) => r.name === "물분무등소화설비");
+  const parkingCondition = inp.elderlyIndoorParkingArea >= 200 || inp.elderlyMechanicalParkingCapacity >= 20;
+
+  if (sprinkler && sprinkler.status === "required" && simpleSprinkler && simpleSprinkler.status === "notRequired") {
+    exceptionItems.push({ category: "설치 제외", name: "간이스프링클러설비", status: "review", reason: "스프링클러설비가 전층 설치 대상이므로 간이스프링클러설비는 제외됩니다." });
+  }
+  if (sprinkler && sprinkler.status === "required" && drencher && drencher.status === "required") {
+    exceptionItems.push({ category: "설치 제외", name: "연결살수설비", status: "review", reason: "스프링클러설비가 설치 대상이면 연결살수설비는 설치 제외 대상입니다." });
+  }
+  if (autoDetection && autoDetection.status === "required" && emergencyAlarm && emergencyAlarm.status === "required") {
+    exceptionItems.push({ category: "설치 제외", name: "비상경보설비", status: "review", reason: "자동화재탐지설비가 설치되면 비상경보설비는 면제 관계로 검토할 수 있습니다." });
+  }
+  if (autoDetection && autoDetection.status === "required" && singleDetector && singleDetector.status === "required") {
+    exceptionItems.push({ category: "설치 제외", name: "단독경보형 감지기", status: "review", reason: "자동화재탐지설비가 설치되면 단독경보형 감지기는 중복 설치가 불필요합니다." });
+  }
+  if (waterSpray && waterSpray.status === "required" && parkingCondition) {
+    exceptionItems.push({ category: "대체설비", name: "주차장 관련 스프링클러설비 대체 가능", status: "review", reason: "주차 관련 공간은 물분무등소화설비 기준이 적용되나, 대체설비로 스프링클러설비를 설치할 수 있습니다." });
+  }
+  if (!exceptionItems.length) {
+    exceptionItems.push({ category: "안내", name: "설치 제외·대체 없음", status: "notRequired", reason: "현재 입력값 기준으로 별도 면제 또는 대체로 표시할 항목이 없습니다." });
+  }
+  return exceptionItems;
+}
+
+function yearBuildNeighborhoodExceptionItems(results, inp) {
+  const exceptionItems = [];
+  const autoDetection = results.find((r) => r.name === "자동화재탐지설비");
+  const emergencyAlarm = results.find((r) => r.name === "비상경보설비");
+  const sprinkler = results.find((r) => r.name === "스프링클러설비");
+  const simpleSprinkler = results.find((r) => r.name === "간이스프링클러설비");
+  const drencher = results.find((r) => r.name === "연결살수설비");
+  const waterSpray = results.find((r) => r.name === "물분무등소화설비");
+  const parkingCondition = inp.indoorParkingArea >= 200 || inp.mechanicalParkingCapacity >= 20;
+
+  if (sprinkler && sprinkler.status === "required" && simpleSprinkler && simpleSprinkler.status === "notRequired") {
+    exceptionItems.push({ category: "설치 제외", name: "간이스프링클러설비", status: "review", reason: "스프링클러설비가 전층 설치 대상이면 간이스프링클러설비는 제외 대상으로 봅니다." });
+  }
+  if (sprinkler && sprinkler.status === "required" && drencher && drencher.status === "required") {
+    exceptionItems.push({ category: "설치 제외", name: "연결살수설비", status: "review", reason: "스프링클러설비가 설치 대상이면 연결살수설비는 설치 제외 대상으로 봅니다." });
+  }
+  if (autoDetection && autoDetection.status === "required" && emergencyAlarm && emergencyAlarm.status === "required") {
+    exceptionItems.push({ category: "설치 제외", name: "비상경보설비", status: "review", reason: "자동화재탐지설비가 설치되면 비상경보설비는 면제 관계로 검토할 수 있습니다." });
+  }
+  if (waterSpray && waterSpray.status === "required" && parkingCondition) {
+    exceptionItems.push({ category: "대체설비", name: "주차장 관련 스프링클러설비 대체 가능", status: "review", reason: "주차 관련 공간의 기본 기준은 물분무등소화설비이며, 그 대체설비로 해당 공간에 스프링클러설비가 설치될 수 있습니다." });
+  }
+  if (!exceptionItems.length) {
+    exceptionItems.push({ category: "안내", name: "설치 제외·대체 없음", status: "notRequired", reason: "현재 입력값 기준으로 별도 면제 또는 대체로 표시할 항목이 없습니다." });
+  }
+  return exceptionItems;
+}
+
 function yearShowResults() {
   if (!yearCurrentStepIsValid()) {
     showToast("현재 질문의 값을 먼저 입력해 주세요.");
@@ -5550,22 +5672,56 @@ function yearShowResults() {
   let results;
   let summaryHtml;
 
+  let exceptionItems = [];
   if (inp.occupancyType === "lodging") {
     results = yearEvaluateLodging(inp);
+    exceptionItems = yearBuildLodgingExceptionItems(results, inp);
     summaryHtml = `<div class="ib-title">입력값 기준</div>숙박시설, 건축허가일 ${permitStr}, 연면적 ${inp.totalArea}㎡, 숙박 사용면적 ${inp.lodgingArea}㎡, 지상 ${inp.aboveGroundFloors}층, 지하 ${inp.basementFloors}층`;
   } else if (inp.occupancyType === "elderly") {
     results = yearEvaluateElderly(inp);
+    exceptionItems = yearBuildElderlyExceptionItems(results, inp);
     const subtypeLabel = inp.elderlySubtype === "living" ? "노유자 생활시설" : "일반 노유자시설";
     summaryHtml = `<div class="ib-title">입력값 기준</div>노유자시설(${subtypeLabel}), 건축허가일 ${permitStr}, 연면적 ${inp.totalArea}㎡, 노유자 사용면적 ${inp.elderlyArea}㎡, 지상 ${inp.aboveGroundFloors}층, 지하 ${inp.basementFloors}층`;
   } else {
     results = yearEvaluateNeighborhood(inp);
+    exceptionItems = yearBuildNeighborhoodExceptionItems(results, inp);
     summaryHtml = `<div class="ib-title">입력값 기준</div>근린생활시설, 건축허가일 ${permitStr}, 연면적 ${inp.totalArea}㎡, 지상 ${inp.aboveGroundFloors}층, 지하 ${inp.basementFloors}층`;
   }
 
-  const requiredItems = results.filter((r) => r.status === "required" || r.status === "review");
+  const excludedNames = new Set(exceptionItems.filter((e) => e.category === "설치 제외").map((e) => e.name));
+  const hasParkingReplacement = exceptionItems.some((e) => e.category === "대체설비" && e.name === "주차장 관련 스프링클러설비 대체 가능");
+  let allRequiredItems = results.filter((r) => r.status === "required" || r.status === "review");
+  let requiredItems = allRequiredItems.filter((r) => !excludedNames.has(r.name));
+
+  // 주차 대체설비: 물분무등소화설비를 목록에서 제거하고, 스프링클러(주차 관련)를 별도 항목으로 추가
+  // 단, 전기실 조건(전기실 300㎡↑)으로 물분무가 설치되는 경우는 유지
+  if (hasParkingReplacement) {
+    let elecArea = 0;
+    if (inp.occupancyType === "lodging") elecArea = inp.lodgingElectricalRoomArea;
+    else if (inp.occupancyType === "elderly") elecArea = inp.elderlyElectricalRoomArea;
+    else elecArea = inp.electricalRoomArea;
+
+    if (elecArea < 300) {
+      // 물분무등소화설비 제거 (주차 조건으로만 설치되는 경우)
+      requiredItems = requiredItems.filter((r) => r.name !== "물분무등소화설비");
+    }
+
+    // 이미 일반 스프링클러설비가 required(전층)가 아닌 경우에만 주차 전용 항목 추가
+    const mainSprinkler = requiredItems.find((r) => r.name === "스프링클러설비");
+    if (!mainSprinkler) {
+      requiredItems.push({
+        category: categories.extinguishing,
+        name: "스프링클러설비(주차 관련 대체설비)",
+        status: "required",
+        reason: "주차 관련 공간은 물분무등소화설비 기준이 적용되지만, 대체설비로 해당 주차 공간에 스프링클러설비를 설치할 수 있습니다.",
+      });
+    }
+  }
+
   document.getElementById("year-result-summary").innerHTML = summaryHtml;
   renderSimpleRequiredList(requiredItems, "year-required-list");
-  renderResultGroup("year-criteria-list", results, [], requiredItems.map((i) => i.name));
+  renderResultGroup("year-criteria-list", results, [...excludedNames], requiredItems.map((i) => i.name));
+  renderResultGroup("year-exception-list", exceptionItems);
 
   document.getElementById("year-question-card").classList.add("hidden");
   document.getElementById("year-result-card").classList.remove("hidden");
@@ -6314,6 +6470,13 @@ function appendRgPage(container, pageNum) {
   container.appendChild(createPdfBlock(pageNum));
 }
 
+// 설비 ID → 점검표 이미지 경로 (image 폴더에 파일 추가 시 여기에 등록)
+const RG_SECTION_IMAGES = {
+  'w03': './image/옥내소화전.png',
+  'w04': './image/스프링클러설비.png',
+  'a05': './image/자동화재탐지설비.png',
+};
+
 const RG_FACILITY_GROUPS = [
   {
     id: 'water', sectionLabel: '3-3', page: 5, name: '수계소화설비',
@@ -6533,11 +6696,19 @@ function renderRgChecklist(c) {
 }
 
 function renderRgSections(c) {
-  var activeGroups = RG_FACILITY_GROUPS.filter(function (g) {
-    return g.items.some(function (i) { return rgState.selected.has(i.id); });
+  // 전체 항목을 등록 순서대로 펼침
+  var allFlat = [];
+  RG_FACILITY_GROUPS.forEach(function (g) {
+    g.items.forEach(function (item) {
+      allFlat.push({ id: item.id, label: item.label, page: g.page, sectionLabel: g.sectionLabel });
+    });
   });
 
-  if (activeGroups.length === 0) {
+  var selectedFlat = allFlat.filter(function (item) {
+    return rgState.selected.has(item.id);
+  });
+
+  if (selectedFlat.length === 0) {
     c.appendChild(rgInfoBox('amber', '⚠️ 선택된 설비 없음',
       '이전 탭(소방시설 현황)에서 해당 설비를 먼저 선택해 주세요.'));
     var backBtn = document.createElement('button');
@@ -6553,20 +6724,30 @@ function renderRgSections(c) {
     return;
   }
 
-  // 페이지별로 묶어서 표시 (같은 페이지 중복 방지)
-  var shownPages = new Set();
-  [5, 6, 7].forEach(function (page) {
-    var groupsOnPage = activeGroups.filter(function (g) { return g.page === page; });
-    if (groupsOnPage.length === 0) return;
-    shownPages.add(page);
-    var label = groupsOnPage.map(function (g) { return g.name + ' (' + g.sectionLabel + ')'; }).join(' / ');
-    c.appendChild(rgSectionLabel(page + '페이지 — ' + label));
-    c.appendChild(createPdfBlock(page));
-  });
+  selectedFlat.forEach(function (item) {
+    // 구분 라벨
+    var lbl = document.createElement('div');
+    lbl.className = 'rg-section-label';
+    lbl.textContent = item.sectionLabel + '  ' + item.label;
+    c.appendChild(lbl);
 
-  // 8페이지: 선택된 설비가 있으면 항상 표시
-  c.appendChild(rgSectionLabel('8페이지 — 소방시설등 불량 세부사항 (4.)'));
-  c.appendChild(createPdfBlock(8));
+    var imgSrc = RG_SECTION_IMAGES[item.id];
+    if (imgSrc) {
+      var wrapper = document.createElement('div');
+      wrapper.className = 'rg-pdf-wrapper';
+      var img = document.createElement('img');
+      img.className = 'rg-section-img';
+      img.src = imgSrc;
+      img.alt = item.label;
+      wrapper.appendChild(img);
+      c.appendChild(wrapper);
+    } else {
+      var placeholder = document.createElement('div');
+      placeholder.className = 'rg-section-placeholder';
+      placeholder.textContent = item.label + ' — 이미지 준비 중';
+      c.appendChild(placeholder);
+    }
+  });
 }
 
 function renderRgWriting(c) {

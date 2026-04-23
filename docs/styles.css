@@ -2604,3 +2604,42 @@ html[data-theme="light"] .cal-day.holiday {
 html[data-theme="light"] .rg-tab-bar {
   background: var(--bg);
 }
+
+/* ── 점검표 이미지 슬라이스 ── */
+.rg-section-img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.rg-section-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 64px;
+  font-size: 12px;
+  color: var(--text-dim);
+  font-family: var(--mono);
+  border: 1px dashed var(--border2);
+  border-radius: var(--radius-sm);
+  margin-bottom: 4px;
+}
+
+.rg-section-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  font-family: var(--mono);
+  color: var(--text-muted);
+  letter-spacing: 0.3px;
+  text-transform: uppercase;
+  padding: 14px 2px 6px;
+}
+.rg-section-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}

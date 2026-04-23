@@ -1,4 +1,4 @@
-const CACHE = 'fireapp-v23';
+const CACHE = 'fireapp-v26';
 const FILES = [
   './index.html',
   './styles.css',
@@ -8,7 +8,10 @@ const FILES = [
   './icon-512.png',
   './report-guide.pdf',
   './pdf.min.js',
-  './pdf.worker.min.js'
+  './pdf.worker.min.js',
+  './image/?¥ë‚´?Œí™”??png',
+  './image/?¤í”„ë§í´?¬ì„¤ë¹?png',
+  './image/?ë™?”ìž¬?ì??¤ë¹„.png',
 ];
 
 self.addEventListener('install', e => {
