@@ -3995,50 +3995,50 @@ const yearState = {
   answers: {
     yOccupancyType: "neighborhood",
     yPermitDate: "",
-    yTotalArea: "",
-    yAboveGroundFloors: "",
-    yBasementFloors: "",
-    yBasementAreaSum: "",
+    yTotalArea: "1500",
+    yAboveGroundFloors: "4",
+    yBasementFloors: "0",
+    yBasementAreaSum: "0",
     yHasWindowlessFloor: "no",
     yWindowlessArea: "",
     yHasLargeTargetFloor: "no",
     yHasLargeFloorFor1000: "no",
-    yNeighborhoodArea: "",
+    yNeighborhoodArea: "1500",
     yFacilitySubtype: "general",
     yIsPostpartum: "no",
     yPostpartumAreaRange: "under600",
     yIsClinicWithInpatient: "no",
     yHasHemodialysis: "no",
     yHas24HourStaff: "no",
-    yFirstSecondFloorArea: "",
+    yFirstSecondFloorArea: "750",
     yIndoorParkingArea: "",
     yMechanicalParkingCapacity: "",
     yElectricalRoomArea: "",
-    ySmokeControlArea: "",
+    ySmokeControlArea: "0",
     yHasSmallUndergroundParking: "no",
     // 숙박시설 전용
-    yLodgingArea: "",
+    yLodgingArea: "1500",
     yLodgingIsTouristHotel: "no",
     yLodgingHasLargeFloorFor1000: "no",
     yLodgingHasGasFacility: "no",
-    yLodgingFirstSecondFloorArea: "",
+    yLodgingFirstSecondFloorArea: "750",
     yLodgingIndoorParkingArea: "",
     yLodgingMechanicalParkingCapacity: "",
     yLodgingElectricalRoomArea: "",
-    yLodgingBasementAreaForSmoke: "",
+    yLodgingBasementAreaForSmoke: "0",
     // 노유자시설 전용
     yElderlySubtype: "general",
-    yElderlyArea: "",
+    yElderlyArea: "1500",
     yElderlyHasLargeTargetFloor: "no",
     yElderlyHasGrillWindow: "no",
     yElderlyHasGasFacility: "no",
     yElderlyHasFloor500Plus: "no",
     yElderlyHas24HourStaff: "no",
-    yElderlyFirstSecondFloorArea: "",
+    yElderlyFirstSecondFloorArea: "750",
     yElderlyIndoorParkingArea: "",
     yElderlyMechanicalParkingCapacity: "",
     yElderlyElectricalRoomArea: "",
-    yElderlyBasementAreaForSmoke: "",
+    yElderlyBasementAreaForSmoke: "0",
     yElderlyHasSmallUndergroundParking: "no",
   },
 };
@@ -4498,7 +4498,34 @@ function yearRenderNumberStep(step) {
   input.step = String(step.step ?? 1);
   input.placeholder = step.placeholder ?? "";
   input.value = yearState.answers[step.key] ?? "";
-  input.addEventListener("input", (e) => { yearState.answers[step.key] = e.target.value; });
+  input.addEventListener("input", (e) => {
+    yearState.answers[step.key] = e.target.value;
+    // yTotalArea 변경 시 관련 필드 자동 파생
+    if (step.key === "yTotalArea") {
+      const ta = parseFloat(e.target.value) || 0;
+      const ag = parseInt(yearState.answers.yAboveGroundFloors) || 0;
+      const bf = parseInt(yearState.answers.yBasementFloors) || 0;
+      const totalFloors = ag + bf || 1;
+      const f12 = Math.round((ta / totalFloors) * 2 * 10) / 10;
+      yearState.answers.yLodgingArea = e.target.value;
+      yearState.answers.yNeighborhoodArea = e.target.value;
+      yearState.answers.yElderlyArea = e.target.value;
+      yearState.answers.yFirstSecondFloorArea = String(f12);
+      yearState.answers.yLodgingFirstSecondFloorArea = String(f12);
+      yearState.answers.yElderlyFirstSecondFloorArea = String(f12);
+    }
+    // 층수 변경 시 1·2층 면적 재계산
+    if (step.key === "yAboveGroundFloors" || step.key === "yBasementFloors") {
+      const ta = parseFloat(yearState.answers.yTotalArea) || 0;
+      const ag = step.key === "yAboveGroundFloors" ? (parseInt(e.target.value) || 0) : (parseInt(yearState.answers.yAboveGroundFloors) || 0);
+      const bf = step.key === "yBasementFloors" ? (parseInt(e.target.value) || 0) : (parseInt(yearState.answers.yBasementFloors) || 0);
+      const totalFloors = ag + bf || 1;
+      const f12 = Math.round((ta / totalFloors) * 2 * 10) / 10;
+      yearState.answers.yFirstSecondFloorArea = String(f12);
+      yearState.answers.yLodgingFirstSecondFloorArea = String(f12);
+      yearState.answers.yElderlyFirstSecondFloorArea = String(f12);
+    }
+  });
   return input;
 }
 
@@ -4600,7 +4627,7 @@ function yearScrollToTop() {
 }
 
 function yearMoveStep(direction) {
-  if (!yearCurrentStepIsValid()) {
+  if (direction > 0 && !yearCurrentStepIsValid()) {
     showToast("현재 질문의 값을 먼저 입력해 주세요.");
     return;
   }
@@ -5474,7 +5501,9 @@ function yearShowResults() {
     return;
   }
   const inp = yearNormalizeAnswers();
-  const permitStr = yearState.answers.yPermitDate;
+  const rawPermit = yearState.answers.yPermitDate;
+  const [py, pm, pd2] = rawPermit.split("-").map(Number);
+  const permitStr = `${py}년 ${pm}월 ${pd2}일`;
   let results;
   let summaryHtml;
 
