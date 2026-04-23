@@ -2643,3 +2643,94 @@ html[data-theme="light"] .rg-tab-bar {
   height: 1px;
   background: var(--border);
 }
+
+/* ── 아코디언 ── */
+.rg-accordion {
+  border: 1px solid var(--border2);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  margin-bottom: 6px;
+}
+
+.rg-accordion-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 13px 14px;
+  background: var(--surface2);
+  text-align: left;
+  cursor: pointer;
+  transition: background var(--transition);
+  border: none;
+  color: var(--text);
+}
+
+.rg-accordion-header:hover {
+  background: var(--surface3);
+}
+
+.rg-accordion-header.open {
+  background: var(--surface3);
+  border-bottom: 1px solid var(--border);
+}
+
+.rg-acc-label {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: -0.2px;
+}
+
+.rg-acc-chevron {
+  font-size: 9px;
+  color: var(--text-dim);
+  transition: transform var(--transition);
+  flex-shrink: 0;
+}
+
+.rg-accordion-header.open .rg-acc-chevron {
+  transform: rotate(180deg);
+}
+
+.rg-accordion-body {
+  background: var(--surface);
+  padding: 14px;
+}
+
+.rg-acc-img-wrap {
+  border-radius: calc(var(--radius-sm) - 2px);
+  overflow: hidden;
+  margin-bottom: 12px;
+  border: 1px solid var(--border);
+}
+
+.rg-acc-desc {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.rg-acc-desc li {
+  font-size: 13px;
+  line-height: 1.65;
+  padding-left: 16px;
+  position: relative;
+  color: var(--text-muted);
+  word-break: keep-all;
+}
+
+.rg-acc-desc li::before {
+  content: '•';
+  position: absolute;
+  left: 4px;
+  color: var(--red-soft);
+  font-size: 11px;
+}
+
+.rg-acc-desc b {
+  color: var(--text);
+  font-weight: 600;
+}

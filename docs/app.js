@@ -6597,11 +6597,143 @@ function renderReportGuide() {
   root.appendChild(content);
 }
 
+// ── 1페이지 아코디언 데이터 ──────────────────────────────────────
+const RG_PAGE1_SECTIONS = [
+  {
+    id: 'p1-type',
+    label: '점검 종류',
+    img: './image/page 1/page1-점검종류.png',
+    desc: [
+      '작동기능점검, 종합정밀점검, 최초점검 중 해당하는 □에 ✔ 표시합니다.',
+      '3급 소방대상물의 관계인이 직접 점검하는 경우 대부분 <b>작동기능점검</b>에 해당합니다.',
+      '최초점검은 신축 건물의 첫 번째 점검 시에만 표시합니다.',
+    ],
+  },
+  {
+    id: 'p1-building',
+    label: '대상물 정보',
+    img: './image/page 1/page1-대상물설명.png',
+    desc: [
+      '<b>특정소방</b>: 관할 소방서 이름을 기재합니다. (예: 종로소방서 → "종로")',
+      '<b>명칭(상호)</b>: 건물 또는 업소명을 기재합니다.',
+      '<b>대상물 구분(용도)</b>: 건축물 대장상의 주용도를 기재합니다.',
+      '<b>소재지</b>: 건물의 도로명 주소를 기재합니다.',
+    ],
+  },
+  {
+    id: 'p1-period',
+    label: '점검기간',
+    img: './image/page 1/page1-점검기간.png',
+    desc: [
+      '점검을 실시한 시작일과 종료일을 연·월·일 형식으로 기재합니다.',
+      '총 점검일수는 시작일부터 종료일까지의 실제 점검일수를 기재합니다.',
+      '하루에 모두 점검했다면 시작일과 종료일을 동일하게 기재하고 총 점검일수는 1로 기재합니다.',
+    ],
+  },
+  {
+    id: 'p1-inspector',
+    label: '점검자',
+    img: './image/page 1/page1-점검자.png',
+    desc: [
+      '관계인·소방안전관리자·소방시설관리업자 중 해당하는 □에 ✔ 표시하고 성명과 전화번호를 기재합니다.',
+      '전자우편 송달 동의 여부를 체크하고, 동의 시 이메일 주소를 기재합니다.',
+      '3급 관계인 자체점검의 경우 <b>관계인</b>에 체크합니다.',
+    ],
+  },
+  {
+    id: 'p1-personnel',
+    label: '점검인력',
+    img: './image/page 1/page1-점검인력.png',
+    desc: [
+      '<b>주된 점검인력</b> 1명은 반드시 기재해야 합니다.',
+      '성명, 자격구분(소방시설관리사/소방기술사 등), 자격번호, 점검참여일을 정확히 기재합니다.',
+      '보조 점검인력은 실제 점검에 참여한 경우에만 기재합니다.',
+      '3급 관계인 자체점검 시 점검인력 란에 관계인 본인 정보를 기재합니다.',
+    ],
+  },
+  {
+    id: 'p1-sign',
+    label: '제출일 · 서명',
+    img: './image/page 1/page1-날짜서명.png',
+    desc: [
+      '보고서를 제출하는 연·월·일을 기재합니다.',
+      '소방시설관리업자·소방안전관리자·관계인이 서명 또는 날인합니다.',
+      '<b>관계인은 반드시 직접 서명(또는 인)해야 합니다.</b>',
+      '소방본부장 또는 소방서장 앞으로 제출하는 공식 문서임을 확인합니다.',
+    ],
+  },
+];
+
+function createRgAccordion(section) {
+  var wrap = document.createElement('div');
+  wrap.className = 'rg-accordion';
+
+  var header = document.createElement('button');
+  header.type = 'button';
+  header.className = 'rg-accordion-header';
+  header.innerHTML =
+    '<span class="rg-acc-label">' + section.label + '</span>' +
+    '<span class="rg-acc-chevron">▼</span>';
+
+  var body = document.createElement('div');
+  body.className = 'rg-accordion-body';
+  body.hidden = true;
+
+  if (section.img) {
+    var imgWrap = document.createElement('div');
+    imgWrap.className = 'rg-acc-img-wrap';
+    var img = document.createElement('img');
+    img.className = 'rg-section-img';
+    img.src = section.img;
+    img.alt = section.label;
+    imgWrap.appendChild(img);
+    body.appendChild(imgWrap);
+  }
+
+  if (section.desc && section.desc.length) {
+    var ul = document.createElement('ul');
+    ul.className = 'rg-acc-desc';
+    section.desc.forEach(function (line) {
+      var li = document.createElement('li');
+      li.innerHTML = line;
+      ul.appendChild(li);
+    });
+    body.appendChild(ul);
+  }
+
+  header.addEventListener('click', function () {
+    body.hidden = !body.hidden;
+    header.classList.toggle('open', !body.hidden);
+  });
+
+  wrap.appendChild(header);
+  wrap.appendChild(body);
+  return wrap;
+}
+
 function renderRgOverview(c) {
-  c.appendChild(rgInfoBox('blue', '📄 보고서 개요',
-    '1~2페이지는 점검 기본 정보와 결과 총괄이 담겨 있습니다.'));
-  appendRgPage(c, 1);
-  appendRgPage(c, 2);
+  c.appendChild(rgInfoBox('blue', '📄 1페이지 — 보고서 표지',
+    '점검 기본 정보를 기재하는 페이지입니다. 각 항목을 클릭하면 작성 방법을 확인할 수 있습니다.'));
+
+  // 전체 이미지
+  var fullWrap = document.createElement('div');
+  fullWrap.className = 'rg-pdf-wrapper';
+  var fullImg = document.createElement('img');
+  fullImg.className = 'rg-section-img';
+  fullImg.src = './image/page 1/page1-full.png';
+  fullImg.alt = '1페이지 전체';
+  fullWrap.appendChild(fullImg);
+  c.appendChild(fullWrap);
+
+  // 섹션별 아코디언
+  var accLabel = document.createElement('div');
+  accLabel.className = 'rg-section-label';
+  accLabel.textContent = '항목별 작성 방법';
+  c.appendChild(accLabel);
+
+  RG_PAGE1_SECTIONS.forEach(function (section) {
+    c.appendChild(createRgAccordion(section));
+  });
 }
 
 function renderRgChecklist(c) {
