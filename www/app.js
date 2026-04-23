@@ -6549,9 +6549,25 @@ const RG_FACILITY_GROUPS = [
 ];
 
 const rgState = {
-  tab: 'overview',
+  tab: 'page1',
   selected: new Set(),
+  grade: null,   // 'special1' | 'grade2' | 'grade3' | 'custom'
 };
+
+// 등급별 자동 선택 프리셋 (항목 ID 배열)
+const RG_GRADE_PRESETS = {
+  special1: null,  // 추후 추가 예정
+  grade2:   null,  // 추후 추가 예정
+  grade3:   ['w01', 'a05', 'a10', 'e01', 'e03', 'ac03'],
+  custom:   null,  // 직접 선택 (preset 없음)
+};
+
+const RG_GRADE_DEFS = [
+  { id: 'special1', label: '특·1급', note: '준비 중' },
+  { id: 'grade2',   label: '2급',    note: '준비 중' },
+  { id: 'grade3',   label: '3급',    note: '소화기 등 6종 자동' },
+  { id: 'custom',   label: '직접선택', note: '수동 체크' },
+];
 
 function renderReportGuide() {
   var root = document.getElementById('report-guide-content');
@@ -6804,16 +6820,48 @@ function renderRgPage2(c) {
 }
 
 function renderRgChecklist(c) {
-  c.appendChild(rgInfoBox('blue', '✅ 소방시설 현황',
-    '3페이지를 참고하여 대상물에 설치된 소방시설을 선택하세요. 선택한 설비에 해당하는 점검표만 다음 탭에 표시됩니다.'));
-  appendRgPage(c, 3);
+  // ── 3페이지 전체 이미지 ──
+  c.appendChild(rgPageBlock('./image/page 3/page3-full.png', '3페이지 전체'));
 
+  // ── (추후) 페이지 항목별 아코디언 추가 예정 ──
+
+  // ── 소방대상물 등급 선택 ──
+  c.appendChild(rgSectionLabel('소방대상물 등급 선택'));
+  c.appendChild(rgInfoBox('blue', '💡 등급별 자동 선택',
+    '등급을 선택하면 해당 대상물에 일반적으로 설치되는 설비가 자동으로 체크됩니다. 이후 직접 수정할 수 있습니다.'));
+
+  var gradeGrid = document.createElement('div');
+  gradeGrid.className = 'rg-grade-selector';
+
+  RG_GRADE_DEFS.forEach(function (g) {
+    var isPreparing = RG_GRADE_PRESETS[g.id] === null && g.id !== 'custom';
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'rg-grade-btn' + (rgState.grade === g.id ? ' active' : '') + (isPreparing ? ' preparing' : '');
+    btn.disabled = isPreparing;
+    btn.innerHTML =
+      '<span class="rg-grade-main">' + g.label + '</span>' +
+      '<span class="rg-grade-note">' + (isPreparing ? '준비 중' : g.note) + '</span>';
+
+    btn.addEventListener('click', function () {
+      rgState.grade = g.id;
+      var preset = RG_GRADE_PRESETS[g.id];
+      if (preset !== null) {
+        rgState.selected = new Set(preset);
+      }
+      // 직접선택은 기존 선택 유지, 다른 등급은 프리셋 적용
+      renderReportGuide();
+    });
+    gradeGrid.appendChild(btn);
+  });
+  c.appendChild(gradeGrid);
+
+  // ── 설치된 소방시설 선택 ──
   c.appendChild(rgSectionLabel('설치된 소방시설 선택'));
 
   RG_FACILITY_GROUPS.forEach(function (group) {
     var allItems = group.items;
 
-    // ── 그룹 헤더 ──
     var header = document.createElement('div');
     header.className = 'rg-group-header';
 
@@ -6838,10 +6886,8 @@ function renderRgChecklist(c) {
     header.appendChild(groupSub);
     c.appendChild(header);
 
-    // ── 개별 항목 그리드 ──
     var grid = document.createElement('div');
     grid.className = 'rg-item-grid';
-
     var itemCbs = [];
 
     allItems.forEach(function (item) {
@@ -6854,6 +6900,7 @@ function renderRgChecklist(c) {
       itemCbs.push(cb);
 
       cb.addEventListener('change', function () {
+        rgState.grade = 'custom';   // 수동 변경 시 직접선택으로 전환
         rgState.selected[cb.checked ? 'add' : 'delete'](item.id);
         var a2 = allItems.every(function (i) { return rgState.selected.has(i.id); });
         var b2 = allItems.some(function (i) { return rgState.selected.has(i.id); });
@@ -6870,6 +6917,7 @@ function renderRgChecklist(c) {
     });
 
     groupCb.addEventListener('change', function () {
+      rgState.grade = 'custom';
       allItems.forEach(function (item, idx) {
         if (groupCb.checked) rgState.selected.add(item.id);
         else rgState.selected.delete(item.id);
