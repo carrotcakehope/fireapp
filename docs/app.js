@@ -6875,7 +6875,8 @@ function createRgAccordion(section) {
 
   var body = document.createElement('div');
   body.className = 'rg-accordion-body';
-  body.hidden = true;
+  body.hidden = false;
+  header.classList.add('open');
 
   if (section.img) {
     var imgWrap = document.createElement('div');
@@ -7165,33 +7166,52 @@ function renderRgSections(c) {
     c.appendChild(wCommonLabel);
 
     RG_WATER_COMMON.forEach(function (wItem) {
-      var subLbl = document.createElement('div');
-      subLbl.className = 'rg-section-label';
-      subLbl.textContent = wItem.label;
-      c.appendChild(subLbl);
+      var wrapAcc = document.createElement('div');
+      wrapAcc.className = 'rg-accordion';
+      wrapAcc.style.marginBottom = '6px';
 
-      var wrapper = document.createElement('div');
-      wrapper.className = 'rg-pdf-wrapper';
-      var img = document.createElement('img');
-      img.className = 'rg-section-img';
-      img.src = wItem.img;
-      img.alt = wItem.label;
-      wrapper.appendChild(img);
-      c.appendChild(wrapper);
+      var wHeader = document.createElement('button');
+      wHeader.type = 'button';
+      wHeader.className = 'rg-accordion-header';
+      wHeader.innerHTML =
+        '<span class="rg-acc-label">' + wItem.label + '</span>' +
+        '<span class="rg-acc-chevron">▼</span>';
+
+      var wBody = document.createElement('div');
+      wBody.className = 'rg-accordion-body';
+      wBody.hidden = true;
+
+      var imgWrapW = document.createElement('div');
+      imgWrapW.className = 'rg-acc-img-wrap';
+      var imgW = document.createElement('img');
+      imgW.className = 'rg-section-img';
+      imgW.src = wItem.img;
+      imgW.alt = wItem.label;
+      imgWrapW.appendChild(imgW);
+      wBody.appendChild(imgWrapW);
 
       if (wItem.desc && wItem.desc.length) {
-        var descWrap = document.createElement('div');
-        descWrap.className = 'rg-facility-desc';
-        var ul = document.createElement('ul');
-        ul.className = 'rg-acc-desc';
+        var descWrapW = document.createElement('div');
+        descWrapW.className = 'rg-facility-desc';
+        var ulW = document.createElement('ul');
+        ulW.className = 'rg-acc-desc';
         wItem.desc.forEach(function (line) {
           var li = document.createElement('li');
           li.innerHTML = line;
-          ul.appendChild(li);
+          ulW.appendChild(li);
         });
-        descWrap.appendChild(ul);
-        c.appendChild(descWrap);
+        descWrapW.appendChild(ulW);
+        wBody.appendChild(descWrapW);
       }
+
+      wHeader.addEventListener('click', function () {
+        wBody.hidden = !wBody.hidden;
+        wHeader.classList.toggle('open', !wBody.hidden);
+      });
+
+      wrapAcc.appendChild(wHeader);
+      wrapAcc.appendChild(wBody);
+      c.appendChild(wrapAcc);
     });
   }
 
@@ -7208,11 +7228,21 @@ function renderRgSections(c) {
 }
 
 function renderFacilityBlock(c, item, selectedIds) {
-  // 구분 라벨
-  var lbl = document.createElement('div');
-  lbl.className = 'rg-section-label';
-  lbl.textContent = item.sectionLabel + '  ' + item.label;
-  c.appendChild(lbl);
+  // 아코디언 래퍼
+  var wrap = document.createElement('div');
+  wrap.className = 'rg-accordion';
+  wrap.style.marginBottom = '6px';
+
+  var header = document.createElement('button');
+  header.type = 'button';
+  header.className = 'rg-accordion-header';
+  header.innerHTML =
+    '<span class="rg-acc-label">' + item.sectionLabel + '&nbsp;&nbsp;' + item.label + '</span>' +
+    '<span class="rg-acc-chevron">▼</span>';
+
+  var body = document.createElement('div');
+  body.className = 'rg-accordion-body';
+  body.hidden = true;
 
   // 포함 항목인 경우 안내 뱃지
   var parentId = RG_MERGED_WITH[item.id];
@@ -7220,26 +7250,26 @@ function renderFacilityBlock(c, item, selectedIds) {
     var badge = document.createElement('div');
     badge.className = 'rg-merged-badge';
     badge.textContent = '아래 점검표는 ' + item.label + '이(가) 포함된 자동화재탐지설비 점검표입니다.';
-    c.appendChild(badge);
+    body.appendChild(badge);
   }
 
   var imgSrc = RG_SECTION_IMAGES[item.id];
   if (imgSrc) {
-    var wrapper = document.createElement('div');
-    wrapper.className = 'rg-pdf-wrapper';
+    var imgWrap = document.createElement('div');
+    imgWrap.className = 'rg-acc-img-wrap';
     var img = document.createElement('img');
     img.className = 'rg-section-img';
     img.src = imgSrc;
     img.alt = item.label;
-    wrapper.appendChild(img);
-    c.appendChild(wrapper);
+    imgWrap.appendChild(img);
+    body.appendChild(imgWrap);
   } else {
     var noImg = document.createElement('div');
     noImg.className = 'rg-section-rare';
     noImg.innerHTML =
       '<span class="rg-rare-icon">ℹ️</span>' +
       '<span>이 시설은 특정한 상황에만 설치됩니다. 잘 쓰이지 않습니다.</span>';
-    c.appendChild(noImg);
+    body.appendChild(noImg);
   }
 
   var descs = RG_FACILITY_DESCS[item.id];
@@ -7254,8 +7284,17 @@ function renderFacilityBlock(c, item, selectedIds) {
       ul.appendChild(li);
     });
     descWrap.appendChild(ul);
-    c.appendChild(descWrap);
+    body.appendChild(descWrap);
   }
+
+  header.addEventListener('click', function () {
+    body.hidden = !body.hidden;
+    header.classList.toggle('open', !body.hidden);
+  });
+
+  wrap.appendChild(header);
+  wrap.appendChild(body);
+  c.appendChild(wrap);
 }
 
 document.getElementById('open-report-guide').addEventListener('click', function () {
