@@ -3974,9 +3974,12 @@ const YD = {
   D20040530: 20040530,
   D20061207: 20061207,
   D20080229: 20080229,
+  D20110707: 20110707,
+  D20120215: 20120215, // 정신의료기관 간이스프링클러 신설 (2012년 2월)
   D20120914: 20120914,
   D20130109: 20130109,
   D20130210: 20130210,
+  D20140708: 20140708, // 요양병원 스프링클러·간이스프링클러·FACP·속보 추가 (2014년 7월)
   D20150701: 20150701,
   D20160101: 20160101,
   D20170128: 20170128,
@@ -4040,6 +4043,30 @@ const yearState = {
     yElderlyElectricalRoomArea: "",
     yElderlyBasementAreaForSmoke: "0",
     yElderlyHasSmallUndergroundParking: "no",
+    // 의료시설 전용
+    yMedicalSubtype: "hospital",
+    yMedicalArea: "1500",
+    yMedicalHasLargeTargetFloor: "no",
+    yMedicalHasGrillWindow: "no",
+    yMedicalHasGasFacility: "no",
+    yMedicalHasFloor500Plus: "no",
+    yMedicalFirstSecondFloorArea: "750",
+    yMedicalIndoorParkingArea: "",
+    yMedicalMechanicalParkingCapacity: "",
+    yMedicalElectricalRoomArea: "",
+    yMedicalBasementAreaForSmoke: "0",
+    // 종교시설 전용
+    yReligiousHasLargeTargetFloor: "no",
+    yReligiousFirstSecondFloorArea: "750",
+    yReligiousIndoorParkingArea: "",
+    yReligiousMechanicalParkingCapacity: "",
+    yReligiousElectricalRoomArea: "",
+    yReligiousOccupancy100Plus: "no",
+    yReligiousIsWoodStructure: "no",
+    yReligiousIsSacrificialBuilding: "no",
+    yReligiousHasStage: "no",
+    yReligiousStageArea: "",
+    yReligiousHasGasFacility: "no",
   },
 };
 
@@ -4059,6 +4086,8 @@ const yearSteps = [
       { value: "neighborhood", label: "근린생활시설", description: "일반 상가·식당·사무실·의원 등" },
       { value: "lodging", label: "숙박시설", description: "호텔·모텔·여관·펜션 등" },
       { value: "elderly", label: "노유자시설", description: "요양원·복지관·어린이집·아동센터 등" },
+      { value: "medical", label: "의료시설", description: "종합병원·병원·요양병원·정신의료기관 등" },
+      { value: "religious", label: "종교시설", description: "교회·성당·사찰·사당·기도원 등" },
     ],
   },
   {
@@ -4318,17 +4347,17 @@ const yearSteps = [
       { value: "general", label: "일반 노유자시설", description: "숙식을 제공하지 않는 시설 — 노인복지관·아동센터·주간보호센터 등" },
       { value: "living", label: "노유자 생활시설", description: "숙식을 함께 제공하는 시설 — 양로원·노인요양원·아동복지시설 등" },
     ],
-    condition: (ya) => ya.yOccupancyType === "elderly",
+    condition: (ya, pd) => ya.yOccupancyType === "elderly" && pd >= YD.D20080229,
   },
   {
     key: "yElderlyArea",
     type: "ynumber",
     title: "노유자시설로 사용하는 바닥면적 합계(㎡)",
-    help: "스프링클러·간이스프링클러 판단에 사용됩니다. 건물 전체를 노유자시설로 사용하면 연면적과 같게 입력하세요.",
+    help: "2008년 2월 29일 이후 간이스프링클러·스프링클러 판단에 사용됩니다. 건물 전체를 노유자시설로 사용하면 연면적과 같게 입력하세요.",
     placeholder: "예: 400",
     min: 0,
     step: 0.1,
-    condition: (ya) => ya.yOccupancyType === "elderly",
+    condition: (ya, pd) => ya.yOccupancyType === "elderly" && pd >= YD.D20080229,
   },
   {
     key: "yElderlyHasLargeTargetFloor",
@@ -4424,6 +4453,206 @@ const yearSteps = [
     ],
     condition: (ya, pd) => ya.yOccupancyType === "elderly" && pd >= YD.D20251201,
   },
+
+  // ── 의료시설 전용 스텝 ──
+  {
+    key: "yMedicalSubtype",
+    type: "ychoice",
+    title: "어떤 의료시설입니까?",
+    help: "세부 유형에 따라 스프링클러·간이스프링클러·자동화재탐지설비·자동화재속보설비 기준이 달라집니다.",
+    options: [
+      { value: "hospital", label: "병원·치과병원·한방병원", description: "병원, 치과병원, 한방병원" },
+      { value: "generalHospital", label: "종합병원", description: "종합병원" },
+      { value: "nursingHome", label: "요양병원", description: "요양병원(정신병원 제외)" },
+      { value: "psychiatricHospital", label: "정신의료기관", description: "정신병원·정신건강의학과의원 등" },
+      { value: "rehabilitationFacility", label: "의료재활시설", description: "장애인 의료재활시설" },
+    ],
+    condition: (ya) => ya.yOccupancyType === "medical",
+  },
+  {
+    key: "yMedicalArea",
+    type: "ynumber",
+    title: "의료시설로 사용하는 바닥면적 합계(㎡)",
+    help: "스프링클러·간이스프링클러·자동화재탐지설비 판단에 사용됩니다. 건물 전체를 의료시설로 사용하면 연면적과 같게 입력하세요.",
+    placeholder: "예: 1500",
+    min: 0,
+    step: 0.1,
+    condition: (ya) => ya.yOccupancyType === "medical",
+  },
+  {
+    key: "yMedicalHasLargeTargetFloor",
+    type: "ychoice",
+    title: "지하층·무창층·4층 이상 층 중 바닥면적 300㎡ 이상인 층이 있습니까?",
+    help: "옥내소화전설비 설치 여부를 판단하는 조건입니다.",
+    options: [
+      { value: "yes", label: "예", description: "해당 층이 있음" },
+      { value: "no", label: "아니오", description: "해당 층이 없음" },
+    ],
+    condition: (ya) => ya.yOccupancyType === "medical" && (parseFloat(ya.yTotalArea) || 0) < 1500,
+  },
+  {
+    key: "yMedicalHasGrillWindow",
+    type: "ychoice",
+    title: "사람의 탈출을 막기 위한 고정식 창살이 설치돼 있습니까?",
+    help: "정신의료기관·의료재활시설에서 바닥면적 300㎡ 미만이어도 간이스프링클러설비 및 자동화재탐지설비 설치 여부를 판단합니다.",
+    options: [
+      { value: "yes", label: "있음", description: "탈출 방지 목적의 고정식 창살이 설치돼 있음" },
+      { value: "no", label: "없음", description: "창살이 없음" },
+    ],
+    condition: (ya, pd) => ya.yOccupancyType === "medical" &&
+      (ya.yMedicalSubtype === "psychiatricHospital" || ya.yMedicalSubtype === "rehabilitationFacility") &&
+      pd >= YD.D20120215,
+  },
+  {
+    key: "yMedicalHasGasFacility",
+    type: "ychoice",
+    title: "가스시설이 설치돼 있습니까?",
+    help: "가스누설경보기 설치 여부를 판단합니다.",
+    options: [
+      { value: "yes", label: "예", description: "주방 등 가스시설이 설치돼 있음" },
+      { value: "no", label: "아니오", description: "가스시설이 없음" },
+    ],
+    condition: (ya) => ya.yOccupancyType === "medical",
+  },
+  // 의료시설 특이 조건 (뒤쪽)
+  {
+    key: "yMedicalHasFloor500Plus",
+    type: "ychoice",
+    title: "바닥면적이 500㎡ 이상인 층이 있습니까?",
+    help: "정신의료기관·의료재활시설의 자동화재속보설비 설치 여부를 판단합니다.",
+    options: [
+      { value: "yes", label: "있음", description: "500㎡ 이상인 층이 하나라도 있음" },
+      { value: "no", label: "없음", description: "모든 층이 500㎡ 미만" },
+    ],
+    condition: (ya, pd) => ya.yOccupancyType === "medical" &&
+      (ya.yMedicalSubtype === "psychiatricHospital" || ya.yMedicalSubtype === "rehabilitationFacility") &&
+      pd >= YD.D20140708,
+  },
+  // 의료시설 세부 조건
+  {
+    key: "yMedicalFirstSecondFloorArea",
+    type: "ynumber",
+    title: "지상 1층·2층 바닥면적 합계(㎡)",
+    help: "옥외소화전 설치 여부를 판단합니다. 해당 없으면 0을 입력하세요.",
+    placeholder: "예: 0",
+    min: 0,
+    step: 0.1,
+    condition: (ya) => ya.yOccupancyType === "medical",
+  },
+  {
+    key: "yMedicalParkingElecSet",
+    type: "ycompound",
+    title: "주차장·전기실 정보를 입력하세요",
+    help: "물분무등소화설비 판단에 사용됩니다. 해당 없으면 0을 입력하세요.",
+    condition: (ya) => ya.yOccupancyType === "medical",
+  },
+  {
+    key: "yMedicalBasementAreaForSmoke",
+    type: "ynumber",
+    title: "지하층·무창층 내 의료시설 사용 바닥면적 합계(㎡)",
+    help: "제연설비 설치 여부를 판단합니다. (2015년 7월 1일 이후 적용) 해당 없으면 0을 입력하세요.",
+    placeholder: "예: 0",
+    min: 0,
+    step: 0.1,
+    condition: (ya, pd) => ya.yOccupancyType === "medical" && pd >= YD.D20150701,
+  },
+
+  // ── 종교시설 전용 스텝 ──
+  {
+    key: "yReligiousHasLargeTargetFloor",
+    type: "ychoice",
+    title: "지하층·무창층·4층 이상 층 중 바닥면적 600㎡ 이상인 층이 있습니까?",
+    help: "옥내소화전설비 설치 여부를 판단하는 조건입니다. (종교시설 기준: 연면적 3,000㎡ 이상 또는 해당 층 600㎡ 이상)",
+    options: [
+      { value: "yes", label: "예", description: "해당 층이 있음" },
+      { value: "no", label: "아니오", description: "해당 층이 없음" },
+    ],
+    condition: (ya) => ya.yOccupancyType === "religious" && (parseFloat(ya.yTotalArea) || 0) < 3000,
+  },
+  // 세부 조건 (뒤쪽)
+  {
+    key: "yReligiousFirstSecondFloorArea",
+    type: "ynumber",
+    title: "지상 1층·2층 바닥면적 합계(㎡)",
+    help: "옥외소화전 설치 여부를 판단합니다. 해당 없으면 0을 입력하세요.",
+    placeholder: "예: 0",
+    min: 0,
+    step: 0.1,
+    condition: (ya) => ya.yOccupancyType === "religious",
+  },
+  {
+    key: "yReligiousParkingElecSet",
+    type: "ycompound",
+    title: "주차장·전기실 정보를 입력하세요",
+    help: "물분무등소화설비 판단에 사용됩니다. 해당 없으면 0을 입력하세요.",
+    condition: (ya) => ya.yOccupancyType === "religious",
+  },
+  // 종교시설 특수 조건 (뒤쪽)
+  {
+    key: "yReligiousOccupancy100Plus",
+    type: "ychoice",
+    title: "수용인원이 100명 이상입니까?",
+    help: "스프링클러설비 설치 여부를 판단합니다. 수용인원 산정은 소방관련법령에 따릅니다.",
+    options: [
+      { value: "yes", label: "예 (100명 이상)", description: "수용인원이 100명 이상인 경우" },
+      { value: "no", label: "아니오 (100명 미만)", description: "수용인원이 100명 미만인 경우" },
+    ],
+    condition: (ya) => ya.yOccupancyType === "religious",
+  },
+  {
+    key: "yReligiousIsWoodStructure",
+    type: "ychoice",
+    title: "주요구조부가 목조(나무)입니까?",
+    help: "2017년 1월 28일 이후부터 주요구조부가 목조인 종교시설은 스프링클러설비 설치 대상에서 제외됩니다.",
+    options: [
+      { value: "yes", label: "예 (목조 건축물)", description: "기둥·보 등 주요구조부가 나무로 된 목조 건축물" },
+      { value: "no", label: "아니오 (비목조)", description: "콘크리트·철골 등 목조가 아닌 건축물" },
+    ],
+    condition: (ya, pd) => ya.yOccupancyType === "religious" && ya.yReligiousOccupancy100Plus === "yes" && pd >= YD.D20170128,
+  },
+  {
+    key: "yReligiousIsSacrificialBuilding",
+    type: "ychoice",
+    title: "사찰·제실·사당에 해당합니까?",
+    help: "2004~2017년 1월 27일까지는 사찰·제실·사당은 규모에 관계없이 스프링클러설비 설치 대상에서 제외됩니다.",
+    options: [
+      { value: "yes", label: "예 (사찰·제실·사당)", description: "사찰, 제실, 사당에 해당하는 시설" },
+      { value: "no", label: "아니오", description: "교회·성당·기도원 등 그 외 종교시설" },
+    ],
+    condition: (ya, pd) => ya.yOccupancyType === "religious" && ya.yReligiousOccupancy100Plus === "yes" && pd >= YD.D20040530 && pd < YD.D20170128,
+  },
+  {
+    key: "yReligiousHasStage",
+    type: "ychoice",
+    title: "무대부가 있습니까?",
+    help: "2011년 7월 7일 이후부터 무대부 바닥면적이 200㎡ 이상이면 해당 무대부에 제연설비를 설치해야 합니다.",
+    options: [
+      { value: "yes", label: "있음", description: "무대장치를 갖춘 무대부가 있음" },
+      { value: "no", label: "없음", description: "무대부가 없음" },
+    ],
+    condition: (ya, pd) => ya.yOccupancyType === "religious" && pd >= YD.D20110707,
+  },
+  {
+    key: "yReligiousStageArea",
+    type: "ynumber",
+    title: "무대부 바닥면적(㎡)",
+    help: "200㎡ 이상이면 해당 무대부에 제연설비를 설치해야 합니다.",
+    placeholder: "예: 250",
+    min: 0,
+    step: 0.1,
+    condition: (ya, pd) => ya.yOccupancyType === "religious" && pd >= YD.D20110707 && ya.yReligiousHasStage === "yes",
+  },
+  {
+    key: "yReligiousHasGasFacility",
+    type: "ychoice",
+    title: "가스시설이 설치돼 있습니까?",
+    help: "2011년 7월 7일 이후부터 가스시설이 있는 종교시설은 가스누설경보기를 설치해야 합니다.",
+    options: [
+      { value: "yes", label: "예", description: "주방 등 가스시설이 설치돼 있음" },
+      { value: "no", label: "아니오", description: "가스시설이 없음" },
+    ],
+    condition: (ya, pd) => ya.yOccupancyType === "religious" && pd >= YD.D20110707,
+  },
 ];
 
 function yearGetActiveSteps() {
@@ -4434,6 +4663,19 @@ function yearGetActiveSteps() {
   const postpartumApplicable = pd >= YD.D20220225 && ya.yIsPostpartum === "yes";
   const autoDispatch = clinicApplicable || hemApplicable || postpartumApplicable;
   return yearSteps.filter((step) => !step.condition || step.condition(ya, pd, autoDispatch));
+}
+
+function yearRecalcF12() {
+  const ta = parseFloat(yearState.answers.yTotalArea) || 0;
+  const ba = parseFloat(yearState.answers.yBasementAreaSum) || 0;
+  const ag = parseInt(yearState.answers.yAboveGroundFloors) || 1;
+  const f12 = Math.round(((ta - ba) / ag) * 2 * 10) / 10;
+  const s = String(f12);
+  yearState.answers.yFirstSecondFloorArea = s;
+  yearState.answers.yLodgingFirstSecondFloorArea = s;
+  yearState.answers.yElderlyFirstSecondFloorArea = s;
+  yearState.answers.yMedicalFirstSecondFloorArea = s;
+  yearState.answers.yReligiousFirstSecondFloorArea = s;
 }
 
 function makeYearField(labelText, name, value, extra = {}) {
@@ -4448,7 +4690,10 @@ function makeYearField(labelText, name, value, extra = {}) {
   input.step = String(extra.step ?? 1);
   input.placeholder = extra.placeholder ?? "";
   input.value = value ?? "";
-  input.addEventListener("input", (e) => { yearState.answers[name] = e.target.value; });
+  input.addEventListener("input", (e) => {
+    yearState.answers[name] = e.target.value;
+    if (name === "yBasementAreaSum") yearRecalcF12();
+  });
   wrapper.appendChild(label);
   wrapper.appendChild(input);
   return wrapper;
@@ -4498,32 +4743,33 @@ function yearRenderNumberStep(step) {
   input.step = String(step.step ?? 1);
   input.placeholder = step.placeholder ?? "";
   input.value = yearState.answers[step.key] ?? "";
+  // 용도별 바닥면적 필드는 연면적을 초과할 수 없음
+  const areaFields = ["yNeighborhoodArea", "yLodgingArea", "yElderlyArea", "yMedicalArea"];
+  if (areaFields.includes(step.key)) {
+    const ta = parseFloat(yearState.answers.yTotalArea) || 0;
+    if (ta > 0) input.max = String(ta);
+  }
   input.addEventListener("input", (e) => {
+    // 용도별 바닥면적이 연면적 초과 시 연면적 값으로 클램핑
+    if (areaFields.includes(step.key)) {
+      const ta = parseFloat(yearState.answers.yTotalArea) || 0;
+      if (ta > 0 && parseFloat(e.target.value) > ta) {
+        e.target.value = String(ta);
+        showToast("해당 용도 바닥면적 합계는 건물 연면적(" + ta + "㎡)을 초과할 수 없습니다.");
+      }
+    }
     yearState.answers[step.key] = e.target.value;
     // yTotalArea 변경 시 관련 필드 자동 파생
     if (step.key === "yTotalArea") {
-      const ta = parseFloat(e.target.value) || 0;
-      const ag = parseInt(yearState.answers.yAboveGroundFloors) || 0;
-      const bf = parseInt(yearState.answers.yBasementFloors) || 0;
-      const totalFloors = ag + bf || 1;
-      const f12 = Math.round((ta / totalFloors) * 2 * 10) / 10;
       yearState.answers.yLodgingArea = e.target.value;
       yearState.answers.yNeighborhoodArea = e.target.value;
       yearState.answers.yElderlyArea = e.target.value;
-      yearState.answers.yFirstSecondFloorArea = String(f12);
-      yearState.answers.yLodgingFirstSecondFloorArea = String(f12);
-      yearState.answers.yElderlyFirstSecondFloorArea = String(f12);
+      yearState.answers.yMedicalArea = e.target.value;
+      yearRecalcF12();
     }
     // 층수 변경 시 1·2층 면적 재계산
     if (step.key === "yAboveGroundFloors" || step.key === "yBasementFloors") {
-      const ta = parseFloat(yearState.answers.yTotalArea) || 0;
-      const ag = step.key === "yAboveGroundFloors" ? (parseInt(e.target.value) || 0) : (parseInt(yearState.answers.yAboveGroundFloors) || 0);
-      const bf = step.key === "yBasementFloors" ? (parseInt(e.target.value) || 0) : (parseInt(yearState.answers.yBasementFloors) || 0);
-      const totalFloors = ag + bf || 1;
-      const f12 = Math.round((ta / totalFloors) * 2 * 10) / 10;
-      yearState.answers.yFirstSecondFloorArea = String(f12);
-      yearState.answers.yLodgingFirstSecondFloorArea = String(f12);
-      yearState.answers.yElderlyFirstSecondFloorArea = String(f12);
+      yearRecalcF12();
     }
   });
   return input;
@@ -4630,6 +4876,18 @@ function yearRenderCompoundStep(step) {
     wrapper.appendChild(makeYearField("건물 내부 차고·주차장 바닥면적(㎡)", "yElderlyIndoorParkingArea", ya.yElderlyIndoorParkingArea, { min: 0, step: 0.1, placeholder: "없으면 0" }));
     wrapper.appendChild(makeYearField("기계식 주차 대수(대)", "yElderlyMechanicalParkingCapacity", ya.yElderlyMechanicalParkingCapacity, { min: 0, step: 1, placeholder: "없으면 0" }));
     wrapper.appendChild(makeYearField("전기실·발전실·변전실·전산실 바닥면적(㎡)", "yElderlyElectricalRoomArea", ya.yElderlyElectricalRoomArea, { min: 0, step: 0.1, placeholder: "없으면 0" }));
+  }
+
+  if (step.key === "yMedicalParkingElecSet") {
+    wrapper.appendChild(makeYearField("건물 내부 차고·주차장 바닥면적(㎡)", "yMedicalIndoorParkingArea", ya.yMedicalIndoorParkingArea, { min: 0, step: 0.1, placeholder: "없으면 0" }));
+    wrapper.appendChild(makeYearField("기계식 주차 대수(대)", "yMedicalMechanicalParkingCapacity", ya.yMedicalMechanicalParkingCapacity, { min: 0, step: 1, placeholder: "없으면 0" }));
+    wrapper.appendChild(makeYearField("전기실·발전실·변전실·전산실 바닥면적(㎡)", "yMedicalElectricalRoomArea", ya.yMedicalElectricalRoomArea, { min: 0, step: 0.1, placeholder: "없으면 0" }));
+  }
+
+  if (step.key === "yReligiousParkingElecSet") {
+    wrapper.appendChild(makeYearField("건물 내부 차고·주차장 바닥면적(㎡)", "yReligiousIndoorParkingArea", ya.yReligiousIndoorParkingArea, { min: 0, step: 0.1, placeholder: "없으면 0" }));
+    wrapper.appendChild(makeYearField("기계식 주차 대수(대)", "yReligiousMechanicalParkingCapacity", ya.yReligiousMechanicalParkingCapacity, { min: 0, step: 1, placeholder: "없으면 0" }));
+    wrapper.appendChild(makeYearField("전기실·발전실·변전실·전산실 바닥면적(㎡)", "yReligiousElectricalRoomArea", ya.yReligiousElectricalRoomArea, { min: 0, step: 0.1, placeholder: "없으면 0" }));
   }
 
   return wrapper;
@@ -4761,6 +5019,30 @@ function yearNormalizeAnswers() {
     elderlyElectricalRoomArea: parseFloat(ya.yElderlyElectricalRoomArea) || 0,
     elderlyBasementAreaForSmoke: parseFloat(ya.yElderlyBasementAreaForSmoke) || 0,
     elderlyHasSmallUndergroundParking: ya.yElderlyHasSmallUndergroundParking === "yes",
+    // 의료시설 전용
+    medicalSubtype: ya.yMedicalSubtype,
+    medicalArea: parseFloat(ya.yMedicalArea) || 0,
+    medicalHasLargeTargetFloor: ya.yMedicalHasLargeTargetFloor === "yes",
+    medicalHasGrillWindow: ya.yMedicalHasGrillWindow === "yes",
+    medicalHasGasFacility: ya.yMedicalHasGasFacility === "yes",
+    medicalHasFloor500Plus: ya.yMedicalHasFloor500Plus === "yes",
+    medicalFirstSecondFloorArea: parseFloat(ya.yMedicalFirstSecondFloorArea) || 0,
+    medicalIndoorParkingArea: parseFloat(ya.yMedicalIndoorParkingArea) || 0,
+    medicalMechanicalParkingCapacity: parseInt(ya.yMedicalMechanicalParkingCapacity) || 0,
+    medicalElectricalRoomArea: parseFloat(ya.yMedicalElectricalRoomArea) || 0,
+    medicalBasementAreaForSmoke: parseFloat(ya.yMedicalBasementAreaForSmoke) || 0,
+    // 종교시설 전용
+    religiousHasLargeTargetFloor: ya.yReligiousHasLargeTargetFloor === "yes",
+    religiousFirstSecondFloorArea: parseFloat(ya.yReligiousFirstSecondFloorArea) || 0,
+    religiousIndoorParkingArea: parseFloat(ya.yReligiousIndoorParkingArea) || 0,
+    religiousMechanicalParkingCapacity: parseInt(ya.yReligiousMechanicalParkingCapacity) || 0,
+    religiousElectricalRoomArea: parseFloat(ya.yReligiousElectricalRoomArea) || 0,
+    religiousOccupancy100Plus: ya.yReligiousOccupancy100Plus === "yes",
+    religiousIsWoodStructure: ya.yReligiousIsWoodStructure === "yes",
+    religiousIsSacrificialBuilding: ya.yReligiousIsSacrificialBuilding === "yes",
+    religiousHasStage: ya.yReligiousHasStage === "yes",
+    religiousStageArea: parseFloat(ya.yReligiousStageArea) || 0,
+    religiousHasGasFacility: ya.yReligiousHasGasFacility === "yes",
   };
 }
 
@@ -5334,42 +5616,42 @@ function yearEvaluateElderly(inp) {
   results.push(makeResult(categories.extinguishing, "스프링클러설비", "",
     sprinklerReq ? "required" : "notRequired", sprinklerReason, ""));
 
-  // ── 간이스프링클러설비 ──
-  let simpleSprinklerReq = false;
-  let simpleSprinklerReason = "";
-  if (sprinklerReq) {
-    simpleSprinklerReason = "스프링클러설비 설치 대상이므로 간이스프링클러설비는 제외됩니다.";
-  } else if (pd < YD.D20080229) {
-    simpleSprinklerReason = "현재 입력 기준으로는 설치 대상이 아닙니다.";
-  } else if (pd >= YD.D20080229 && pd < YD.D20120914) {
-    // 300~600㎡ 또는 창살
-    if (!isLiving) {
-      simpleSprinklerReq = (ea >= 300 && ea < 600) || inp.elderlyHasGrillWindow;
-      simpleSprinklerReason = ea >= 300 && ea < 600
-        ? "노유자시설 사용 바닥면적이 300㎡ 이상 600㎡ 미만입니다."
-        : inp.elderlyHasGrillWindow
-        ? "창살이 설치된 노유자시설로 면적에 관계없이 설치 대상입니다."
-        : "현재 입력 기준으로는 설치 대상이 아닙니다.";
+  // ── 간이스프링클러설비 (2008.2.29 이후부터 법령 도입) ──
+  if (pd >= YD.D20080229) {
+    let simpleSprinklerReq = false;
+    let simpleSprinklerReason = "";
+    if (sprinklerReq) {
+      simpleSprinklerReason = "스프링클러설비 설치 대상이므로 간이스프링클러설비는 제외됩니다.";
+    } else if (pd < YD.D20120914) {
+      // 2008.2.29 ~ 2012.9.13: 300~600㎡ 또는 창살
+      if (!isLiving) {
+        simpleSprinklerReq = (ea >= 300 && ea < 600) || inp.elderlyHasGrillWindow;
+        simpleSprinklerReason = ea >= 300 && ea < 600
+          ? "노유자시설 사용 바닥면적이 300㎡ 이상 600㎡ 미만입니다."
+          : inp.elderlyHasGrillWindow
+          ? "창살이 설치된 노유자시설로 면적에 관계없이 설치 대상입니다."
+          : "현재 입력 기준으로는 설치 대상이 아닙니다.";
+      } else {
+        simpleSprinklerReason = "현재 입력 기준으로는 설치 대상이 아닙니다. (이 시기 생활시설에는 간이스프링클러 조항 없음)";
+      }
     } else {
-      simpleSprinklerReason = "현재 입력 기준으로는 설치 대상이 아닙니다. (이 시기 생활시설에는 간이스프링클러 조항 없음)";
+      // 2012.9.14 이후
+      if (isLiving) {
+        simpleSprinklerReq = true;
+        simpleSprinklerReason = "노유자 생활시설은 면적에 관계없이 간이스프링클러설비를 설치해야 합니다.";
+      } else {
+        simpleSprinklerReq = (ea >= 300 && ea < 600) || inp.elderlyHasGrillWindow;
+        simpleSprinklerReason = ea >= 300 && ea < 600
+          ? "노유자시설 사용 바닥면적이 300㎡ 이상 600㎡ 미만입니다."
+          : inp.elderlyHasGrillWindow
+          ? "창살이 설치된 노유자시설로 면적에 관계없이 설치 대상입니다."
+          : "현재 입력 기준으로는 설치 대상이 아닙니다.";
+      }
     }
-  } else {
-    // 2012.9.14 이후
-    if (isLiving) {
-      simpleSprinklerReq = true;
-      simpleSprinklerReason = "노유자 생활시설은 면적에 관계없이 간이스프링클러설비를 설치해야 합니다.";
-    } else {
-      simpleSprinklerReq = (ea >= 300 && ea < 600) || inp.elderlyHasGrillWindow;
-      simpleSprinklerReason = ea >= 300 && ea < 600
-        ? "노유자시설 사용 바닥면적이 300㎡ 이상 600㎡ 미만입니다."
-        : inp.elderlyHasGrillWindow
-        ? "창살이 설치된 노유자시설로 면적에 관계없이 설치 대상입니다."
-        : "현재 입력 기준으로는 설치 대상이 아닙니다.";
-    }
+    results.push(makeResult(categories.extinguishing, "간이스프링클러설비", "",
+      sprinklerReq ? "notRequired" : (simpleSprinklerReq ? "required" : "notRequired"),
+      sprinklerReq ? "스프링클러설비 설치 대상이므로 제외됩니다." : simpleSprinklerReason, ""));
   }
-  results.push(makeResult(categories.extinguishing, "간이스프링클러설비", "",
-    sprinklerReq ? "notRequired" : (simpleSprinklerReq ? "required" : "notRequired"),
-    sprinklerReq ? "스프링클러설비 설치 대상이므로 제외됩니다." : simpleSprinklerReason, ""));
 
   // ── 물분무등소화설비 ──
   const waterSprayReq = inp.elderlyIndoorParkingArea >= 200 || inp.elderlyMechanicalParkingCapacity >= 20 || inp.elderlyElectricalRoomArea >= 300;
@@ -5556,6 +5838,532 @@ function yearEvaluateElderly(inp) {
   return results;
 }
 
+function yearEvaluateMedical(inp) {
+  const results = [];
+  const { pd } = inp;
+  const ag = inp.aboveGroundFloors;
+  const bf = inp.basementFloors;
+  const ba = inp.basementAreaSum;
+  const ta = inp.totalArea;
+  const tf = inp.totalFloors;
+  const ma = inp.medicalArea;
+  const wl = inp.windowlessArea;
+  const bsmtAvg = bf > 0 ? ba / bf : 0;
+
+  const subtype = inp.medicalSubtype;
+  const isNursingHome = subtype === "nursingHome";
+  const isPsychiatric = subtype === "psychiatricHospital";
+  const isRehabilitation = subtype === "rehabilitationFacility";
+  const isHospitalGrade = subtype === "hospital" || subtype === "generalHospital";
+  const isBigHospital = isHospitalGrade || isNursingHome;
+
+  const hasBasement150 = bf > 0 && bsmtAvg >= 150;
+  const hasBasement300 = bf > 0 && bsmtAvg >= 300;
+  const hasBasement450 = bf > 0 && bsmtAvg >= 450;
+  const hasWindowless150 = inp.hasWindowlessFloor && wl >= 150;
+  const hasWindowless300 = inp.hasWindowlessFloor && wl >= 300;
+  const hasWindowless450 = inp.hasWindowlessFloor && wl >= 450;
+
+  // ── 소화기구 ──
+  results.push(makeResult(categories.extinguishing, "소화기구", "",
+    ta >= 33 ? "required" : "notRequired",
+    ta >= 33 ? "연면적이 33㎡ 이상입니다." : "연면적이 33㎡ 미만입니다.", ""));
+
+  // ── 옥내소화전설비 (기준 20년 동일) ──
+  const indoorHydrantReq = ta >= 1500 || hasBasement300 || hasWindowless300 || inp.medicalHasLargeTargetFloor;
+  results.push(makeResult(categories.extinguishing, "옥내소화전설비", "",
+    indoorHydrantReq ? "required" : "notRequired",
+    ta >= 1500 ? "연면적이 1,500㎡ 이상입니다." :
+    hasBasement300 ? "지하층 바닥면적이 300㎡ 이상인 층이 있습니다." :
+    hasWindowless300 ? "무창층 바닥면적이 300㎡ 이상입니다." :
+    inp.medicalHasLargeTargetFloor ? "4층 이상 층 중 바닥면적 300㎡ 이상인 층이 있습니다." :
+    "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
+
+  // ── 스프링클러설비 ──
+  let sprinklerReq = false;
+  let sprinklerReason = "";
+  const commonSprinkler = ag >= 11;
+
+  if (pd >= YD.D20040530 && pd < YD.D20140708) {
+    if (isPsychiatric) {
+      sprinklerReq = ma >= 600 || commonSprinkler;
+      sprinklerReason = ma >= 600 ? "정신의료기관 바닥면적 합계가 600㎡ 이상으로 전층 설치 대상입니다." :
+        commonSprinkler ? "층수가 11층 이상입니다." : "현재 입력 기준으로는 설치 대상이 아닙니다.";
+    } else {
+      sprinklerReq = commonSprinkler;
+      sprinklerReason = commonSprinkler ? "층수가 11층 이상입니다." : "현재 입력 기준으로는 설치 대상이 아닙니다.";
+    }
+  } else if (pd >= YD.D20140708 && pd < YD.D20190806) {
+    if (isNursingHome || isPsychiatric) {
+      sprinklerReq = ma >= 600 || commonSprinkler;
+      const label = isNursingHome ? "요양병원" : "정신의료기관";
+      sprinklerReason = ma >= 600 ? `${label} 바닥면적 합계가 600㎡ 이상으로 전층 설치 대상입니다.` :
+        commonSprinkler ? "층수가 11층 이상입니다." : "현재 입력 기준으로는 설치 대상이 아닙니다.";
+    } else {
+      sprinklerReq = commonSprinkler;
+      sprinklerReason = commonSprinkler ? "층수가 11층 이상입니다." : "현재 입력 기준으로는 설치 대상이 아닙니다.";
+    }
+  } else {
+    if (isBigHospital || isPsychiatric) {
+      sprinklerReq = ma >= 600 || commonSprinkler;
+      sprinklerReason = ma >= 600 ? "의료시설 바닥면적 합계가 600㎡ 이상으로 전층 설치 대상입니다." :
+        commonSprinkler ? "층수가 11층 이상입니다." : "현재 입력 기준으로는 설치 대상이 아닙니다.";
+    } else {
+      sprinklerReq = commonSprinkler;
+      sprinklerReason = commonSprinkler ? "층수가 11층 이상입니다." : "현재 입력 기준으로는 설치 대상이 아닙니다.";
+    }
+  }
+  results.push(makeResult(categories.extinguishing, "스프링클러설비", "",
+    sprinklerReq ? "required" : "notRequired", sprinklerReason, ""));
+
+  // ── 간이스프링클러설비 ──
+  let simpleSprinklerReq = false;
+  let simpleSprinklerReason = "";
+  if (sprinklerReq) {
+    simpleSprinklerReason = "스프링클러설비 설치 대상이므로 간이스프링클러설비는 제외됩니다.";
+  } else if (pd < YD.D20120215) {
+    simpleSprinklerReason = "현재 입력 기준으로는 설치 대상이 아닙니다.";
+  } else if (pd >= YD.D20120215 && pd < YD.D20140708) {
+    if (isPsychiatric || isRehabilitation) {
+      simpleSprinklerReq = (ma >= 300 && ma < 600) || inp.medicalHasGrillWindow;
+      simpleSprinklerReason = ma >= 300 && ma < 600 ? "정신의료기관 바닥면적이 300㎡ 이상 600㎡ 미만입니다." :
+        inp.medicalHasGrillWindow ? "창살이 설치된 시설로 면적에 관계없이 설치 대상입니다." :
+        "현재 입력 기준으로는 설치 대상이 아닙니다.";
+    } else {
+      simpleSprinklerReason = "현재 입력 기준으로는 설치 대상이 아닙니다.";
+    }
+  } else if (pd >= YD.D20140708 && pd < YD.D20190806) {
+    if (isNursingHome) {
+      simpleSprinklerReq = true;
+      simpleSprinklerReason = "요양병원은 바닥면적에 관계없이 간이스프링클러설비 설치 대상입니다.";
+    } else if (isPsychiatric || isRehabilitation) {
+      simpleSprinklerReq = (ma >= 300 && ma < 600) || inp.medicalHasGrillWindow;
+      simpleSprinklerReason = ma >= 300 && ma < 600 ? "정신의료기관·의료재활시설 바닥면적이 300㎡ 이상 600㎡ 미만입니다." :
+        inp.medicalHasGrillWindow ? "창살이 설치된 시설로 면적에 관계없이 설치 대상입니다." :
+        "현재 입력 기준으로는 설치 대상이 아닙니다.";
+    } else {
+      simpleSprinklerReason = "현재 입력 기준으로는 설치 대상이 아닙니다.";
+    }
+  } else {
+    if (isBigHospital) {
+      simpleSprinklerReq = true;
+      simpleSprinklerReason = "병원급 의료시설은 바닥면적에 관계없이 간이스프링클러설비 설치 대상입니다.";
+    } else if (isPsychiatric || isRehabilitation) {
+      simpleSprinklerReq = (ma >= 300 && ma < 600) || inp.medicalHasGrillWindow;
+      simpleSprinklerReason = ma >= 300 && ma < 600 ? "정신의료기관·의료재활시설 바닥면적이 300㎡ 이상 600㎡ 미만입니다." :
+        inp.medicalHasGrillWindow ? "창살이 설치된 시설로 면적에 관계없이 설치 대상입니다." :
+        "현재 입력 기준으로는 설치 대상이 아닙니다.";
+    } else {
+      simpleSprinklerReason = "현재 입력 기준으로는 설치 대상이 아닙니다.";
+    }
+  }
+  results.push(makeResult(categories.extinguishing, "간이스프링클러설비", "",
+    sprinklerReq ? "notRequired" : (simpleSprinklerReq ? "required" : "notRequired"),
+    sprinklerReq ? "스프링클러설비 설치 대상이므로 제외됩니다." : simpleSprinklerReason, ""));
+
+  // ── 물분무등소화설비 ──
+  const waterSprayReq = inp.medicalIndoorParkingArea >= 200 || inp.medicalMechanicalParkingCapacity >= 20 || inp.medicalElectricalRoomArea >= 300;
+  results.push(makeResult(categories.extinguishing, "물분무등소화설비", "",
+    waterSprayReq ? "required" : "notRequired",
+    buildWaterSprayReason(0, inp.medicalIndoorParkingArea, inp.medicalMechanicalParkingCapacity, inp.medicalElectricalRoomArea), ""));
+
+  // ── 옥외소화전설비 ──
+  results.push(makeResult(categories.extinguishing, "옥외소화전설비", "",
+    inp.medicalFirstSecondFloorArea >= 9000 ? "required" : "notRequired",
+    inp.medicalFirstSecondFloorArea >= 9000 ? "지상 1층과 2층의 바닥면적 합계가 9,000㎡ 이상입니다." :
+    "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
+
+  // ── 비상경보설비 (기준 20년 동일) ──
+  const emergAlarmReq = ta >= 400 || hasBasement150 || hasWindowless150;
+  results.push(makeResult(categories.alarm, "비상경보설비", "",
+    emergAlarmReq ? "required" : "notRequired",
+    ta >= 400 ? "연면적이 400㎡ 이상입니다." :
+    hasBasement150 ? "지하층 바닥면적이 150㎡ 이상입니다." :
+    hasWindowless150 ? "무창층 바닥면적이 150㎡ 이상입니다." :
+    "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
+
+  // ── 자동화재탐지설비 ──
+  let autoDetReq = false;
+  let autoDetReason = "";
+  if (pd >= YD.D20040530 && pd < YD.D20140708) {
+    autoDetReq = ta >= 600;
+    autoDetReason = ta >= 600 ? "연면적이 600㎡ 이상인 의료시설입니다." : "연면적이 600㎡ 미만이어서 설치 대상이 아닙니다.";
+  } else if (pd >= YD.D20140708 && pd < YD.D20150701) {
+    if (isNursingHome || isPsychiatric || isRehabilitation) {
+      autoDetReq = ma >= 300 || inp.medicalHasGrillWindow;
+      autoDetReason = ma >= 300 ? "요양병원·정신의료기관·의료재활시설로 바닥면적이 300㎡ 이상입니다." :
+        inp.medicalHasGrillWindow ? "창살이 설치된 시설로 면적에 관계없이 설치 대상입니다." :
+        "현재 입력 기준으로는 설치 대상이 아닙니다.";
+    } else {
+      autoDetReq = ta >= 600;
+      autoDetReason = ta >= 600 ? "연면적이 600㎡ 이상인 의료시설입니다." : "연면적이 600㎡ 미만이어서 설치 대상이 아닙니다.";
+    }
+  } else {
+    if (isNursingHome) {
+      autoDetReq = true;
+      autoDetReason = "요양병원(의료재활시설 제외)은 면적에 관계없이 자동화재탐지설비를 설치해야 합니다.";
+    } else if (isPsychiatric || isRehabilitation) {
+      autoDetReq = ma >= 300 || inp.medicalHasGrillWindow;
+      autoDetReason = ma >= 300 ? "정신의료기관·의료재활시설로 바닥면적이 300㎡ 이상입니다." :
+        inp.medicalHasGrillWindow ? "창살이 설치된 시설로 면적에 관계없이 설치 대상입니다." :
+        "현재 입력 기준으로는 설치 대상이 아닙니다.";
+    } else {
+      autoDetReq = ta >= 600;
+      autoDetReason = ta >= 600 ? "연면적이 600㎡ 이상인 의료시설입니다." : "연면적이 600㎡ 미만이어서 설치 대상이 아닙니다.";
+    }
+  }
+  results.push(makeResult(categories.alarm, "자동화재탐지설비", "", autoDetReq ? "required" : "notRequired", autoDetReason, ""));
+
+  // ── 시각경보기 (자동화재탐지설비 설치 의료시설에 세트) ──
+  results.push(makeResult(categories.alarm, "시각경보기", "",
+    autoDetReq ? "required" : "notRequired",
+    autoDetReq ? "자동화재탐지설비 설치 대상 의료시설에 시각경보기를 함께 설치해야 합니다." :
+    "자동화재탐지설비 설치 대상이 아닙니다.", ""));
+
+  // ── 비상방송설비 (기준 20년 동일) ──
+  const broadcastReq = ta >= 3500 || ag >= 11 || bf >= 3;
+  results.push(makeResult(categories.alarm, "비상방송설비", "",
+    broadcastReq ? "required" : "notRequired",
+    ta >= 3500 ? "연면적이 3,500㎡ 이상입니다." :
+    ag >= 11 ? "지상층수가 11층 이상입니다." :
+    bf >= 3 ? "지하층수가 3층 이상입니다." :
+    "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
+
+  // ── 자동화재속보설비 ──
+  let autoDispatchReq = false;
+  let autoDispatchReason = "";
+  if (pd < YD.D20140708) {
+    autoDispatchReason = "해당 허가 시기에는 의료시설에 자동화재속보설비 설치 의무가 없었습니다.";
+  } else if (pd >= YD.D20140708 && pd < YD.D20150701) {
+    if (isNursingHome) {
+      autoDispatchReq = inp.medicalHasFloor500Plus;
+      autoDispatchReason = inp.medicalHasFloor500Plus ? "요양병원으로 바닥면적이 500㎡ 이상인 층이 있습니다." :
+        "바닥면적 500㎡ 이상인 층이 없어 설치 대상이 아닙니다.";
+    } else {
+      autoDispatchReason = "해당 허가 시기에는 요양병원 이외의 의료시설은 자동화재속보설비 설치 의무가 없었습니다.";
+    }
+  } else if (pd >= YD.D20150701 && pd < YD.D20190806) {
+    if (isNursingHome) {
+      autoDispatchReq = true;
+      autoDispatchReason = "요양병원(정신병원·의료재활시설 제외)은 면적에 관계없이 자동화재속보설비를 설치해야 합니다.";
+    } else if (isPsychiatric || isRehabilitation) {
+      autoDispatchReq = inp.medicalHasFloor500Plus;
+      autoDispatchReason = inp.medicalHasFloor500Plus ? "정신병원·의료재활시설로 바닥면적이 500㎡ 이상인 층이 있습니다." :
+        "바닥면적 500㎡ 이상인 층이 없어 설치 대상이 아닙니다.";
+    } else {
+      autoDispatchReason = "해당 허가 시기에는 요양병원 이외의 병원급 의료시설은 자동화재속보설비 설치 의무가 없었습니다.";
+    }
+  } else {
+    if (isBigHospital) {
+      autoDispatchReq = true;
+      autoDispatchReason = "병원급 의료시설(종합병원·병원·치과병원·한방병원·요양병원)은 면적에 관계없이 자동화재속보설비를 설치해야 합니다.";
+    } else if (isPsychiatric || isRehabilitation) {
+      autoDispatchReq = inp.medicalHasFloor500Plus;
+      autoDispatchReason = inp.medicalHasFloor500Plus ? "정신병원·의료재활시설로 바닥면적이 500㎡ 이상인 층이 있습니다." :
+        "바닥면적 500㎡ 이상인 층이 없어 설치 대상이 아닙니다.";
+    }
+  }
+  results.push(makeResult(categories.alarm, "자동화재속보설비", "", autoDispatchReq ? "required" : "notRequired", autoDispatchReason, ""));
+
+  // ── 가스누설경보기 (가스시설 있으면 무조건) ──
+  results.push(makeResult(categories.alarm, "가스누설경보기", "",
+    inp.medicalHasGasFacility ? "required" : "notRequired",
+    inp.medicalHasGasFacility ? "가스시설이 설치된 의료시설입니다." : "가스시설이 없어 설치 대상이 아닙니다.", ""));
+
+  // ── 피난기구 (일반 기준과 동일) ──
+  results.push(makeResult(categories.evacuation, "피난기구(구조대·완강기 등)", "",
+    ag >= 3 ? "required" : "notRequired",
+    ag >= 3 ? "3층 이상 10층 이하 층에 피난기구를 설치해야 합니다." :
+    "3층 이상 층이 없어 설치 대상이 아닙니다.", ""));
+
+  // ── 인명구조기구 (병원급에만 적용) ──
+  let rescueReq = false;
+  let rescueReason = "";
+  if (isHospitalGrade) {
+    if (tf >= 5) {
+      rescueReq = true;
+      rescueReason = pd >= YD.D20221201
+        ? "지하층 포함 5층 이상이고 병원 용도로 사용하는 층이 있어 인명구조기구(방열복 또는 방화복·공기호흡기) 설치 대상입니다."
+        : "지하층을 포함한 층수가 5층 이상인 병원으로 인명구조기구(방열복·공기호흡기) 설치 대상입니다.";
+    } else {
+      rescueReason = "지하층을 포함한 층수가 5층 미만이어서 설치 대상이 아닙니다.";
+    }
+  } else {
+    rescueReason = "종합병원·병원·치과병원·한방병원에만 해당하여 현재 시설은 설치 대상이 아닙니다.";
+  }
+  results.push(makeResult(categories.evacuation, "인명구조기구(방열복·공기호흡기)", "",
+    rescueReq ? "required" : "notRequired", rescueReason, ""));
+
+  // ── 유도등 ──
+  results.push(makeResult(categories.evacuation, "유도등(피난구유도등·통로유도등)", "", "required",
+    "모든 의료시설에 피난구유도등, 통로유도등, 유도표지를 설치해야 합니다.", ""));
+
+  // ── 비상조명등 ──
+  const emLightReq = (tf >= 5 && ta >= 3000) || hasBasement450 || hasWindowless450;
+  results.push(makeResult(categories.evacuation, "비상조명등", "",
+    emLightReq ? "required" : "notRequired",
+    tf >= 5 && ta >= 3000 ? "전체 층수가 5층 이상이고 연면적이 3,000㎡ 이상입니다." :
+    hasBasement450 ? "지하층 바닥면적이 450㎡ 이상입니다." :
+    hasWindowless450 ? "무창층 바닥면적이 450㎡ 이상입니다." :
+    "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
+
+  // ── 소화용수설비 ──
+  results.push(makeResult(categories.waterSupply, "상수도소화용수설비", "",
+    ta >= 5000 ? "required" : "notRequired",
+    ta >= 5000 ? "연면적이 5,000㎡ 이상입니다." : "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
+
+  // ── 제연설비 (2015.7.1 이후 의료시설 편입) ──
+  let smokeReq = false;
+  let smokeReason = "";
+  if (pd >= YD.D20150701) {
+    smokeReq = inp.medicalBasementAreaForSmoke >= 1000;
+    smokeReason = smokeReq
+      ? "지하층·무창층 내 의료시설 사용 바닥면적 합계가 1,000㎡ 이상입니다."
+      : "현재 입력 기준으로는 설치 대상이 아닙니다.";
+  } else {
+    smokeReason = "2015년 7월 1일 이전에는 의료시설은 제연설비 설치 대상이 아니었습니다.";
+  }
+  results.push(makeResult(categories.fireSupport, "제연설비", "",
+    smokeReq ? "required" : "notRequired", smokeReason, ""));
+
+  // ── 연결송수관설비 (기준 20년 동일) ──
+  const standpipeReq = (tf >= 5 && ta >= 6000) || tf >= 7 || (bf >= 3 && ba >= 1000);
+  results.push(makeResult(categories.fireSupport, "연결송수관설비", "",
+    standpipeReq ? "required" : "notRequired",
+    tf >= 5 && ta >= 6000 ? "전체 층수가 5층 이상이고 연면적이 6,000㎡ 이상입니다." :
+    tf >= 7 ? "전체 층수가 7층 이상입니다." :
+    bf >= 3 && ba >= 1000 ? "지하층이 3층 이상이고 지하층 바닥면적 합계가 1,000㎡ 이상입니다." :
+    "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
+
+  // ── 연결살수설비 (지하층 150㎡ 이상) ──
+  results.push(makeResult(categories.fireSupport, "연결살수설비", "",
+    ba >= 150 ? "required" : "notRequired",
+    ba >= 150 ? "지하층 바닥면적 합계가 150㎡ 이상입니다." :
+    "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
+
+  // ── 비상콘센트설비 (기준 20년 동일) ──
+  const emConsentReq = ag >= 11 || (bf >= 3 && ba >= 1000);
+  results.push(makeResult(categories.fireSupport, "비상콘센트설비", "",
+    emConsentReq ? "required" : "notRequired",
+    ag >= 11 ? "지상층수가 11층 이상입니다." :
+    bf >= 3 && ba >= 1000 ? "지하층이 3층 이상이고 지하층 바닥면적 합계가 1,000㎡ 이상입니다." :
+    "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
+
+  // ── 무선통신보조설비 ──
+  const radioBase = ba >= 3000 || (bf >= 3 && ba >= 1000);
+  const radioHigh = pd >= YD.D20120914 && ag >= 30;
+  results.push(makeResult(categories.fireSupport, "무선통신보조설비", "",
+    radioBase || radioHigh ? "required" : "notRequired",
+    ba >= 3000 ? "지하층 바닥면적 합계가 3,000㎡ 이상입니다." :
+    bf >= 3 && ba >= 1000 ? "지하층이 3층 이상이고 지하층 바닥면적 합계가 1,000㎡ 이상입니다." :
+    radioHigh ? "지상층수가 30층 이상으로 16층 이상 부분에 설치 대상입니다." :
+    "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
+
+  return results;
+}
+
+function yearEvaluateReligious(inp) {
+  const results = [];
+  const { pd } = inp;
+  const ag = inp.aboveGroundFloors;
+  const bf = inp.basementFloors;
+  const ba = inp.basementAreaSum;
+  const ta = inp.totalArea;
+  const tf = inp.totalFloors;
+  const wl = inp.windowlessArea;
+  const bsmtAvg = bf > 0 ? ba / bf : 0;
+
+  const hasBasement150 = bf > 0 && bsmtAvg >= 150;
+  const hasBasement450 = bf > 0 && bsmtAvg >= 450;
+  const hasBasement600 = bf > 0 && bsmtAvg >= 600;
+  const hasWindowless150 = inp.hasWindowlessFloor && wl >= 150;
+  const hasWindowless450 = inp.hasWindowlessFloor && wl >= 450;
+  const hasWindowless600 = inp.hasWindowlessFloor && wl >= 600;
+
+  // ── 소화기구 ──
+  results.push(makeResult(categories.extinguishing, "소화기구", "",
+    ta >= 33 ? "required" : "notRequired",
+    ta >= 33 ? "연면적이 33㎡ 이상입니다." : "연면적이 33㎡ 미만입니다.", ""));
+
+  // ── 옥내소화전설비 (종교시설: 연면적 3,000㎡ 이상 또는 층 바닥면적 600㎡ 이상) ──
+  const indoorHydrantReq = ta >= 3000 || hasBasement600 || hasWindowless600 || inp.religiousHasLargeTargetFloor;
+  results.push(makeResult(categories.extinguishing, "옥내소화전설비", "",
+    indoorHydrantReq ? "required" : "notRequired",
+    ta >= 3000 ? "연면적이 3,000㎡ 이상입니다." :
+    hasBasement600 ? "지하층 평균 바닥면적이 600㎡ 이상입니다." :
+    hasWindowless600 ? "무창층 바닥면적이 600㎡ 이상입니다." :
+    inp.religiousHasLargeTargetFloor ? "4층 이상 층 중 바닥면적 600㎡ 이상인 층이 있습니다." :
+    "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
+
+  // ── 스프링클러설비 ──
+  let sprinklerReq = false;
+  let sprinklerReason = "";
+  if (!inp.religiousOccupancy100Plus) {
+    sprinklerReason = "수용인원이 100명 미만이어서 설치 대상이 아닙니다.";
+  } else if (pd >= YD.D20170128) {
+    if (inp.religiousIsWoodStructure) {
+      sprinklerReason = "주요구조부가 목조인 종교시설로 스프링클러설비 설치 대상에서 제외됩니다. (2017년 1월 28일 이후 기준)";
+    } else {
+      sprinklerReq = true;
+      sprinklerReason = "수용인원이 100명 이상이고 주요구조부가 목조가 아닌 종교시설로 전층 설치 대상입니다.";
+    }
+  } else {
+    if (inp.religiousIsSacrificialBuilding) {
+      sprinklerReason = "사찰·제실·사당에 해당하여 이 허가 시기에는 스프링클러설비 설치 대상에서 제외됩니다.";
+    } else {
+      sprinklerReq = true;
+      sprinklerReason = "수용인원이 100명 이상인 종교시설로 전층 설치 대상입니다.";
+    }
+  }
+  results.push(makeResult(categories.extinguishing, "스프링클러설비", "",
+    sprinklerReq ? "required" : "notRequired", sprinklerReason, ""));
+
+  // ── 물분무등소화설비 ──
+  const waterSprayReq = inp.religiousIndoorParkingArea >= 200 || inp.religiousMechanicalParkingCapacity >= 20 || inp.religiousElectricalRoomArea >= 300;
+  results.push(makeResult(categories.extinguishing, "물분무등소화설비", "",
+    waterSprayReq ? "required" : "notRequired",
+    buildWaterSprayReason(0, inp.religiousIndoorParkingArea, inp.religiousMechanicalParkingCapacity, inp.religiousElectricalRoomArea), ""));
+
+  // ── 옥외소화전설비 ──
+  results.push(makeResult(categories.extinguishing, "옥외소화전설비", "",
+    inp.religiousFirstSecondFloorArea >= 9000 ? "required" : "notRequired",
+    inp.religiousFirstSecondFloorArea >= 9000 ? "지상 1층과 2층의 바닥면적 합계가 9,000㎡ 이상입니다." :
+    "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
+
+  // ── 비상경보설비 ──
+  const emergAlarmReq = ta >= 400 || hasBasement150 || hasWindowless150;
+  results.push(makeResult(categories.alarm, "비상경보설비", "",
+    emergAlarmReq ? "required" : "notRequired",
+    ta >= 400 ? "연면적이 400㎡ 이상입니다." :
+    hasBasement150 ? "지하층 바닥면적이 150㎡ 이상입니다." :
+    hasWindowless150 ? "무창층 바닥면적이 150㎡ 이상입니다." :
+    "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
+
+  // ── 자동화재탐지설비 (종교시설: 연면적 1,000㎡ 이상, 20년간 동일) ──
+  const autoDetReq = ta >= 1000;
+  results.push(makeResult(categories.alarm, "자동화재탐지설비", "",
+    autoDetReq ? "required" : "notRequired",
+    autoDetReq ? "연면적이 1,000㎡ 이상인 종교시설입니다." :
+    "연면적이 1,000㎡ 미만이어서 설치 대상이 아닙니다.", ""));
+
+  // ── 시각경보기 (2011년 7월 7일 이후 종교시설 편입) ──
+  let visualAlarmReq = false;
+  let visualAlarmReason = "";
+  if (pd >= YD.D20110707) {
+    visualAlarmReq = autoDetReq;
+    visualAlarmReason = autoDetReq
+      ? "자동화재탐지설비 설치 대상 종교시설에 함께 설치해야 합니다."
+      : "자동화재탐지설비 설치 대상이 아닙니다.";
+  } else {
+    visualAlarmReason = "2011년 7월 7일 이전에는 종교시설은 시각경보기 설치 대상이 아니었습니다.";
+  }
+  results.push(makeResult(categories.alarm, "시각경보기", "",
+    visualAlarmReq ? "required" : "notRequired", visualAlarmReason, ""));
+
+  // ── 비상방송설비 (20년간 동일) ──
+  const broadcastReq = ta >= 3500 || ag >= 11 || bf >= 3;
+  results.push(makeResult(categories.alarm, "비상방송설비", "",
+    broadcastReq ? "required" : "notRequired",
+    ta >= 3500 ? "연면적이 3,500㎡ 이상입니다." :
+    ag >= 11 ? "지상층수가 11층 이상입니다." :
+    bf >= 3 ? "지하층수가 3층 이상입니다." :
+    "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
+
+  // ── 자동화재속보설비 (종교시설 해당 없음) ──
+  results.push(makeResult(categories.alarm, "자동화재속보설비", "", "notRequired",
+    "종교시설은 자동화재속보설비 설치 대상이 아닙니다.", ""));
+
+  // ── 가스누설경보기 (2011년 7월 7일 이후 종교시설 편입) ──
+  let gasAlarmReq = false;
+  let gasAlarmReason = "";
+  if (pd >= YD.D20110707) {
+    gasAlarmReq = inp.religiousHasGasFacility;
+    gasAlarmReason = inp.religiousHasGasFacility
+      ? "가스시설이 설치된 종교시설입니다."
+      : "가스시설이 없어 설치 대상이 아닙니다.";
+  } else {
+    gasAlarmReason = "2011년 7월 7일 이전에는 종교시설은 가스누설경보기 설치 대상이 아니었습니다.";
+  }
+  results.push(makeResult(categories.alarm, "가스누설경보기", "",
+    gasAlarmReq ? "required" : "notRequired", gasAlarmReason, ""));
+
+  // ── 피난기구 (3층 이상 10층 이하) ──
+  results.push(makeResult(categories.evacuation, "피난기구(구조대·완강기 등)", "",
+    ag >= 3 ? "required" : "notRequired",
+    ag >= 3 ? "3층 이상 10층 이하 층에 피난기구를 설치해야 합니다." :
+    "3층 이상 층이 없어 설치 대상이 아닙니다.", ""));
+
+  // ── 유도등 ──
+  results.push(makeResult(categories.evacuation, "유도등(피난구유도등·통로유도등)", "", "required",
+    "모든 종교시설에 피난구유도등, 통로유도등, 유도표지를 설치해야 합니다.", ""));
+
+  // ── 비상조명등 ──
+  const emLightReq = (tf >= 5 && ta >= 3000) || hasBasement450 || hasWindowless450;
+  results.push(makeResult(categories.evacuation, "비상조명등", "",
+    emLightReq ? "required" : "notRequired",
+    tf >= 5 && ta >= 3000 ? "전체 층수가 5층 이상이고 연면적이 3,000㎡ 이상입니다." :
+    hasBasement450 ? "지하층 바닥면적이 450㎡ 이상입니다." :
+    hasWindowless450 ? "무창층 바닥면적이 450㎡ 이상입니다." :
+    "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
+
+  // ── 소화용수설비 ──
+  results.push(makeResult(categories.waterSupply, "상수도소화용수설비", "",
+    ta >= 5000 ? "required" : "notRequired",
+    ta >= 5000 ? "연면적이 5,000㎡ 이상입니다." : "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
+
+  // ── 제연설비 (2011년 7월 7일 이후 무대부 200㎡ 이상) ──
+  let smokeReq = false;
+  let smokeReason = "";
+  if (pd >= YD.D20110707) {
+    const stageArea = inp.religiousHasStage ? inp.religiousStageArea : 0;
+    smokeReq = stageArea >= 200;
+    smokeReason = smokeReq
+      ? `무대부 바닥면적이 ${stageArea}㎡로 200㎡ 이상입니다. 해당 무대부에 제연설비를 설치해야 합니다.`
+      : inp.religiousHasStage
+      ? `무대부 바닥면적이 ${stageArea}㎡로 200㎡ 미만이어서 설치 대상이 아닙니다.`
+      : "무대부가 없어 설치 대상이 아닙니다.";
+  } else {
+    smokeReason = "2011년 7월 7일 이전에는 종교시설은 제연설비 설치 대상이 아니었습니다.";
+  }
+  results.push(makeResult(categories.fireSupport, "제연설비", "",
+    smokeReq ? "required" : "notRequired", smokeReason, ""));
+
+  // ── 연결송수관설비 ──
+  const standpipeReq = (tf >= 5 && ta >= 6000) || tf >= 7 || (bf >= 3 && ba >= 1000);
+  results.push(makeResult(categories.fireSupport, "연결송수관설비", "",
+    standpipeReq ? "required" : "notRequired",
+    tf >= 5 && ta >= 6000 ? "전체 층수가 5층 이상이고 연면적이 6,000㎡ 이상입니다." :
+    tf >= 7 ? "전체 층수가 7층 이상입니다." :
+    bf >= 3 && ba >= 1000 ? "지하층이 3층 이상이고 지하층 바닥면적 합계가 1,000㎡ 이상입니다." :
+    "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
+
+  // ── 연결살수설비 ──
+  results.push(makeResult(categories.fireSupport, "연결살수설비", "",
+    ba >= 150 ? "required" : "notRequired",
+    ba >= 150 ? "지하층 바닥면적 합계가 150㎡ 이상입니다." :
+    "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
+
+  // ── 비상콘센트설비 ──
+  const emConsentReq = ag >= 11 || (bf >= 3 && ba >= 1000);
+  results.push(makeResult(categories.fireSupport, "비상콘센트설비", "",
+    emConsentReq ? "required" : "notRequired",
+    ag >= 11 ? "지상층수가 11층 이상입니다." :
+    bf >= 3 && ba >= 1000 ? "지하층이 3층 이상이고 지하층 바닥면적 합계가 1,000㎡ 이상입니다." :
+    "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
+
+  // ── 무선통신보조설비 ──
+  const radioBase = ba >= 3000 || (bf >= 3 && ba >= 1000);
+  const radioHigh = pd >= YD.D20120914 && ag >= 30;
+  results.push(makeResult(categories.fireSupport, "무선통신보조설비", "",
+    radioBase || radioHigh ? "required" : "notRequired",
+    ba >= 3000 ? "지하층 바닥면적 합계가 3,000㎡ 이상입니다." :
+    bf >= 3 && ba >= 1000 ? "지하층이 3층 이상이고 지하층 바닥면적 합계가 1,000㎡ 이상입니다." :
+    radioHigh ? "지상층수가 30층 이상으로 16층 이상 부분에 설치 대상입니다." :
+    "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
+
+  return results;
+}
+
 // ── 연도별 탐색기: 제외·대체 항목 계산 ──
 
 function yearBuildLodgingExceptionItems(results, inp) {
@@ -5627,6 +6435,64 @@ function yearBuildElderlyExceptionItems(results, inp) {
   return exceptionItems;
 }
 
+function yearBuildMedicalExceptionItems(results, inp) {
+  const exceptionItems = [];
+  const autoDetection = results.find((r) => r.name === "자동화재탐지설비");
+  const emergencyAlarm = results.find((r) => r.name === "비상경보설비");
+  const singleDetector = results.find((r) => r.name === "단독경보형 감지기");
+  const sprinkler = results.find((r) => r.name === "스프링클러설비");
+  const simpleSprinkler = results.find((r) => r.name === "간이스프링클러설비");
+  const drencher = results.find((r) => r.name === "연결살수설비");
+  const waterSpray = results.find((r) => r.name === "물분무등소화설비");
+  const parkingCondition = inp.medicalIndoorParkingArea >= 200 || inp.medicalMechanicalParkingCapacity >= 20;
+
+  // 간이스프링클러는 2012년 2월 15일 이후 허가 건물에서만 설치 대상이므로,
+  // 그 이전 허가 건물은 애초에 설치 대상이 아니라 제외 항목 표시 대상이 아님
+  if (sprinkler && sprinkler.status === "required" && simpleSprinkler && simpleSprinkler.status === "notRequired" && inp.pd >= YD.D20120215) {
+    exceptionItems.push({ category: "설치 제외", name: "간이스프링클러설비", status: "review", reason: "스프링클러설비가 전층 설치 대상이므로 간이스프링클러설비는 제외됩니다." });
+  }
+  if (sprinkler && sprinkler.status === "required" && drencher && drencher.status === "required") {
+    exceptionItems.push({ category: "설치 제외", name: "연결살수설비", status: "review", reason: "스프링클러설비가 설치 대상이면 연결살수설비는 설치 제외 대상입니다." });
+  }
+  if (autoDetection && autoDetection.status === "required" && emergencyAlarm && emergencyAlarm.status === "required") {
+    exceptionItems.push({ category: "설치 제외", name: "비상경보설비", status: "review", reason: "자동화재탐지설비가 설치되면 비상경보설비는 면제 관계로 검토할 수 있습니다." });
+  }
+  if (autoDetection && autoDetection.status === "required" && singleDetector && singleDetector.status === "required") {
+    exceptionItems.push({ category: "설치 제외", name: "단독경보형 감지기", status: "review", reason: "자동화재탐지설비가 설치되면 단독경보형 감지기는 중복 설치가 불필요합니다." });
+  }
+  if (waterSpray && waterSpray.status === "required" && parkingCondition) {
+    exceptionItems.push({ category: "대체설비", name: "주차장 관련 스프링클러설비 대체 가능", status: "review", reason: "주차 관련 공간은 물분무등소화설비 기준이 적용되나, 대체설비로 스프링클러설비를 설치할 수 있습니다." });
+  }
+  if (!exceptionItems.length) {
+    exceptionItems.push({ category: "안내", name: "설치 제외·대체 없음", status: "notRequired", reason: "현재 입력값 기준으로 별도 면제 또는 대체로 표시할 항목이 없습니다." });
+  }
+  return exceptionItems;
+}
+
+function yearBuildReligiousExceptionItems(results, inp) {
+  const exceptionItems = [];
+  const autoDetection = results.find((r) => r.name === "자동화재탐지설비");
+  const emergencyAlarm = results.find((r) => r.name === "비상경보설비");
+  const sprinkler = results.find((r) => r.name === "스프링클러설비");
+  const drencher = results.find((r) => r.name === "연결살수설비");
+  const waterSpray = results.find((r) => r.name === "물분무등소화설비");
+  const parkingCondition = inp.religiousIndoorParkingArea >= 200 || inp.religiousMechanicalParkingCapacity >= 20;
+
+  if (sprinkler && sprinkler.status === "required" && drencher && drencher.status === "required") {
+    exceptionItems.push({ category: "설치 제외", name: "연결살수설비", status: "review", reason: "스프링클러설비가 설치 대상이면 연결살수설비는 설치 제외 대상으로 봅니다." });
+  }
+  if (autoDetection && autoDetection.status === "required" && emergencyAlarm && emergencyAlarm.status === "required") {
+    exceptionItems.push({ category: "설치 제외", name: "비상경보설비", status: "review", reason: "자동화재탐지설비가 설치되면 비상경보설비는 면제 관계로 검토할 수 있습니다." });
+  }
+  if (waterSpray && waterSpray.status === "required" && parkingCondition) {
+    exceptionItems.push({ category: "대체설비", name: "주차장 관련 스프링클러설비 대체 가능", status: "review", reason: "주차 관련 공간의 기본 기준은 물분무등소화설비이며, 그 대체설비로 해당 주차 공간에 스프링클러설비를 설치할 수 있습니다." });
+  }
+  if (!exceptionItems.length) {
+    exceptionItems.push({ category: "안내", name: "설치 제외·대체 없음", status: "notRequired", reason: "현재 입력값 기준으로 별도 면제 또는 대체로 표시할 항목이 없습니다." });
+  }
+  return exceptionItems;
+}
+
 function yearBuildNeighborhoodExceptionItems(results, inp) {
   const exceptionItems = [];
   const autoDetection = results.find((r) => r.name === "자동화재탐지설비");
@@ -5682,6 +6548,22 @@ function yearShowResults() {
     exceptionItems = yearBuildElderlyExceptionItems(results, inp);
     const subtypeLabel = inp.elderlySubtype === "living" ? "노유자 생활시설" : "일반 노유자시설";
     summaryHtml = `<div class="ib-title">입력값 기준</div>노유자시설(${subtypeLabel}), 건축허가일 ${permitStr}, 연면적 ${inp.totalArea}㎡, 노유자 사용면적 ${inp.elderlyArea}㎡, 지상 ${inp.aboveGroundFloors}층, 지하 ${inp.basementFloors}층`;
+  } else if (inp.occupancyType === "medical") {
+    results = yearEvaluateMedical(inp);
+    exceptionItems = yearBuildMedicalExceptionItems(results, inp);
+    const medicalSubtypeLabels = {
+      generalHospital: "종합병원",
+      hospital: "병원·치과병원·한방병원",
+      nursingHome: "요양병원",
+      psychiatricHospital: "정신의료기관",
+      rehabilitationFacility: "의료재활시설",
+    };
+    const subtypeLabel = medicalSubtypeLabels[inp.medicalSubtype] || "의료시설";
+    summaryHtml = `<div class="ib-title">입력값 기준</div>의료시설(${subtypeLabel}), 건축허가일 ${permitStr}, 연면적 ${inp.totalArea}㎡, 의료 사용면적 ${inp.medicalArea}㎡, 지상 ${inp.aboveGroundFloors}층, 지하 ${inp.basementFloors}층`;
+  } else if (inp.occupancyType === "religious") {
+    results = yearEvaluateReligious(inp);
+    exceptionItems = yearBuildReligiousExceptionItems(results, inp);
+    summaryHtml = `<div class="ib-title">입력값 기준</div>종교시설, 건축허가일 ${permitStr}, 연면적 ${inp.totalArea}㎡, 지상 ${inp.aboveGroundFloors}층, 지하 ${inp.basementFloors}층`;
   } else {
     results = yearEvaluateNeighborhood(inp);
     exceptionItems = yearBuildNeighborhoodExceptionItems(results, inp);
@@ -5699,6 +6581,7 @@ function yearShowResults() {
     let elecArea = 0;
     if (inp.occupancyType === "lodging") elecArea = inp.lodgingElectricalRoomArea;
     else if (inp.occupancyType === "elderly") elecArea = inp.elderlyElectricalRoomArea;
+    else if (inp.occupancyType === "medical") elecArea = inp.medicalElectricalRoomArea;
     else elecArea = inp.electricalRoomArea;
 
     if (elecArea < 300) {
@@ -5779,6 +6662,30 @@ function yearWizardRestart() {
   ya.yElderlyElectricalRoomArea = "";
   ya.yElderlyBasementAreaForSmoke = "0";
   ya.yElderlyHasSmallUndergroundParking = "no";
+  // 의료시설 전용
+  ya.yMedicalSubtype = "hospital";
+  ya.yMedicalArea = "1500";
+  ya.yMedicalHasLargeTargetFloor = "no";
+  ya.yMedicalHasGrillWindow = "no";
+  ya.yMedicalHasGasFacility = "no";
+  ya.yMedicalHasFloor500Plus = "no";
+  ya.yMedicalFirstSecondFloorArea = "750";
+  ya.yMedicalIndoorParkingArea = "";
+  ya.yMedicalMechanicalParkingCapacity = "";
+  ya.yMedicalElectricalRoomArea = "";
+  ya.yMedicalBasementAreaForSmoke = "0";
+  // 종교시설 전용
+  ya.yReligiousHasLargeTargetFloor = "no";
+  ya.yReligiousFirstSecondFloorArea = "750";
+  ya.yReligiousIndoorParkingArea = "";
+  ya.yReligiousMechanicalParkingCapacity = "";
+  ya.yReligiousElectricalRoomArea = "";
+  ya.yReligiousOccupancy100Plus = "no";
+  ya.yReligiousIsWoodStructure = "no";
+  ya.yReligiousIsSacrificialBuilding = "no";
+  ya.yReligiousHasStage = "no";
+  ya.yReligiousStageArea = "";
+  ya.yReligiousHasGasFacility = "no";
 
   document.getElementById("year-question-card").classList.remove("hidden");
   document.getElementById("year-result-card").classList.add("hidden");
