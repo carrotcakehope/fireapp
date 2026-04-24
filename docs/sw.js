@@ -1,6 +1,5 @@
-const CACHE = 'fireapp-v39';
+const CACHE = 'fireapp-v40';
 
-// ?¤ì¹˜ ??ìºì‹œ???µì‹¬ ?Œì¼ (?‘ê³  ë¹ ë¥¸ ê²ƒë§Œ)
 const PRECACHE_FILES = [
   './index.html',
   './styles.css',
@@ -10,7 +9,6 @@ const PRECACHE_FILES = [
   './icon-512.png',
 ];
 
-// ??ƒ ìµœì‹ ë²„ì „??ê°€?¸ì????˜ëŠ” ?Œì¼ (network-first)
 const NETWORK_FIRST = ['index.html', 'app.js', 'styles.css', 'manifest.json'];
 
 self.addEventListener('install', e => {
@@ -28,12 +26,8 @@ self.addEventListener('activate', e => {
         keys.filter(k => k !== CACHE).map(k => caches.delete(k))
       ))
       .then(() => self.clients.claim())
-      .then(() => self.clients.matchAll({ type: 'window' }))
-      .then(clients => {
-        // ??SW ?œì„±?”ë˜ë©?ëª¨ë“  ì°½ì— ?ˆë¡œê³ ì¹¨ ? í˜¸ ?„ì†¡
-        clients.forEach(c => c.postMessage({ type: 'SW_UPDATED' }));
-      })
-  );
+    // clients.claim() ?¤í–‰ ???˜ì´ì§€??controllerchange ?´ë²¤?¸ê? ë°œìƒ?˜ì—¬
+    // index.html?ì„œ window.location.reload()ê°€ ?¸ì¶œ??  );
 });
 
 self.addEventListener('fetch', e => {

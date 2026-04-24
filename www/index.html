@@ -17,13 +17,15 @@
       window.addEventListener('load', function() {
         navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' })
           .then(function(reg) {
-            reg.update(); // 앱 시작마다 업데이트 확인
+            reg.update(); // 앱 시작 시 즉시 업데이트 확인
+            // 앱이 백그라운드에서 돌아올 때마다 업데이트 확인 (안드로이드 대응)
+            document.addEventListener('visibilitychange', function() {
+              if (document.visibilityState === 'visible') reg.update();
+            });
           });
-        // 새 SW가 활성화되면 자동 새로고침
-        navigator.serviceWorker.addEventListener('message', function(e) {
-          if (e.data && e.data.type === 'SW_UPDATED') {
-            window.location.reload();
-          }
+        // SW 컨트롤러 교체 감지 → 즉시 새로고침 (postMessage보다 안정적)
+        navigator.serviceWorker.addEventListener('controllerchange', function() {
+          window.location.reload();
         });
       });
     }
