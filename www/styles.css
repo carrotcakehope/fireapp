@@ -2789,3 +2789,42 @@ html[data-theme="light"] .rg-tab-bar {
   color: var(--red-soft);
   opacity: 0.8;
 }
+
+/* ── 이미지 없는 희귀 설비 안내 ── */
+.rg-section-rare {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 14px 16px;
+  border: 1px dashed var(--border2);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1.55;
+  margin-bottom: 4px;
+}
+
+.rg-rare-icon {
+  flex-shrink: 0;
+  font-size: 15px;
+}
+
+/* ── 포함 항목 뱃지 ── */
+.rg-merged-badge {
+  font-size: 11px;
+  color: var(--amber);
+  background: var(--amber-dim);
+  border: 1px solid rgba(249,171,0,0.25);
+  border-radius: var(--radius-sm);
+  padding: 6px 12px;
+  margin-bottom: 6px;
+}
+
+/* ── 설비별 작성방법 ── */
+.rg-facility-desc {
+  padding: 12px 14px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  margin-bottom: 6px;
+}

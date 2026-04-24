@@ -6471,10 +6471,142 @@ function appendRgPage(container, pageNum) {
 }
 
 // 설비 ID → 점검표 이미지 경로 (image 폴더에 파일 추가 시 여기에 등록)
+// 다른 설비 점검표 안에 포함되어 표시되는 항목 { 항목ID: 포함된 부모ID }
+const RG_MERGED_WITH = {
+  'a10': 'a05',  // 시각경보기 → 자동화재탐지설비 점검표 내 표시
+};
+
+// 설비별 점검표 이미지 (image 폴더 기준)
 const RG_SECTION_IMAGES = {
+  'w01': './image/소화기구.png',
   'w03': './image/옥내소화전.png',
   'w04': './image/스프링클러설비.png',
+  'w05': './image/간이스프링클러설비.png',
+  'w11': './image/옥외소화전.png',
+  'a03': './image/비상방송설비.png',
   'a05': './image/자동화재탐지설비.png',
+  'a06': './image/자동화재속보설비.png',
+  'a08': './image/가스누설경보기.png',
+  'a10': './image/자동화재탐지설비.png',  // 시각경보기는 자탐 점검표 내 포함
+  'e01': './image/피난기구.png',
+  'e02': './image/인명구조기구.png',
+  'e03': './image/유도등.png',
+  'e04': './image/비상조명등.png',
+  'e05': './image/휴대용비상조명등.png',
+  's01': './image/소화용수설비.png',
+  'ac02': './image/연결송수관설비.png',
+  'ac03': './image/연결살수설비.png',
+  'ac04': './image/비상콘센트설비.png',
+  'ac05': './image/무선통신보조설비.png',
+};
+
+// 설비별 작성방법 설명
+const RG_FACILITY_DESCS = {
+  'w01': [
+    '소화기 종류(분말/기타)와 동별·층별 설치 수량을 합계란에 기재합니다.',
+    '투척용 소화용구, 간이소화용구, 자동확산소화기는 별도 칸에 수량을 기재합니다.',
+    '층별 소계와 전체 합계를 정확히 맞춰 기재합니다.',
+  ],
+  'w02': [
+    '주거용·상업용 주방자동소화장치, 캐비닛형 등 종류를 구분하여 설치 수량을 기재합니다.',
+    '설치 위치(층, 호)를 층별로 기재합니다.',
+  ],
+  'w03': [
+    '설치장소 동명을 기재하고, 전체층/일부층 중 해당하는 □에 ✔ 표시합니다.',
+    '설치 층수 범위를 지상/지하로 구분하여 기재합니다. (예: 지상 1층~3층, 지하 1층)',
+    '설치개수가 가장 많은 층의 소화전 설치 개수를 기재합니다.',
+  ],
+  'w04': [
+    '종류(습식/부압식/준비작동식/건식/일제살수식) 중 해당하는 □에 ✔ 표시합니다.',
+    '설치장소 동명, 전체층/일부층, 설치 층 범위를 기재합니다.',
+    '클러설비(헤드) 설치 층 범위와 송수구 설치 위치도 함께 기재합니다.',
+  ],
+  'w05': [
+    '간이스프링클러 종류와 설치장소(동명, 층 범위)를 기재합니다.',
+    '주택용·생활형숙박시설용 등 설치 목적을 비고란에 기재합니다.',
+  ],
+  'w06': [
+    '화재조기진압용 스프링클러는 랙식 창고 등 특수한 용도에 설치합니다.',
+    '설치장소 동명, 층 범위, 헤드 수량을 기재합니다.',
+  ],
+  'w11': [
+    '설치 위치(건물 외부)와 소화전 개수를 기재합니다.',
+    '방수구 구경(65㎜)과 설치 호스 길이를 확인하여 기재합니다.',
+  ],
+  'a03': [
+    '전용/겸용 여부를 확인하고 설치장소 동명, 전체층/일부층을 기재합니다.',
+    '증폭기 설치장소(동명, 층)와 실명을 기재합니다.',
+  ],
+  'a05': [
+    '수신기 위치(동명, 지상/지하 층수, 실명)를 기재합니다.',
+    '경보방식(전층경보/우선경보, 시각경보기 유무)에 해당하는 □에 ✔ 표시합니다.',
+    '설치장소 층 범위와 감지기 종류(열/연기/그 밖의 것)를 기재합니다.',
+  ],
+  'a06': [
+    '속보기 설치 여부와 소방관서 자동 신고 연결 여부를 확인합니다.',
+    '설치장소 동명과 층을 기재합니다.',
+  ],
+  'a08': [
+    '가스 종류(LPG/LNG)를 확인하고 경보기 설치 수량을 기재합니다.',
+    '설치장소(가스 사용 시설의 동명, 층, 실)를 기재합니다.',
+  ],
+  'a10': [
+    '시각경보기는 자동화재탐지설비 점검표 내에 함께 표시됩니다.',
+    '경보방식 항목에서 시각경보기 유/무 □에 ✔ 표시합니다.',
+  ],
+  'e01': [
+    '피난기구 종류(피난사다리/완강기/구조대 등)와 동별·층별 수량을 기재합니다.',
+    '설치 위치(층, 호)를 정확히 기재하고, 접이식/고정식 여부를 비고란에 기재합니다.',
+  ],
+  'e02': [
+    '공기호흡기, 방열복, 공기안전매트, 인공소생기 등 종류별 수량을 기재합니다.',
+    '보관 위치(동명, 층, 실명)를 비고란에 기재합니다.',
+  ],
+  'e03': [
+    '피난구유도등, 통로유도등, 유도표지 등 종류별 수량을 기재합니다.',
+    '대형/중형/소형 구분과 설치 층별 수량을 기재합니다.',
+  ],
+  'e04': [
+    '설치장소(동명, 층)와 비상조명등 수량을 층별로 기재합니다.',
+    '내장형/외장형 구분과 예비전원 용량을 확인합니다.',
+  ],
+  'e05': [
+    '보관 위치(동명, 층, 실명)와 수량을 기재합니다.',
+    '충전 상태를 정기적으로 확인하며 방전된 경우 교체합니다.',
+  ],
+  's01': [
+    '상수도소화용수설비의 소화전 구경과 설치 위치를 기재합니다.',
+    '관할 수도사업소 연락처를 비고란에 기재합니다.',
+  ],
+  's02': [
+    '소화수조·저수조의 용량(㎥)과 위치(동명, 지하층 등)를 기재합니다.',
+    '흡수관 투입구 위치와 채수구 개수를 확인합니다.',
+  ],
+  'ac01': [
+    '제연구역과 제연경계 구획 방식을 기재합니다.',
+    '설치 위치(동명, 층)와 제연 방식(자연/기계)을 기재합니다.',
+  ],
+  'ac02': [
+    '설치장소 동명과 층 범위를 기재합니다.',
+    '방수구 구경과 방수구 설치 개소(층별)를 기재합니다.',
+    '가압송수장치 유무를 확인하여 기재합니다.',
+  ],
+  'ac03': [
+    '설치장소(동명, 층 범위)와 헤드 종류(개방형/폐쇄형)를 기재합니다.',
+    '송수구 위치와 개수를 확인합니다.',
+  ],
+  'ac04': [
+    '설치 층과 콘센트 수량(층별)을 기재합니다.',
+    '단상(220V)/삼상(380V) 구분을 확인하여 기재합니다.',
+  ],
+  'ac05': [
+    '설치 범위(동명, 층 범위)를 기재합니다.',
+    '누설동축케이블/안테나 방식을 확인하여 기재합니다.',
+  ],
+  'ac06': [
+    '연소방지설비는 지하구(공동구)에 설치합니다.',
+    '설치 구간과 방화구획 위치를 기재합니다.',
+  ],
 };
 
 const RG_FACILITY_GROUPS = [
@@ -6556,21 +6688,66 @@ const rgState = {
 
 // 등급별 자동 선택 프리셋 (항목 ID 배열)
 const RG_GRADE_PRESETS = {
-  special1: null,  // 추후 추가 예정
-  grade2:   null,  // 추후 추가 예정
-  grade3:   ['w01', 'a05', 'a10', 'e01', 'e03', 'ac03'],
-  custom:   null,  // 직접 선택 (preset 없음)
+  special: ['w01','w03','w04','a03','a05','a08','a10','e01','e03','e04','s01','ac02','w11','g01','ac01','ac04','ac05'],
+  grade12: ['w01','w03','w04','a03','a05','a08','a10','e01','e03','e04','s01','ac02'],
+  grade3:  ['w01','a05','a10','e01','e03','ac03'],
+  custom:  null,
 };
 
 const RG_GRADE_DEFS = [
-  { id: 'special1', label: '특·1급', note: '준비 중' },
-  { id: 'grade2',   label: '2급',    note: '준비 중' },
-  { id: 'grade3',   label: '3급',    note: '소화기 등 6종 자동' },
-  { id: 'custom',   label: '직접선택', note: '수동 체크' },
+  { id: 'special',  label: '특급',    note: '17종 자동 선택' },
+  { id: 'grade12',  label: '1,2급',   note: '12종 자동 선택' },
+  { id: 'grade3',   label: '3급',     note: '6종 자동 선택' },
+  { id: 'custom',   label: '직접선택', note: '전체 초기화' },
 ];
 
-function renderReportGuide() {
+// 수계소화설비 공동사항을 표시할 설비 ID
+const RG_WATER_IDS = new Set(['w03', 'w04', 'w05', 'w06', 'w07', 'w08', 'w09', 'w10', 'w11']);
+
+// 수계소화설비 공동사항 항목
+const RG_WATER_COMMON = [
+  {
+    id: '_wc_su', label: '수원', img: './image/수원.png',
+    desc: [
+      '수원의 종류(수조/고가수조/압력수조)와 저수량(㎥)을 기재합니다.',
+      '주수원과 보조수원으로 구분하여 각각 용량과 위치를 기재합니다.',
+      '고가수조 방식은 낙차(m)를, 압력수조 방식은 압력(㎫)을 기재합니다.',
+    ],
+  },
+  {
+    id: '_wc_ga', label: '가압송수장치', img: './image/가압송수장치.png',
+    desc: [
+      '펌프방식/고가수조방식/압력수조방식 중 해당하는 □에 ✔ 표시합니다.',
+      '설치장소(동명, 지상/지하 층, 실명)를 기재합니다.',
+      '토출량(ℓ/min)과 전양정(m) 또는 압력(㎫), 동력(㎾)을 기재합니다.',
+    ],
+  },
+  {
+    id: '_wc_so', label: '송수구', img: './image/송수구.png',
+    desc: [
+      '송수구 설치 위치(동명, 층)와 단구형/쌍구형 구분을 기재합니다.',
+      '설치 개수와 구경(65㎜)을 확인하여 기재합니다.',
+    ],
+  },
+  {
+    id: '_wc_bi', label: '비상전원', img: './image/비상전원.png',
+    desc: [
+      '비상전원 종류(자가발전설비/축전지설비/전기저장장치)에 해당하는 □에 ✔ 표시합니다.',
+      '설치장소(동명, 층, 실명)와 용량(㎾ 또는 ㎾h)을 기재합니다.',
+    ],
+  },
+];
+
+function renderReportGuide(restoreScroll) {
   var root = document.getElementById('report-guide-content');
+
+  // 현재 스크롤 위치 저장
+  var savedScroll = 0;
+  if (restoreScroll) {
+    var prevContent = root.querySelector('.rg-content');
+    if (prevContent) savedScroll = prevContent.scrollTop;
+  }
+
   root.innerHTML = '';
 
   // ── 탭 바 ──
@@ -6611,6 +6788,11 @@ function renderReportGuide() {
   if (rgState.tab === 'sections')  renderRgSections(content);
 
   root.appendChild(content);
+
+  // 스크롤 위치 복원
+  if (savedScroll > 0) {
+    requestAnimationFrame(function () { content.scrollTop = savedScroll; });
+  }
 }
 
 // ── 1페이지 아코디언 데이터 ──────────────────────────────────────
@@ -6834,23 +7016,21 @@ function renderRgChecklist(c) {
   gradeGrid.className = 'rg-grade-selector';
 
   RG_GRADE_DEFS.forEach(function (g) {
-    var isPreparing = RG_GRADE_PRESETS[g.id] === null && g.id !== 'custom';
     var btn = document.createElement('button');
     btn.type = 'button';
-    btn.className = 'rg-grade-btn' + (rgState.grade === g.id ? ' active' : '') + (isPreparing ? ' preparing' : '');
-    btn.disabled = isPreparing;
+    btn.className = 'rg-grade-btn' + (rgState.grade === g.id ? ' active' : '');
     btn.innerHTML =
       '<span class="rg-grade-main">' + g.label + '</span>' +
-      '<span class="rg-grade-note">' + (isPreparing ? '준비 중' : g.note) + '</span>';
+      '<span class="rg-grade-note">' + g.note + '</span>';
 
     btn.addEventListener('click', function () {
       rgState.grade = g.id;
-      var preset = RG_GRADE_PRESETS[g.id];
-      if (preset !== null) {
-        rgState.selected = new Set(preset);
+      if (g.id === 'custom') {
+        rgState.selected = new Set();   // 직접선택: 전체 초기화
+      } else {
+        rgState.selected = new Set(RG_GRADE_PRESETS[g.id]);
       }
-      // 직접선택은 기존 선택 유지, 다른 등급은 프리셋 적용
-      renderReportGuide();
+      renderReportGuide(true);  // 스크롤 위치 유지
     });
     gradeGrid.appendChild(btn);
   });
@@ -6942,20 +7122,16 @@ function renderRgChecklist(c) {
 }
 
 function renderRgSections(c) {
-  // 전체 항목을 등록 순서대로 펼침
   var allFlat = [];
   RG_FACILITY_GROUPS.forEach(function (g) {
     g.items.forEach(function (item) {
-      allFlat.push({ id: item.id, label: item.label, page: g.page, sectionLabel: g.sectionLabel });
+      allFlat.push({ id: item.id, label: item.label, sectionLabel: g.sectionLabel });
     });
   });
 
   var selectedFlat = allFlat.filter(function (item) {
     return rgState.selected.has(item.id);
   });
-
-  // 4페이지: 소방시설 현황표 (선택 여부와 무관하게 항상 표시)
-  appendRgPage(c, 4);
 
   if (selectedFlat.length === 0) {
     c.appendChild(rgInfoBox('amber', '⚠️ 선택된 설비 없음',
@@ -6973,32 +7149,113 @@ function renderRgSections(c) {
     return;
   }
 
-  c.appendChild(rgSectionLabel('선택한 설비 점검표'));
+  // 선택된 ID 집합 (중복 여부 판단용)
+  var selectedIds = new Set(selectedFlat.map(function (i) { return i.id; }));
 
-  selectedFlat.forEach(function (item) {
-    // 구분 라벨
-    var lbl = document.createElement('div');
-    lbl.className = 'rg-section-label';
-    lbl.textContent = item.sectionLabel + '  ' + item.label;
-    c.appendChild(lbl);
+  // ── 소화기구(w01): 무조건 최우선 표시 ──
+  var w01Item = selectedFlat.find(function (i) { return i.id === 'w01'; });
+  if (w01Item) renderFacilityBlock(c, w01Item, selectedIds);
 
-    var imgSrc = RG_SECTION_IMAGES[item.id];
-    if (imgSrc) {
+  // ── 수계소화설비 공동사항: 해당 설비 1개 이상 선택 시 표시 ──
+  var hasWater = selectedFlat.some(function (i) { return RG_WATER_IDS.has(i.id); });
+  if (hasWater) {
+    var wCommonLabel = document.createElement('div');
+    wCommonLabel.className = 'rg-section-label';
+    wCommonLabel.textContent = '3-2  수계소화설비 (공동사항)';
+    c.appendChild(wCommonLabel);
+
+    RG_WATER_COMMON.forEach(function (wItem) {
+      var subLbl = document.createElement('div');
+      subLbl.className = 'rg-section-label';
+      subLbl.textContent = wItem.label;
+      c.appendChild(subLbl);
+
       var wrapper = document.createElement('div');
       wrapper.className = 'rg-pdf-wrapper';
       var img = document.createElement('img');
       img.className = 'rg-section-img';
-      img.src = imgSrc;
-      img.alt = item.label;
+      img.src = wItem.img;
+      img.alt = wItem.label;
       wrapper.appendChild(img);
       c.appendChild(wrapper);
-    } else {
-      var placeholder = document.createElement('div');
-      placeholder.className = 'rg-section-placeholder';
-      placeholder.textContent = item.label + ' — 이미지 준비 중';
-      c.appendChild(placeholder);
-    }
+
+      if (wItem.desc && wItem.desc.length) {
+        var descWrap = document.createElement('div');
+        descWrap.className = 'rg-facility-desc';
+        var ul = document.createElement('ul');
+        ul.className = 'rg-acc-desc';
+        wItem.desc.forEach(function (line) {
+          var li = document.createElement('li');
+          li.innerHTML = line;
+          ul.appendChild(li);
+        });
+        descWrap.appendChild(ul);
+        c.appendChild(descWrap);
+      }
+    });
+  }
+
+  selectedFlat.forEach(function (item) {
+    // 소화기구(w01)는 이미 최상단에 표시했으므로 건너뜀
+    if (item.id === 'w01') return;
+
+    // 다른 설비 안에 포함된 항목이고, 부모 설비도 선택됐으면 건너뜀
+    var parentId = RG_MERGED_WITH[item.id];
+    if (parentId && selectedIds.has(parentId)) return;
+
+    renderFacilityBlock(c, item, selectedIds);
   });
+}
+
+function renderFacilityBlock(c, item, selectedIds) {
+  // 구분 라벨
+  var lbl = document.createElement('div');
+  lbl.className = 'rg-section-label';
+  lbl.textContent = item.sectionLabel + '  ' + item.label;
+  c.appendChild(lbl);
+
+  // 포함 항목인 경우 안내 뱃지
+  var parentId = RG_MERGED_WITH[item.id];
+  if (parentId) {
+    var badge = document.createElement('div');
+    badge.className = 'rg-merged-badge';
+    badge.textContent = '아래 점검표는 ' + item.label + '이(가) 포함된 자동화재탐지설비 점검표입니다.';
+    c.appendChild(badge);
+  }
+
+  var imgSrc = RG_SECTION_IMAGES[item.id];
+  if (imgSrc) {
+    var wrapper = document.createElement('div');
+    wrapper.className = 'rg-pdf-wrapper';
+    var img = document.createElement('img');
+    img.className = 'rg-section-img';
+    img.src = imgSrc;
+    img.alt = item.label;
+    wrapper.appendChild(img);
+    c.appendChild(wrapper);
+  } else {
+    var noImg = document.createElement('div');
+    noImg.className = 'rg-section-rare';
+    noImg.innerHTML =
+      '<span class="rg-rare-icon">ℹ️</span>' +
+      '<span>이 시설은 특정한 상황에만 설치됩니다. 잘 쓰이지 않습니다.</span>';
+    c.appendChild(noImg);
+  }
+
+  var descs = RG_FACILITY_DESCS[item.id];
+  if (descs && descs.length) {
+    var descWrap = document.createElement('div');
+    descWrap.className = 'rg-facility-desc';
+    var ul = document.createElement('ul');
+    ul.className = 'rg-acc-desc';
+    descs.forEach(function (line) {
+      var li = document.createElement('li');
+      li.innerHTML = line;
+      ul.appendChild(li);
+    });
+    descWrap.appendChild(ul);
+    c.appendChild(descWrap);
+  }
 }
 
 document.getElementById('open-report-guide').addEventListener('click', function () {
