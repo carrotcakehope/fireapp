@@ -2147,7 +2147,7 @@ function buildMedicalExceptionItems(results, input) {
     exceptionItems.push({ category: "설치 제외", name: "연결살수설비", status: "review", reason: "스프링클러설비가 설치 대상이면 연결살수설비는 설치 제외 대상입니다." });
   }
   if (autoDetection && autoDetection.status === "required" && emergencyAlarm && emergencyAlarm.status === "required") {
-    exceptionItems.push({ category: "설치 제외", name: "비상경보설비", status: "review", reason: "자동화재탐지설비가 설치되면 비상경보설비는 면제 관계로 검토할 수 있습니다." });
+    exceptionItems.push({ category: "설치 제외", name: "비상경보설비", status: "review", reason: "자동화재탐지설비가 설치되면 비상경보설비는 설치대상 목록에서 제외됩니다." });
   }
   if (waterSpray && waterSpray.status === "required" && parkingCondition) {
     exceptionItems.push({ category: "대체설비", name: "주차장 관련 스프링클러설비 대체 가능", status: "review", reason: "주차 관련 공간은 물분무등소화설비 기준이 적용되나, 대체설비로 스프링클러설비를 설치할 수 있습니다." });
@@ -4021,6 +4021,7 @@ const yearState = {
     yHasSmallUndergroundParking: "no",
     // 숙박시설 전용
     yLodgingArea: "1500",
+    yLodgingIsLiving: "no",
     yLodgingIsTouristHotel: "no",
     yLodgingHasLargeFloorFor1000: "no",
     yLodgingHasGasFacility: "no",
@@ -4274,6 +4275,17 @@ const yearSteps = [
     min: 0,
     step: 0.1,
     condition: (ya) => ya.yOccupancyType === "lodging",
+  },
+  {
+    key: "yLodgingIsLiving",
+    type: "ychoice",
+    title: "생활형 숙박시설(레지던스 등)입니까?",
+    help: "2013년 2월 10일부터 2022년 11월 30일까지는 생활형 숙박시설로서 바닥면적 합계가 600㎡ 이상인 경우에만 간이스프링클러설비 설치 대상입니다.",
+    options: [
+      { value: "yes", label: "생활형 숙박시설", description: "레지던스·생활숙박시설 등 숙박 목적의 주거형 시설" },
+      { value: "no", label: "일반 숙박시설", description: "호텔·모텔·여관·펜션 등" },
+    ],
+    condition: (ya, pd) => ya.yOccupancyType === "lodging" && pd >= YD.D20130210 && pd < YD.D20221201,
   },
   {
     key: "yLodgingHasLargeFloorFor1000",
@@ -4997,6 +5009,7 @@ function yearNormalizeAnswers() {
     totalFloors: (parseInt(ya.yAboveGroundFloors) || 0) + bf,
     // 숙박시설 전용
     lodgingArea: parseFloat(ya.yLodgingArea) || 0,
+    lodgingIsLiving: ya.yLodgingIsLiving === "yes",
     lodgingIsTouristHotel: ya.yLodgingIsTouristHotel === "yes",
     lodgingHasLargeFloorFor1000: ya.yLodgingHasLargeFloorFor1000 === "yes",
     lodgingHasGasFacility: ya.yLodgingHasGasFacility === "yes",
@@ -5351,72 +5364,15 @@ function yearEvaluateLodging(inp) {
   } else if (pd >= YD.D20040530 && pd < YD.D20130210) {
     simpleSprinklerReason = "현재 입력 기준으로는 설치 대상이 아닙니다.";
   } else if (pd >= YD.D20130210 && pd < YD.D20221201) {
-    simpleSprinklerReason = "현재 입력 기준으로는 설치 대상이 아닙니다.";
-    simpleSprinklerReq = false;
-    results.push(makeResult(categories.extinguishing, "간이스프링클러설비", "", "notRequired",
-      simpleSprinklerReason, ""));
-    // 물분무 이하 계속
-    const waterSprayReq = inp.lodgingIndoorParkingArea >= 200 || inp.lodgingMechanicalParkingCapacity >= 20 || inp.lodgingElectricalRoomArea >= 300;
-    results.push(makeResult(categories.extinguishing, "물분무등소화설비", "",
-      waterSprayReq ? "required" : "notRequired",
-      buildWaterSprayReason(0, inp.lodgingIndoorParkingArea, inp.lodgingMechanicalParkingCapacity, inp.lodgingElectricalRoomArea), ""));
-    results.push(makeResult(categories.extinguishing, "옥외소화전설비", "",
-      inp.lodgingFirstSecondFloorArea >= 9000 ? "required" : "notRequired",
-      inp.lodgingFirstSecondFloorArea >= 9000 ? "지상 1층과 2층의 바닥면적 합계가 9,000㎡ 이상입니다." :
-      "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
-    const emergAlarm = ta >= 400 || hasBasement150 || hasWindowless150;
-    results.push(makeResult(categories.alarm, "비상경보설비", "",
-      emergAlarm ? "required" : "notRequired",
-      ta >= 400 ? "연면적이 400㎡ 이상입니다." :
-      hasBasement150 ? "지하층 바닥면적이 150㎡ 이상입니다." :
-      hasWindowless150 ? "무창층 바닥면적이 150㎡ 이상입니다." :
-      "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
-    const autoDetReq = ta >= 600;
-    results.push(makeResult(categories.alarm, "자동화재탐지설비", "",
-      autoDetReq ? "required" : "notRequired",
-      autoDetReq ? "연면적이 600㎡ 이상인 숙박시설입니다." :
-      "연면적이 600㎡ 미만이어서 설치 대상이 아닙니다.", ""));
-    results.push(makeResult(categories.alarm, "시각경보기", "",
-      autoDetReq ? "required" : "notRequired",
-      autoDetReq ? "자동화재탐지설비 설치 대상 숙박시설에 함께 설치해야 합니다." :
-      "자동화재탐지설비 설치 대상이 아닙니다.", ""));
-    results.push(makeResult(categories.alarm, "비상방송설비", "",
-      ta >= 3500 || ag >= 11 || bf >= 3 ? "required" : "notRequired",
-      ta >= 3500 ? "연면적이 3,500㎡ 이상입니다." : ag >= 11 ? "지상층수가 11층 이상입니다." : bf >= 3 ? "지하층수가 3층 이상입니다." : "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
-    results.push(makeResult(categories.alarm, "자동화재속보설비", "", "notRequired", "숙박시설은 자동화재속보설비 설치 대상이 아닙니다.", ""));
-    results.push(makeResult(categories.alarm, "가스누설경보기", "",
-      inp.lodgingHasGasFacility ? "required" : "notRequired",
-      inp.lodgingHasGasFacility ? "가스시설이 설치된 숙박시설입니다." : "가스시설이 없어 설치 대상이 아닙니다.", ""));
-    results.push(makeResult(categories.evacuation, "피난기구(구조대·완강기 등)", "",
-      ag >= 3 ? "required" : "notRequired",
-      ag >= 3 ? "숙박시설은 3층 이상 10층 이하 층에 피난기구를 설치해야 합니다." : "3층 이상 층이 없어 설치 대상이 아닙니다.", ""));
-    results.push(makeResult(categories.evacuation, "인명구조기구(방열복·공기호흡기)", "",
-      inp.lodgingIsTouristHotel && tf >= 7 ? "required" : "notRequired",
-      inp.lodgingIsTouristHotel && tf >= 7 ? "지하층을 포함한 층수가 7층 이상인 관광호텔로 설치 대상입니다." : "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
-    results.push(makeResult(categories.evacuation, "유도등(피난구유도등·통로유도등)", "", "required", "모든 숙박시설에 설치해야 합니다.", ""));
-    results.push(makeResult(categories.evacuation, "비상조명등", "",
-      (tf >= 5 && ta >= 3000) || hasBasement450 || hasWindowless450 ? "required" : "notRequired",
-      tf >= 5 && ta >= 3000 ? "전체 층수가 5층 이상이고 연면적이 3,000㎡ 이상입니다." :
-      hasBasement450 ? "지하층 바닥면적이 450㎡ 이상입니다." :
-      hasWindowless450 ? "무창층 바닥면적이 450㎡ 이상입니다." :
-      "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
-    results.push(makeResult(categories.evacuation, "휴대용비상조명등", "", "required", "면적·층수에 관계없이 모든 숙박시설에 설치해야 합니다.", ""));
-    results.push(makeResult(categories.waterSupply, "상수도소화용수설비", "", ta >= 5000 ? "required" : "notRequired", ta >= 5000 ? "연면적이 5,000㎡ 이상입니다." : "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
-    const smokeReq = inp.lodgingBasementAreaForSmoke >= 1000;
-    results.push(makeResult(categories.fireSupport, "제연설비", "", smokeReq ? "required" : "notRequired", smokeReq ? "지하층·무창층 내 숙박시설 사용 바닥면적 합계가 1,000㎡ 이상입니다." : "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
-    const standpipeReq = (tf >= 5 && ta >= 6000) || tf >= 7 || (bf >= 3 && ba >= 1000);
-    results.push(makeResult(categories.fireSupport, "연결송수관설비", "", standpipeReq ? "required" : "notRequired",
-      tf >= 5 && ta >= 6000 ? "전체 층수가 5층 이상이고 연면적이 6,000㎡ 이상입니다." :
-      tf >= 7 ? "전체 층수가 7층 이상입니다." :
-      bf >= 3 && ba >= 1000 ? "지하층이 3층 이상이고 지하층 바닥면적 합계가 1,000㎡ 이상입니다." :
-      "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
-    results.push(makeResult(categories.fireSupport, "연결살수설비", "", ba >= 150 ? "required" : "notRequired", ba >= 150 ? "지하층 바닥면적 합계가 150㎡ 이상입니다." : "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
-    const emConsentReq = ag >= 11 || (bf >= 3 && ba >= 1000);
-    results.push(makeResult(categories.fireSupport, "비상콘센트설비", "", emConsentReq ? "required" : "notRequired", ag >= 11 ? "지상층수가 11층 이상입니다." : bf >= 3 && ba >= 1000 ? "지하층이 3층 이상이고 지하층 바닥면적 합계가 1,000㎡ 이상입니다." : "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
-    const radioBase = ba >= 3000 || (bf >= 3 && ba >= 1000);
-    const radioHigh = pd >= YD.D20120914 && ag >= 30;
-    results.push(makeResult(categories.fireSupport, "무선통신보조설비", "", radioBase || radioHigh ? "required" : "notRequired", ba >= 3000 ? "지하층 바닥면적 합계가 3,000㎡ 이상입니다." : bf >= 3 && ba >= 1000 ? "지하층이 3층 이상이고 지하층 바닥면적 합계가 1,000㎡ 이상입니다." : radioHigh ? "지상층수가 30층 이상으로 16층 이상 부분에 설치 대상입니다." : "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
-    return results;
+    // 2013.2.10~2022.11.30: 생활형 숙박시설로서 바닥면적 600㎡ 이상인 경우에만 간이스프링클러 설치 대상
+    if (inp.lodgingIsLiving && la >= 600) {
+      simpleSprinklerReq = true;
+      simpleSprinklerReason = "생활형 숙박시설(레지던스 등)로서 숙박시설 사용 바닥면적이 600㎡ 이상이어서 간이스프링클러설비 설치 대상입니다.";
+    } else {
+      simpleSprinklerReason = inp.lodgingIsLiving
+        ? "생활형 숙박시설이나 숙박시설 사용 바닥면적이 600㎡ 미만이어서 설치 대상이 아닙니다."
+        : "일반 숙박시설은 해당 기간(2013.2.10~2022.11.30)에 간이스프링클러설비 설치 대상이 아닙니다.";
+    }
   } else {
     // pd >= YD.D20221201: 300~600㎡ 미만 → 간이스프링클러
     simpleSprinklerReq = la >= 300 && la < 600;
@@ -6392,7 +6348,7 @@ function yearBuildLodgingExceptionItems(results, inp) {
     exceptionItems.push({ category: "설치 제외", name: "단독경보형 감지기", status: "review", reason: "자동화재탐지설비가 설치되면 단독경보형 감지기는 중복 설치가 불필요합니다." });
   }
   if (emLight && emLight.status === "required" && portableLight && portableLight.status === "required") {
-    exceptionItems.push({ category: "설치 제외", name: "휴대용비상조명등", status: "review", reason: "숙박시설 복도에 비상조명등이 설치되면 객실에 설치하는 휴대용비상조명등은 제외됩니다." });
+    exceptionItems.push({ category: "설치 제외", name: "휴대용비상조명등", status: "review", reason: "숙박시설 복도에 비상조명등이 설치되면 객실에 설치하는 휴대용비상조명등의 설치는 제외될 수 있습니다." });
   }
   if (waterSpray && waterSpray.status === "required" && parkingCondition) {
     exceptionItems.push({ category: "대체설비", name: "주차장 관련 스프링클러설비 대체 가능", status: "review", reason: "주차 관련 공간은 물분무등소화설비 기준이 적용되나, 대체설비로 스프링클러설비를 설치할 수 있습니다." });
@@ -7143,7 +7099,7 @@ showScreen("home");
           step(2, '스크롤 내려서 <strong>홈 화면에 추가</strong> 탭') +
           step(3, '오른쪽 위 <strong>추가</strong> 탭') +
         '</div>';
-    } else if (isAndroid) {
+    } else if (isAndroid || deferredPrompt) {
       if (deferredPrompt) {
         modalTitle.textContent = '홈 화면에 설치';
         modalBody.innerHTML = '<p class="ios-guide-desc">아래 버튼을 누르면 홈 화면에 앱 아이콘이 추가됩니다.</p>';
@@ -7719,10 +7675,9 @@ const RG_PAGE1_SECTIONS = [
     label: '대상물 정보',
     img: './image/page 1/page1-대상물설명.png',
     desc: [
-      '<b>특정소방</b>: 관할 소방서 이름을 기재합니다. (예: 종로소방서 → "종로")',
       '<b>명칭(상호)</b>: 건물명을 기재합니다.',
       '<b>대상물 구분(용도)</b>: 「소방시설 설치 및 관리에 관한 법률 시행령」 별표 2에 따른 특정소방대상물 구분을 기재합니다.',
-      '<b>소재지</b>: 특정소방대상물의 도로명주소를 기재합니다.',
+      '<b>소재지</b>: 특정소방대상물의 주소를 기재합니다.',
     ],
   },
   {
@@ -7740,9 +7695,8 @@ const RG_PAGE1_SECTIONS = [
     label: '점검자',
     img: './image/page 1/page1-점검자.png',
     desc: [
-      '관계인·소방안전관리자·소방시설관리업자 중 <b>점검을 실시한 자</b>의 □에 ✔ 표시하고 세부 사항을 기입합니다.',
+      '<b>관계인·소방안전관리자·소방시설관리업자 </b> 중 점검을 실시한 자에 ✔ 표시하고 전화번호를 기입합니다.',
       '<b>전자우편 송달에 동의</b>하는 경우, 불량사항 조치에 대한 사전통지와 조치명령서가 우편 대신 정보통신망을 통해 발송됩니다.',
-      '3급 관계인 자체점검의 경우 <b>관계인</b>에 체크하고 본인의 성명·전화번호를 기재합니다.',
     ],
   },
   {
@@ -7753,7 +7707,7 @@ const RG_PAGE1_SECTIONS = [
       '주된 점검인력과 보조 점검인력으로 구분하여 <b>참여한 인력을 모두 기입</b>합니다.',
       '「소방시설 설치 및 관리에 관한 법률 시행규칙」 별표 4에 따라 보조 점검인력을 추가한 경우, 추가된 보조 인력도 함께 기입해야 합니다.',
       '성명, 자격구분, 자격번호, 점검참여일(기간)을 정확히 기재합니다.',
-      '3급 관계인 자체점검 시에는 주된 점검인력 란에 관계인 본인 정보를 기재합니다.',
+      '3급 관계인 자체점검 시에는 주인력 1명과 보조인력1단위를 기본 1단위로 합니다.',
     ],
   },
   {
