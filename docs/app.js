@@ -1728,8 +1728,15 @@ function evaluateLodgingMultiuseFacilities(input) {
     extraSafetyItems.push({ category: "그 밖의 안전시설", name: "창문", status: "required", reason: "고시원이므로 창문을 설치해야 합니다." });
   }
 
+  const transitionalNotes = buildMultiuseTransitionalNotes({
+    isSealed: input.lodgingMultiuseIsSealed,
+    usesAV: input.lodgingMultiuseUsesAV,
+    hasEvacuationRoute: input.lodgingMultiuseHasEvacuationRoute,
+    isGosiwon: input.lodgingMultiuseIsGosiwon,
+  });
+
   const reasonItems = [...requiredItems, ...extraSafetyItems];
-  return { requiredItems, extraSafetyItems, reasonItems };
+  return { requiredItems, extraSafetyItems, reasonItems, transitionalNotes };
 }
 
 function evaluateElderlyFacility(input) {
@@ -2277,12 +2284,19 @@ function setSectionVisibility(sectionId, visible) {
 }
 
 function clearMultiuseSections() {
-  ["multiuse-required-list", "multiuse-extra-list", "multiuse-reason-list"].forEach((id) => {
+  ["multiuse-required-list", "multiuse-extra-list", "multiuse-reason-list", "multiuse-transitional-notes"].forEach((id) => {
     const node = document.getElementById(id);
     if (node) node.innerHTML = "";
   });
   setSectionVisibility("multiuse-extra-section", false);
   setSectionVisibility("open-multiuse-safety", false);
+}
+
+function renderTransitionalNotes(notes) {
+  const container = document.getElementById("multiuse-transitional-notes");
+  if (!container || !notes || notes.length === 0) return;
+  const items = notes.map((n) => `<div class="transitional-item"><strong>${n.title}</strong><br>${n.text}</div>`).join("");
+  container.innerHTML = `<div class="info-box amber"><div class="ib-title">경과규정 안내 — 기존 영업장 적용 제외 가능</div>${items}</div>`;
 }
 
 function renderSimpleRequiredList(items, targetId = "required-list") {
@@ -2296,9 +2310,46 @@ function renderSimpleRequiredList(items, targetId = "required-list") {
   });
 }
 
+function buildMultiuseTransitionalNotes(flags) {
+  const notes = [];
+  if (flags.isSealed) {
+    notes.push({
+      title: "간이스프링클러설비 (밀폐구조 업소)",
+      text: "2015년 1월 8일 이전부터 영업 중이고, 그 이후 안전시설등 설치신고 또는 영업장 내부구조 변경신고를 한 적이 없는 영업장은 간이스프링클러설비를 설치하지 않아도 됩니다.",
+    });
+  }
+  if (flags.usesAV) {
+    notes.push({
+      title: "자동화재탐지설비 (영상음향장치 업소)",
+      text: "2015년 1월 8일 이전부터 영업 중이고, 그 이후 안전시설등 설치신고 또는 영업장 내부구조 변경신고를 한 적이 없는 영업장은 비상벨설비를 유지해도 됩니다(자동화재탐지설비로 강화할 의무 없음).",
+    });
+    notes.push({
+      title: "영상음향차단장치 자동연동",
+      text: "2012년 2월 15일 이전부터 영업 중이고, 그 이후 안전시설등 설치신고 또는 내부구조 변경신고를 한 적이 없는 영업장은 자동화재탐지설비 감지기와의 자동연동 설치의무가 없습니다.",
+    });
+  }
+  if (flags.hasEvacuationRoute) {
+    notes.push({
+      title: "피난유도선 (2018년 전면 확대분)",
+      text: "2018년 7월 10일 이전부터 영업 중이고, 그 이후 영업장 내부구조 변경신고를 한 적이 없는 영업장은 2018년에 전면 확대된 피난유도선 설치의무가 없습니다.",
+    });
+  }
+  if (flags.isGosiwon) {
+    notes.push({
+      title: "창문 (고시원)",
+      text: "2007년 3월 25일 이전부터 영업 중인 기존 고시원은 창문 설치의무가 없습니다. 해당 일자 이후 신규 영업을 시작한 경우에만 적용됩니다.",
+    });
+  }
+  notes.push({
+    title: "비상구 추락방지 기준",
+    text: "2016년 10월 19일 시행된 발코니·부속실 추락방지 기준(경보음 장치·쇠사슬 등)은 기존 영업장에 소급 적용되지 않습니다. 시행 이후 안전시설등 설치신고 또는 영업장 내부구조 변경신고를 하는 영업장부터 적용됩니다.",
+  });
+  return notes;
+}
+
 function evaluateMultiuseFacilities(input) {
   if (!input.hasMultiuseBusiness) {
-    return { requiredItems: [], extraSafetyItems: [], reasonItems: [] };
+    return { requiredItems: [], extraSafetyItems: [], reasonItems: [], transitionalNotes: [] };
   }
 
   const requiredItems = [
@@ -2381,8 +2432,15 @@ function evaluateMultiuseFacilities(input) {
     });
   }
 
+  const transitionalNotes = buildMultiuseTransitionalNotes({
+    isSealed: input.multiuseIsSealed,
+    usesAV: input.multiuseUsesAV,
+    hasEvacuationRoute: input.multiuseHasEvacuationRoute,
+    isGosiwon: input.multiuseIsGosiwon,
+  });
+
   const reasonItems = [...requiredItems, ...extraSafetyItems];
-  return { requiredItems, extraSafetyItems, reasonItems };
+  return { requiredItems, extraSafetyItems, reasonItems, transitionalNotes };
 }
 
 function showExplorerCard(view) {
@@ -2413,6 +2471,7 @@ function renderMultiuseSafetyCard(input) {
   renderSimpleRequiredList(multiuse.extraSafetyItems, "multiuse-extra-list");
   renderResultGroup("multiuse-reason-list", multiuse.reasonItems);
   setSectionVisibility("multiuse-extra-section", multiuse.extraSafetyItems.length > 0);
+  renderTransitionalNotes(multiuse.transitionalNotes);
 }
 
 function renderLodgingMultiuseSafetyCard(input) {
@@ -2423,6 +2482,7 @@ function renderLodgingMultiuseSafetyCard(input) {
   renderSimpleRequiredList(multiuse.extraSafetyItems, "multiuse-extra-list");
   renderResultGroup("multiuse-reason-list", multiuse.reasonItems);
   setSectionVisibility("multiuse-extra-section", multiuse.extraSafetyItems.length > 0);
+  renderTransitionalNotes(multiuse.transitionalNotes);
 }
 
 function renderResults(results, input) {
