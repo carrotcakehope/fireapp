@@ -195,6 +195,17 @@ const steps = [
     ],
   },
   {
+    key: "multiuseHasRooms",
+    title: "영업장 내부에 구획된 실(室)이 있나요?",
+    help: "노래방 룸, 고시원 방 등 별도로 구획된 공간이 있는 경우입니다. 해당하면 영업장 내부 피난통로를 확보해야 합니다.",
+    type: "choice",
+    onlyFor: "neighborhood",
+    options: [
+      { value: "yes", label: "예", description: "구획된 룸·방 등이 있음" },
+      { value: "no", label: "아니오", description: "구획된 실이 없음" },
+    ],
+  },
+  {
     key: "multiuseHasEvacuationRoute",
     title: "영업장 내부 피난통로 또는 복도가 있는 영업장인가요?",
     help: "맞다면 피난유도선을 설치해야 합니다.",
@@ -318,6 +329,17 @@ const steps = [
     options: [
       { value: "yes", label: "예", description: "가스시설을 사용함" },
       { value: "no", label: "아니오", description: "가스시설을 사용하지 않음" },
+    ],
+  },
+  {
+    key: "lodgingMultiuseHasRooms",
+    title: "영업장 내부에 구획된 실(室)이 있나요?",
+    help: "노래방 룸, 고시원 방 등 별도로 구획된 공간이 있는 경우입니다. 해당하면 영업장 내부 피난통로를 확보해야 합니다.",
+    type: "choice",
+    onlyFor: "lodging",
+    options: [
+      { value: "yes", label: "예", description: "구획된 룸·방 등이 있음" },
+      { value: "no", label: "아니오", description: "구획된 실이 없음" },
     ],
   },
   {
@@ -498,6 +520,7 @@ const state = {
     multiuseOnGroundOrRefugeFloor: "no",
     multiuseUsesAV: "no",
     multiuseHasGasFacility: "no",
+    multiuseHasRooms: "no",
     multiuseHasEvacuationRoute: "no",
     // 숙박시설
     lodgingArea: 450,
@@ -524,6 +547,7 @@ const state = {
     lodgingMultiuseOnGroundOrRefugeFloor: "no",
     lodgingMultiuseUsesAV: "no",
     lodgingMultiuseHasGasFacility: "no",
+    lodgingMultiuseHasRooms: "no",
     lodgingMultiuseHasEvacuationRoute: "no",
     // 노유자시설
     elderlySubtype: "general",
@@ -890,7 +914,7 @@ function getActiveSteps() {
       return state.answers.hasMultiuseBusiness === "yes"
         && (state.answers.multiuseIsPostpartum === "yes" || state.answers.multiuseIsGosiwon === "yes");
     }
-    if (["multiuseSimpleSprinklerCheck", "multiuseOnSecondToTenthFloor", "multiuseUsesAV", "multiuseHasGasFacility", "multiuseHasEvacuationRoute"].includes(step.key)) {
+    if (["multiuseSimpleSprinklerCheck", "multiuseOnSecondToTenthFloor", "multiuseUsesAV", "multiuseHasGasFacility", "multiuseHasRooms", "multiuseHasEvacuationRoute"].includes(step.key)) {
       return state.answers.hasMultiuseBusiness === "yes";
     }
     // 숙박시설 전용 조건
@@ -907,7 +931,7 @@ function getActiveSteps() {
       return state.answers.lodgingHasMultiuseBusiness === "yes"
         && (state.answers.lodgingMultiuseIsPostpartum === "yes" || state.answers.lodgingMultiuseIsGosiwon === "yes");
     }
-    if (["lodgingMultiuseSimpleSprinklerCheck", "lodgingMultiuseOnSecondToTenthFloor", "lodgingMultiuseUsesAV", "lodgingMultiuseHasGasFacility", "lodgingMultiuseHasEvacuationRoute"].includes(step.key)) {
+    if (["lodgingMultiuseSimpleSprinklerCheck", "lodgingMultiuseOnSecondToTenthFloor", "lodgingMultiuseUsesAV", "lodgingMultiuseHasGasFacility", "lodgingMultiuseHasRooms", "lodgingMultiuseHasEvacuationRoute"].includes(step.key)) {
       return state.answers.lodgingHasMultiuseBusiness === "yes";
     }
     // 노유자시설 전용 조건
@@ -1261,6 +1285,7 @@ function normalizeAnswers() {
     multiuseOnGroundOrRefugeFloor: toBool(state.answers.multiuseOnGroundOrRefugeFloor),
     multiuseUsesAV: toBool(state.answers.multiuseUsesAV),
     multiuseHasGasFacility: toBool(state.answers.multiuseHasGasFacility),
+    multiuseHasRooms: toBool(state.answers.multiuseHasRooms),
     multiuseHasEvacuationRoute: toBool(state.answers.multiuseHasEvacuationRoute),
     // 숙박시설
     lodgingArea: toNumber(state.answers.lodgingArea),
@@ -1287,6 +1312,7 @@ function normalizeAnswers() {
     lodgingMultiuseOnGroundOrRefugeFloor: toBool(state.answers.lodgingMultiuseOnGroundOrRefugeFloor),
     lodgingMultiuseUsesAV: toBool(state.answers.lodgingMultiuseUsesAV),
     lodgingMultiuseHasGasFacility: toBool(state.answers.lodgingMultiuseHasGasFacility),
+    lodgingMultiuseHasRooms: toBool(state.answers.lodgingMultiuseHasRooms),
     lodgingMultiuseHasEvacuationRoute: toBool(state.answers.lodgingMultiuseHasEvacuationRoute),
     // 노유자시설
     elderlySubtype: state.answers.elderlySubtype,
@@ -1685,20 +1711,11 @@ function buildLodgingRequiredItems(results, input, exceptionItems) {
 
 function evaluateLodgingMultiuseFacilities(input) {
   if (!input.lodgingHasMultiuseBusiness) {
-    return { requiredItems: [], extraSafetyItems: [], reasonItems: [] };
+    return { requiredItems: [], extraSafetyItems: [], reasonItems: [], transitionalNotes: [] };
   }
 
   const requiredItems = [
     { category: "다중이용업소 공통", name: "소화기", status: "required", reason: "다중이용업소 공통 설치대상이며, 구획된 실마다 설치해야 합니다." },
-    { category: "다중이용업소 공통", name: "비상벨설비", status: "required", reason: "다중이용업소 공통 설치대상이며, 비상벨설비 구성품 중 경종은 구획된 실마다 설치해야 합니다." },
-    { category: "다중이용업소 공통", name: "휴대용 비상조명등", status: "required", reason: "다중이용업소 공통 설치대상이며, 구획된 실마다 설치해야 합니다." },
-    { category: "다중이용업소 공통", name: "유도등", status: "required", reason: "다중이용업소 공통 설치대상이며, 구획된 실마다 설치해야 합니다." },
-    { category: "다중이용업소 공통", name: "비상구", status: "required", reason: "다중이용업소에는 비상구를 설치해야 합니다. 다만 주된 출입구 외에 해당 영업장 내부에서 피난층 또는 지상으로 통하는 직통계단이 주된 출입구 중심선으로부터 수평거리로 영업장의 긴 변 길이의 2분의 1 이상 떨어진 위치에 별도로 설치된 경우에는 비상구를 설치하지 않을 수 있습니다." },
-  ];
-
-  const extraSafetyItems = [
-    { category: "그 밖의 안전시설", name: "누전차단기", status: "required", reason: "다중이용업소 공통 안전시설로 설치해야 합니다." },
-    { category: "그 밖의 안전시설", name: "방염", status: "required", reason: "다중이용업소이므로 방염을 해야 합니다." },
   ];
 
   const simpleSprinklerReasons = [];
@@ -1711,22 +1728,41 @@ function evaluateLodgingMultiuseFacilities(input) {
     requiredItems.push({ category: categories.extinguishing, name: "간이스프링클러설비", status: "required", reason: simpleSprinklerReasons.join(" ") });
   }
 
-  if (input.lodgingMultiuseOnSecondToTenthFloor) {
-    requiredItems.push({ category: categories.evacuation, name: "피난기구", status: "required", reason: "다중이용업소가 2층부터 10층 사이에 설치돼 있어 피난기구 설치대상입니다. 주로 구조대나 피난사다리를 설치하며, 법에는 완강기 설치가 가능하지만 대구에서는 완강기 설치가 불가합니다." });
-  }
+  requiredItems.push({ category: "다중이용업소 공통", name: "비상벨설비", status: "required", reason: "다중이용업소 공통 설치대상이며, 비상벨설비 구성품 중 경종은 구획된 실마다 설치해야 합니다." });
+
   if (input.lodgingMultiuseUsesAV) {
     requiredItems.push({ category: categories.alarm, name: "자동화재탐지설비", status: "required", reason: "노래반주기 등 영상음향장치를 사용하는 영업장입니다." });
-    extraSafetyItems.push({ category: "그 밖의 안전시설", name: "영상음향차단장치", status: "required", reason: "노래반주기 등 영상음향장치를 사용하는 영업장입니다." });
   }
   if (input.lodgingMultiuseHasGasFacility) {
     requiredItems.push({ category: categories.alarm, name: "가스누설경보기", status: "required", reason: "가스시설을 사용하는 주방 또는 난방시설이 있습니다." });
   }
+  if (input.lodgingMultiuseOnSecondToTenthFloor) {
+    requiredItems.push({ category: categories.evacuation, name: "피난기구", status: "required", reason: "다중이용업소가 2층부터 10층 사이에 설치돼 있어 피난기구 설치대상입니다. 주로 구조대나 피난사다리를 설치하며, 법에는 완강기 설치가 가능하지만 대구에서는 완강기 설치가 불가합니다." });
+  }
   if (input.lodgingMultiuseHasEvacuationRoute) {
     requiredItems.push({ category: categories.evacuation, name: "피난유도선", status: "required", reason: "영업장 내부 피난통로 또는 복도가 있습니다." });
   }
+
+  requiredItems.push({ category: "다중이용업소 공통", name: "유도등", status: "required", reason: "다중이용업소 공통 설치대상이며, 구획된 실마다 설치해야 합니다." });
+  requiredItems.push({ category: "다중이용업소 공통", name: "휴대용 비상조명등", status: "required", reason: "다중이용업소 공통 설치대상이며, 구획된 실마다 설치해야 합니다." });
+  requiredItems.push({ category: "다중이용업소 공통", name: "비상구", status: "required", reason: "다중이용업소에는 비상구를 설치해야 합니다. 다만 주된 출입구 외에 해당 영업장 내부에서 피난층 또는 지상으로 통하는 직통계단이 주된 출입구 중심선으로부터 수평거리로 영업장의 긴 변 길이의 2분의 1 이상 떨어진 위치에 별도로 설치된 경우에는 비상구를 설치하지 않을 수 있습니다." });
+
+  if (input.lodgingMultiuseHasRooms) {
+    requiredItems.push({ category: "다중이용업소 공통", name: "영업장 내부 피난통로", status: "required", reason: "구획된 실이 있는 다중이용업소는 내부 피난통로를 확보해야 합니다. 양옆에 구획된 실이 있는 경우 폭 150cm 이상, 그 외 120cm 이상이어야 하며, 3번 이상 구부러지는 형태는 금지됩니다." });
+  }
+
+  const extraSafetyItems = [];
+  if (input.lodgingMultiuseUsesAV) {
+    extraSafetyItems.push({ category: "그 밖의 안전시설", name: "영상음향차단장치", status: "required", reason: "노래반주기 등 영상음향장치를 사용하는 영업장입니다." });
+  }
+  extraSafetyItems.push({ category: "그 밖의 안전시설", name: "누전차단기", status: "required", reason: "다중이용업소 공통 안전시설로 설치해야 합니다." });
   if (input.lodgingMultiuseIsGosiwon) {
     extraSafetyItems.push({ category: "그 밖의 안전시설", name: "창문", status: "required", reason: "고시원이므로 창문을 설치해야 합니다." });
   }
+
+  const etcItems = [];
+  etcItems.push({ category: "기타", name: "피난안내도, 피난안내영상물", status: "required", reason: "다중이용업소이므로 피난안내도를 각 층마다 보기 쉬운 위치에 비치하거나 피난안내영상물을 상영해야 합니다." });
+  etcItems.push({ category: "기타", name: "방염", status: "required", reason: "다중이용업소이므로 방염을 해야 합니다." });
 
   const transitionalNotes = buildMultiuseTransitionalNotes({
     isSealed: input.lodgingMultiuseIsSealed,
@@ -1735,8 +1771,8 @@ function evaluateLodgingMultiuseFacilities(input) {
     isGosiwon: input.lodgingMultiuseIsGosiwon,
   });
 
-  const reasonItems = [...requiredItems, ...extraSafetyItems];
-  return { requiredItems, extraSafetyItems, reasonItems, transitionalNotes };
+  const reasonItems = [...requiredItems, ...extraSafetyItems, ...etcItems];
+  return { requiredItems, extraSafetyItems, etcItems, reasonItems, transitionalNotes };
 }
 
 function evaluateElderlyFacility(input) {
@@ -2284,11 +2320,12 @@ function setSectionVisibility(sectionId, visible) {
 }
 
 function clearMultiuseSections() {
-  ["multiuse-required-list", "multiuse-extra-list", "multiuse-reason-list", "multiuse-transitional-notes"].forEach((id) => {
+  ["multiuse-required-list", "multiuse-extra-list", "multiuse-etc-list", "multiuse-reason-list", "multiuse-transitional-notes"].forEach((id) => {
     const node = document.getElementById(id);
     if (node) node.innerHTML = "";
   });
   setSectionVisibility("multiuse-extra-section", false);
+  setSectionVisibility("multiuse-etc-section", false);
   setSectionVisibility("open-multiuse-safety", false);
 }
 
@@ -2354,83 +2391,64 @@ function evaluateMultiuseFacilities(input) {
 
   const requiredItems = [
     { category: "다중이용업소 공통", name: "소화기", status: "required", reason: "다중이용업소 공통 설치대상이며, 구획된 실마다 설치해야 합니다." },
-    { category: "다중이용업소 공통", name: "비상벨설비", status: "required", reason: "다중이용업소 공통 설치대상이며, 비상벨설비 구성품 중 경종은 구획된 실마다 설치해야 합니다." },
-    { category: "다중이용업소 공통", name: "휴대용 비상조명등", status: "required", reason: "다중이용업소 공통 설치대상이며, 구획된 실마다 설치해야 합니다." },
-    { category: "다중이용업소 공통", name: "유도등", status: "required", reason: "다중이용업소 공통 설치대상이며, 구획된 실마다 설치해야 합니다." },
-    { category: "다중이용업소 공통", name: "비상구", status: "required", reason: "다중이용업소에는 비상구를 설치해야 합니다. 다만 주된 출입구 외에 해당 영업장 내부에서 피난층 또는 지상으로 통하는 직통계단이 주된 출입구 중심선으로부터 수평거리로 영업장의 긴 변 길이의 2분의 1 이상 떨어진 위치에 별도로 설치된 경우에는 비상구를 설치하지 않을 수 있습니다." },
   ];
 
-  const extraSafetyItems = [
-    { category: "그 밖의 안전시설", name: "누전차단기", status: "required", reason: "다중이용업소 공통 안전시설로 설치해야 합니다." },
-    { category: "그 밖의 안전시설", name: "방염", status: "required", reason: "다중이용업소이므로 방염을 해야 합니다." },
-  ];
-
+  // 간이스프링클러 (소화기 바로 다음)
   const simpleSprinklerReasons = [];
   if (input.multiuseInBasement) simpleSprinklerReasons.push("지하층에 설치돼 있습니다.");
   if (input.multiuseIsSealed) simpleSprinklerReasons.push("밀폐구조 영업장입니다.");
   if (input.multiuseIsPostpartum && !input.multiuseOnGroundOrRefugeFloor) simpleSprinklerReasons.push("산후조리업에 해당합니다.");
   if (input.multiuseIsGosiwon && !input.multiuseOnGroundOrRefugeFloor) simpleSprinklerReasons.push("고시원에 해당합니다.");
   if (input.multiuseIsGunRange) simpleSprinklerReasons.push("권총사격장에 해당합니다.");
-
   if (simpleSprinklerReasons.length) {
-    requiredItems.push({
-      category: categories.extinguishing,
-      name: "간이스프링클러설비",
-      status: "required",
-      reason: simpleSprinklerReasons.join(" "),
-    });
+    requiredItems.push({ category: categories.extinguishing, name: "간이스프링클러설비", status: "required", reason: simpleSprinklerReasons.join(" ") });
   }
 
-  if (input.multiuseOnSecondToTenthFloor) {
-    requiredItems.push({
-      category: categories.evacuation,
-      name: "피난기구",
-      status: "required",
-      reason: "다중이용업소가 2층부터 10층 사이에 설치돼 있어 피난기구 설치대상입니다. 주로 구조대나 피난사다리를 설치하며, 법에는 완강기 설치가 가능하지만 대구에서는 완강기 설치가 불가합니다.",
-    });
-  }
+  // 비상벨설비 (항상)
+  requiredItems.push({ category: "다중이용업소 공통", name: "비상벨설비", status: "required", reason: "다중이용업소 공통 설치대상이며, 비상벨설비 구성품 중 경종은 구획된 실마다 설치해야 합니다." });
 
+  // 자동화재탐지설비 (영상음향장치 업소)
   if (input.multiuseUsesAV) {
-    requiredItems.push({
-      category: categories.alarm,
-      name: "자동화재탐지설비",
-      status: "required",
-      reason: "노래반주기 등 영상음향장치를 사용하는 영업장입니다.",
-    });
-    extraSafetyItems.push({
-      category: "그 밖의 안전시설",
-      name: "영상음향차단장치",
-      status: "required",
-      reason: "노래반주기 등 영상음향장치를 사용하는 영업장입니다.",
-    });
+    requiredItems.push({ category: categories.alarm, name: "자동화재탐지설비", status: "required", reason: "노래반주기 등 영상음향장치를 사용하는 영업장입니다." });
   }
 
+  // 가스누설경보기
   if (input.multiuseHasGasFacility) {
-    requiredItems.push({
-      category: categories.alarm,
-      name: "가스누설경보기",
-      status: "required",
-      reason: "가스시설을 사용하는 주방 또는 난방시설이 있습니다.",
-    });
+    requiredItems.push({ category: categories.alarm, name: "가스누설경보기", status: "required", reason: "가스시설을 사용하는 주방 또는 난방시설이 있습니다." });
   }
 
+  // 피난기구 (2~10층)
+  if (input.multiuseOnSecondToTenthFloor) {
+    requiredItems.push({ category: categories.evacuation, name: "피난기구", status: "required", reason: "다중이용업소가 2층부터 10층 사이에 설치돼 있어 피난기구 설치대상입니다. 주로 구조대나 피난사다리를 설치하며, 법에는 완강기 설치가 가능하지만 대구에서는 완강기 설치가 불가합니다." });
+  }
+
+  // 피난유도선 (피난통로/복도 있을 때)
   if (input.multiuseHasEvacuationRoute) {
-    requiredItems.push({
-      category: categories.evacuation,
-      name: "피난유도선",
-      status: "required",
-      reason: "영업장 내부 피난통로 또는 복도가 있습니다.",
-    });
+    requiredItems.push({ category: categories.evacuation, name: "피난유도선", status: "required", reason: "영업장 내부 피난통로 또는 복도가 있습니다." });
   }
 
-  if (input.multiuseIsGosiwon) {
-    extraSafetyItems.push({
-      category: "그 밖의 안전시설",
-      name: "창문",
-      status: "required",
-      reason: "고시원이므로 창문을 설치해야 합니다.",
-    });
+  // 유도등·휴대용비상조명등·비상구 (항상)
+  requiredItems.push({ category: "다중이용업소 공통", name: "유도등", status: "required", reason: "다중이용업소 공통 설치대상이며, 구획된 실마다 설치해야 합니다." });
+  requiredItems.push({ category: "다중이용업소 공통", name: "휴대용 비상조명등", status: "required", reason: "다중이용업소 공통 설치대상이며, 구획된 실마다 설치해야 합니다." });
+  requiredItems.push({ category: "다중이용업소 공통", name: "비상구", status: "required", reason: "다중이용업소에는 비상구를 설치해야 합니다. 다만 주된 출입구 외에 해당 영업장 내부에서 피난층 또는 지상으로 통하는 직통계단이 주된 출입구 중심선으로부터 수평거리로 영업장의 긴 변 길이의 2분의 1 이상 떨어진 위치에 별도로 설치된 경우에는 비상구를 설치하지 않을 수 있습니다." });
+
+  // 영업장 내부 피난통로 (구획된 실 있을 때)
+  if (input.multiuseHasRooms) {
+    requiredItems.push({ category: "다중이용업소 공통", name: "영업장 내부 피난통로", status: "required", reason: "구획된 실이 있는 다중이용업소는 내부 피난통로를 확보해야 합니다. 양옆에 구획된 실이 있는 경우 폭 150cm 이상, 그 외 120cm 이상이어야 하며, 3번 이상 구부러지는 형태는 금지됩니다." });
   }
+
+  const extraSafetyItems = [];
+  if (input.multiuseUsesAV) {
+    extraSafetyItems.push({ category: "그 밖의 안전시설", name: "영상음향차단장치", status: "required", reason: "노래반주기 등 영상음향장치를 사용하는 영업장입니다." });
+  }
+  extraSafetyItems.push({ category: "그 밖의 안전시설", name: "누전차단기", status: "required", reason: "다중이용업소 공통 안전시설로 설치해야 합니다." });
+  if (input.multiuseIsGosiwon) {
+    extraSafetyItems.push({ category: "그 밖의 안전시설", name: "창문", status: "required", reason: "고시원이므로 창문을 설치해야 합니다." });
+  }
+
+  const etcItems = [];
+  etcItems.push({ category: "기타", name: "피난안내도, 피난안내영상물", status: "required", reason: "다중이용업소이므로 피난안내도를 각 층마다 보기 쉬운 위치에 비치하거나 피난안내영상물을 상영해야 합니다." });
+  etcItems.push({ category: "기타", name: "방염", status: "required", reason: "다중이용업소이므로 방염을 해야 합니다." });
 
   const transitionalNotes = buildMultiuseTransitionalNotes({
     isSealed: input.multiuseIsSealed,
@@ -2439,8 +2457,8 @@ function evaluateMultiuseFacilities(input) {
     isGosiwon: input.multiuseIsGosiwon,
   });
 
-  const reasonItems = [...requiredItems, ...extraSafetyItems];
-  return { requiredItems, extraSafetyItems, reasonItems, transitionalNotes };
+  const reasonItems = [...requiredItems, ...extraSafetyItems, ...etcItems];
+  return { requiredItems, extraSafetyItems, etcItems, reasonItems, transitionalNotes };
 }
 
 function showExplorerCard(view) {
@@ -2469,8 +2487,10 @@ function renderMultiuseSafetyCard(input) {
   document.getElementById("multiuse-safety-summary").innerHTML = `<div class="ib-title">다중이용업소 안전시설 기준</div>입력한 조건을 기준으로 다중이용업소에 설치해야 하는 안전시설만 별도로 정리했습니다.`;
   renderSimpleRequiredList(multiuse.requiredItems, "multiuse-required-list");
   renderSimpleRequiredList(multiuse.extraSafetyItems, "multiuse-extra-list");
+  renderSimpleRequiredList(multiuse.etcItems, "multiuse-etc-list");
   renderResultGroup("multiuse-reason-list", multiuse.reasonItems);
   setSectionVisibility("multiuse-extra-section", multiuse.extraSafetyItems.length > 0);
+  setSectionVisibility("multiuse-etc-section", multiuse.etcItems.length > 0);
   renderTransitionalNotes(multiuse.transitionalNotes);
 }
 
@@ -2480,8 +2500,10 @@ function renderLodgingMultiuseSafetyCard(input) {
   document.getElementById("multiuse-safety-summary").innerHTML = `<div class="ib-title">다중이용업소 안전시설 기준</div>입력한 조건을 기준으로 다중이용업소에 설치해야 하는 안전시설만 별도로 정리했습니다.`;
   renderSimpleRequiredList(multiuse.requiredItems, "multiuse-required-list");
   renderSimpleRequiredList(multiuse.extraSafetyItems, "multiuse-extra-list");
+  renderSimpleRequiredList(multiuse.etcItems, "multiuse-etc-list");
   renderResultGroup("multiuse-reason-list", multiuse.reasonItems);
   setSectionVisibility("multiuse-extra-section", multiuse.extraSafetyItems.length > 0);
+  setSectionVisibility("multiuse-etc-section", multiuse.etcItems.length > 0);
   renderTransitionalNotes(multiuse.transitionalNotes);
 }
 
@@ -2735,6 +2757,7 @@ function restartExplorer() {
     multiuseOnGroundOrRefugeFloor: "no",
     multiuseUsesAV: "no",
     multiuseHasGasFacility: "no",
+    multiuseHasRooms: "no",
     multiuseHasEvacuationRoute: "no",
     // 숙박시설
     lodgingArea: 450,
@@ -2761,6 +2784,7 @@ function restartExplorer() {
     lodgingMultiuseOnGroundOrRefugeFloor: "no",
     lodgingMultiuseUsesAV: "no",
     lodgingMultiuseHasGasFacility: "no",
+    lodgingMultiuseHasRooms: "no",
     lodgingMultiuseHasEvacuationRoute: "no",
     // 노유자시설
     elderlySubtype: "general",
