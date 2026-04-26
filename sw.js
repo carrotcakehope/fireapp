@@ -9,7 +9,7 @@ const PRECACHE_FILES = [
   './icon-512.png',
 ];
 
-const NETWORK_FIRST = ['index.html', 'app.js', 'styles.css', 'manifest.json'];
+const NETWORK_FIRST = ['index.html', 'app.js', 'styles.css', 'manifest.json', 'facilities-data.js', 'facilities.js'];
 
 self.addEventListener('install', e => {
   e.waitUntil(
@@ -26,8 +26,9 @@ self.addEventListener('activate', e => {
         keys.filter(k => k !== CACHE).map(k => caches.delete(k))
       ))
       .then(() => self.clients.claim())
-    // clients.claim() ?�행 ???�이지??controllerchange ?�벤?��? 발생?�여
-    // index.html?�서 window.location.reload()가 ?�출??  );
+      .then(() => self.clients.matchAll({ type: 'window' }))
+      .then(clients => clients.forEach(c => c.postMessage({ type: 'CACHE_UPDATED' })))
+  );
 });
 
 self.addEventListener('fetch', e => {
@@ -36,10 +37,10 @@ self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
   const filename = url.pathname.split('/').pop();
 
-  // ?�심 ???�일: ??�� ?�트?�크?�서 최신�?가?�오�?(?�프?�인 ??캐시 ?�용)
+  // ?�심 ???�일: ??�� ?�트?�크?�서 최신�?가?�오�?(?�프?�인 ??캐시 ?�용)
   if (NETWORK_FIRST.includes(filename)) {
     e.respondWith(
-      fetch(e.request)
+      fetch(new Request(e.request.url, { cache: 'no-store' }))
         .then(res => {
           if (res && res.ok) {
             caches.open(CACHE).then(c => c.put(e.request, res.clone()));
@@ -51,7 +52,7 @@ self.addEventListener('fetch', e => {
     return;
   }
 
-  // ?�머지 (?��?지, PDF, ?�이브러�???: 캐시 ?�선, ?�으�??�트?�크?�서 받아 캐시
+  // ?�머지 (?��?지, PDF, ?�이브러�???: 캐시 ?�선, ?�으�??�트?�크?�서 받아 캐시
   e.respondWith(
     caches.match(e.request).then(cached => {
       if (cached) return cached;

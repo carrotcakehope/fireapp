@@ -14,19 +14,26 @@
   <script>(function(){var t=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',t);})();</script>
   <script>
     if ('serviceWorker' in navigator) {
+      var _reloading = false;
+      function _forceReload() {
+        if (_reloading) return;
+        _reloading = true;
+        window.location.reload();
+      }
       window.addEventListener('load', function() {
         navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' })
           .then(function(reg) {
-            reg.update(); // 앱 시작 시 즉시 업데이트 확인
-            // 앱이 백그라운드에서 돌아올 때마다 업데이트 확인 (안드로이드 대응)
+            reg.update();
             document.addEventListener('visibilitychange', function() {
               if (document.visibilityState === 'visible') reg.update();
             });
           });
-        // SW 컨트롤러 교체 감지 → 즉시 새로고침 (postMessage보다 안정적)
-        navigator.serviceWorker.addEventListener('controllerchange', function() {
-          window.location.reload();
+        // SW activate 후 postMessage 수신 (iOS 홈화면 앱 대응)
+        navigator.serviceWorker.addEventListener('message', function(e) {
+          if (e.data && e.data.type === 'CACHE_UPDATED') _forceReload();
         });
+        // controllerchange fallback (PC/Android)
+        navigator.serviceWorker.addEventListener('controllerchange', _forceReload);
       });
     }
   </script>

@@ -3007,6 +3007,46 @@ html[data-theme="light"] .rg-tab-bar {
   word-break: keep-all;
 }
 
+/* ── 소화기 사용법 번호 리스트 ── */
+.fac-usage-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  counter-reset: usage-counter;
+}
+
+.fac-usage-list li {
+  font-size: 13px;
+  line-height: 1.65;
+  padding-left: 28px;
+  position: relative;
+  color: var(--text-muted);
+  word-break: keep-all;
+  counter-increment: usage-counter;
+}
+
+.fac-usage-list li::before {
+  content: counter(usage-counter);
+  position: absolute;
+  left: 0;
+  top: 1px;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--red-dim2);
+  border: 1px solid rgba(217, 48, 37, 0.3);
+  color: var(--red-soft);
+  font-size: 10px;
+  font-weight: 700;
+  font-family: var(--mono);
+}
+
 html[data-theme="light"] .fac-definition {
   background: var(--surface2);
 }
