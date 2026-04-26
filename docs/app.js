@@ -760,6 +760,7 @@ const CALC_MODES = {
 
 const screens = {
   home: document.getElementById("screen-home"),
+  explorerSelect: document.getElementById("screen-explorer-select"),
   explorer: document.getElementById("screen-explorer"),
   explorerYear: document.getElementById("screen-explorer-year"),
   date: document.getElementById("screen-date"),
@@ -786,7 +787,7 @@ const explorerModeBadgeEl = document.getElementById("explorer-mode-badge");
 function applyExplorerModeUI() {
   if (!explorerTitleEl || !explorerModeBadgeEl) return;
   const isYearMode = explorerRuntime.mode === "year";
-  explorerTitleEl.textContent = isYearMode ? "소방시설탐색기 (연도별_테스트중)" : "소방시설탐색기";
+  explorerTitleEl.textContent = isYearMode ? "소방시설탐색기 (연도별)" : "소방시설탐색기";
   explorerModeBadgeEl.classList.toggle("hidden", !isYearMode);
 }
 
@@ -1226,7 +1227,7 @@ function renderCurrentStep() {
   else node = renderNumberStep(step);
 
   questionElements.input.appendChild(node);
-  document.getElementById("prev-step").disabled = state.currentStep === 0;
+  document.getElementById("prev-step").disabled = false;
   if (state.currentStep === activeSteps.length - 1) {
     document.getElementById("next-step").textContent = explorerRuntime.mode === "year" ? "결과 준비중" : "결과 보기";
   } else {
@@ -3833,10 +3834,18 @@ function multiuseRestart() {
 // ─────────────────────────────────────────────────────────────────────────────
 
 document.getElementById("open-explorer").addEventListener("click", () => {
+  showScreen("explorerSelect");
+});
+document.getElementById("back-from-explorer-select").addEventListener("click", () => showScreen("home"));
+document.getElementById("explorer-select-simple").addEventListener("click", () => {
   explorerRuntime.mode = "default";
   applyExplorerModeUI();
   showScreen("explorer");
   restartExplorer();
+});
+document.getElementById("explorer-select-detailed").addEventListener("click", () => {
+  showScreen("explorerYear");
+  yearWizardRestart();
 });
 document.getElementById("open-date-calculator").addEventListener("click", () => {
   showScreen("date");
@@ -5145,6 +5154,7 @@ const yearSteps = [
       { value: "marketBathhouse", label: "시장·공중목욕장", description: "재래시장, 슈퍼마켓, 공중목욕장 — 자동화재탐지설비 1,000㎡ 기준 적용" },
       { value: "general", label: "기타 근린생활시설", description: "의원, 소매점, 사무소, 이·미용원 등 — 소화기구 150㎡·자탐 600㎡ 기준 적용" },
     ],
+    condition: (ya) => ya.yEraChoice === "before2004" && ya.yOccupancyType === "neighborhood",
   },
   {
     key: "yBefore2004HasLargeFloor450",
@@ -5155,6 +5165,7 @@ const yearSteps = [
       { value: "yes", label: "예", description: "해당 조건의 층이 있음" },
       { value: "no", label: "아니오", description: "해당 조건의 층이 없음" },
     ],
+    condition: (ya) => ya.yEraChoice === "before2004" && ya.yOccupancyType === "neighborhood",
   },
   {
     key: "yBefore2004SprinklerFloor",
@@ -5165,6 +5176,7 @@ const yearSteps = [
       { value: "yes", label: "예", description: "해당 층이 있음" },
       { value: "no", label: "아니오", description: "해당 층이 없음" },
     ],
+    condition: (ya) => ya.yEraChoice === "before2004" && ya.yOccupancyType === "neighborhood",
   },
   {
     key: "yBefore2004HasDetFloor300",
@@ -5175,6 +5187,7 @@ const yearSteps = [
       { value: "yes", label: "예", description: "해당 층이 있음" },
       { value: "no", label: "아니오", description: "해당 층이 없음" },
     ],
+    condition: (ya) => ya.yEraChoice === "before2004" && ya.yOccupancyType === "neighborhood",
   },
   {
     key: "yBefore2004LargeFloor1000",
@@ -5185,6 +5198,7 @@ const yearSteps = [
       { value: "yes", label: "예", description: "해당 층이 있음" },
       { value: "no", label: "아니오", description: "해당 층이 없음" },
     ],
+    condition: (ya) => ya.yEraChoice === "before2004" && ya.yOccupancyType === "neighborhood",
   },
 
   // ── 소방법 분법 이전(~2004.5.29) 의료시설 전용 스텝 ──
@@ -5197,6 +5211,7 @@ const yearSteps = [
       { value: "generalHospital", label: "종합병원", description: "종합병원 — 대형 피난구·통로유도등 기준 적용(1984~1992)" },
       { value: "hospital", label: "병원·의원 등", description: "병원·치과병원·한방병원·의원·치과의원·한의원 등" },
     ],
+    condition: (ya) => ya.yEraChoice === "before2004" && ya.yOccupancyType === "medical",
   },
   {
     key: "yBefore2004MedicalHasLargeFloor450",
@@ -5207,6 +5222,7 @@ const yearSteps = [
       { value: "yes", label: "예", description: "해당 조건의 층이 있음" },
       { value: "no", label: "아니오", description: "해당 조건의 층이 없음" },
     ],
+    condition: (ya) => ya.yEraChoice === "before2004" && ya.yOccupancyType === "medical",
   },
   {
     key: "yBefore2004MedicalHasLargeFloor300",
@@ -5217,6 +5233,7 @@ const yearSteps = [
       { value: "yes", label: "예", description: "해당 조건의 층이 있음" },
       { value: "no", label: "아니오", description: "해당 조건의 층이 없음" },
     ],
+    condition: (ya) => ya.yEraChoice === "before2004" && ya.yOccupancyType === "medical",
   },
   {
     key: "yBefore2004MedicalSprinklerFloor",
@@ -5227,6 +5244,7 @@ const yearSteps = [
       { value: "yes", label: "예", description: "해당 층이 있음" },
       { value: "no", label: "아니오", description: "해당 층이 없음" },
     ],
+    condition: (ya) => ya.yEraChoice === "before2004" && ya.yOccupancyType === "medical",
   },
   {
     key: "yBefore2004MedicalAutoDetFloor300",
@@ -5237,6 +5255,7 @@ const yearSteps = [
       { value: "yes", label: "예", description: "해당 층이 있음" },
       { value: "no", label: "아니오", description: "해당 층이 없음" },
     ],
+    condition: (ya) => ya.yEraChoice === "before2004" && ya.yOccupancyType === "medical",
   },
   {
     key: "yBefore2004MedicalHasLargeFloor1000",
@@ -5247,6 +5266,7 @@ const yearSteps = [
       { value: "yes", label: "예", description: "해당 층이 있음" },
       { value: "no", label: "아니오", description: "해당 층이 없음" },
     ],
+    condition: (ya) => ya.yEraChoice === "before2004" && ya.yOccupancyType === "medical",
   },
   {
     key: "yBefore2004MedicalHasFloor1500",
@@ -5257,12 +5277,14 @@ const yearSteps = [
       { value: "yes", label: "예", description: "1,500㎡ 이상인 층이 있음" },
       { value: "no", label: "아니오", description: "해당 층이 없음" },
     ],
+    condition: (ya) => ya.yEraChoice === "before2004" && ya.yOccupancyType === "medical",
   },
   {
     key: "yBefore2004MedicalParkingElecSet",
     type: "ycompound",
     title: "주차장·전기실 정보를 입력하세요",
     help: "물분무등소화설비 판단에 사용됩니다. 해당 없으면 0을 입력하세요.",
+    condition: (ya) => ya.yEraChoice === "before2004" && ya.yOccupancyType === "medical",
   },
 
   // ── 소방법 분법 이전(~2004.5.29) 노유자시설 전용 스텝 ──
@@ -5275,6 +5297,7 @@ const yearSteps = [
       { value: "yes", label: "예", description: "해당 조건의 층이 있음" },
       { value: "no", label: "아니오", description: "해당 조건의 층이 없음" },
     ],
+    condition: (ya) => ya.yEraChoice === "before2004" && ya.yOccupancyType === "elderly",
   },
   {
     key: "yBefore2004ElderlySprinklerFloor",
@@ -5285,6 +5308,7 @@ const yearSteps = [
       { value: "yes", label: "예", description: "해당 층이 있음" },
       { value: "no", label: "아니오", description: "해당 층이 없음" },
     ],
+    condition: (ya) => ya.yEraChoice === "before2004" && ya.yOccupancyType === "elderly",
   },
   {
     key: "yBefore2004ElderlyAutoDetFloor300",
@@ -5295,6 +5319,7 @@ const yearSteps = [
       { value: "yes", label: "예", description: "해당 층이 있음" },
       { value: "no", label: "아니오", description: "해당 층이 없음" },
     ],
+    condition: (ya) => ya.yEraChoice === "before2004" && ya.yOccupancyType === "elderly",
   },
   {
     key: "yBefore2004ElderlyHasLargeFloor300",
@@ -5305,6 +5330,7 @@ const yearSteps = [
       { value: "yes", label: "예", description: "해당 조건의 층이 있음" },
       { value: "no", label: "아니오", description: "해당 조건의 층이 없음" },
     ],
+    condition: (ya) => ya.yEraChoice === "before2004" && ya.yOccupancyType === "elderly",
   },
   {
     key: "yBefore2004ElderlyLargeFloor1000",
@@ -5315,6 +5341,7 @@ const yearSteps = [
       { value: "yes", label: "예", description: "해당 층이 있음" },
       { value: "no", label: "아니오", description: "해당 층이 없음" },
     ],
+    condition: (ya) => ya.yEraChoice === "before2004" && ya.yOccupancyType === "elderly",
   },
   {
     key: "yBefore2004ElderlyHasFloor500Plus",
@@ -5325,12 +5352,14 @@ const yearSteps = [
       { value: "yes", label: "있음", description: "500㎡ 이상인 층이 하나라도 있음" },
       { value: "no", label: "없음", description: "모든 층이 500㎡ 미만" },
     ],
+    condition: (ya) => ya.yEraChoice === "before2004" && ya.yOccupancyType === "elderly",
   },
   {
     key: "yBefore2004ElderlyParkingElecSet",
     type: "ycompound",
     title: "주차장·전기실 정보를 입력하세요",
     help: "물분무등소화설비 판단에 사용됩니다. 해당 없으면 0을 입력하세요.",
+    condition: (ya) => ya.yEraChoice === "before2004" && ya.yOccupancyType === "elderly",
   },
 
   // ── 소방법 분법 이전(~2004.5.29) 종교시설 전용 스텝 ──
@@ -5343,12 +5372,14 @@ const yearSteps = [
       { value: "yes", label: "있음", description: "해당 조건의 층이 하나라도 있음" },
       { value: "no", label: "없음", description: "조건에 맞는 층이 없음" },
     ],
+    condition: (ya) => ya.yEraChoice === "before2004" && ya.yOccupancyType === "religious",
   },
   {
     key: "yBefore2004ReligiousParkingElecSet",
     type: "ycompound",
     title: "주차장·전기실 정보를 입력하세요",
     help: "물분무등소화설비 판단에 사용됩니다. 해당 없으면 0을 입력하세요.",
+    condition: (ya) => ya.yEraChoice === "before2004" && ya.yOccupancyType === "religious",
   },
 ];
 
@@ -9505,11 +9536,7 @@ function yearWizardRestart() {
   yearRenderCurrentStep();
 }
 
-document.getElementById("back-from-explorer-year").addEventListener("click", () => showScreen("home"));
-document.getElementById("open-explorer-year").addEventListener("click", () => {
-  showScreen("explorerYear");
-  yearWizardRestart();
-});
+document.getElementById("back-from-explorer-year").addEventListener("click", () => showScreen("explorerSelect"));
 document.getElementById("year-prev-btn").addEventListener("click", () => yearMoveStep(-1));
 document.getElementById("year-next-btn").addEventListener("click", () => {
   const activeSteps = yearGetActiveSteps();
@@ -9573,7 +9600,13 @@ document.getElementById("open-guide").addEventListener("click", () => showScreen
     });
   }
 })();
-document.getElementById("prev-step").addEventListener("click", () => moveStep(-1));
+document.getElementById("prev-step").addEventListener("click", () => {
+  if (state.currentStep === 0) {
+    showScreen("explorerSelect");
+  } else {
+    moveStep(-1);
+  }
+});
 document.getElementById("next-step").addEventListener("click", () => {
   const activeSteps = getActiveSteps();
   const currentStep = activeSteps[state.currentStep];
@@ -9625,6 +9658,7 @@ document.getElementById("back-to-main-result").addEventListener("click", () => {
 });
 document.getElementById("restart-explorer").addEventListener("click", restartExplorer);
 document.getElementById("restart-explorer-from-multiuse").addEventListener("click", restartExplorer);
+document.getElementById("result-back-to-select").addEventListener("click", () => showScreen("explorerSelect"));
 
 renderCurrentStep();
 
