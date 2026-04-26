@@ -9534,46 +9534,32 @@ showScreen("home");
           step(3, '오른쪽 위 <strong>추가</strong> 탭') +
         '</div>';
     } else if (isAndroid || deferredPrompt) {
-      var apkDivider =
-        '<div style="display:flex;align-items:center;gap:10px;margin:16px 0 12px;">' +
-          '<div style="flex:1;height:1px;background:var(--border);"></div>' +
-          '<span style="color:var(--text-dim);font-size:11px;letter-spacing:0.5px;">또는</span>' +
-          '<div style="flex:1;height:1px;background:var(--border);"></div>' +
-        '</div>';
-      var apkBlock =
-        '<p style="margin:0 0 10px;color:var(--text-muted);font-size:12px;text-align:center;">안드로이드 APK 직접 설치</p>' +
-        '<a href="' + APP_URL + 'fireapp.apk" download ' +
-          'style="display:block;width:100%;box-sizing:border-box;padding:13px;text-align:center;' +
-          'border-radius:12px;border:1px solid var(--border);background:var(--surface2);' +
-          'color:var(--text);text-decoration:none;font-size:14px;font-weight:700;">' +
-          '⬇️ APK 다운로드' +
-        '</a>' +
-        '<p style="margin:8px 0 0;color:var(--text-dim);font-size:11px;text-align:center;line-height:1.6;">' +
-          '처음 설치 시 "출처를 알 수 없는 앱" 허용이 필요할 수 있습니다' +
-        '</p>';
-
       if (deferredPrompt) {
-        modalTitle.textContent = '홈 화면에 설치';
+        modalTitle.textContent = '앱 설치';
         modalBody.innerHTML =
-          '<p class="ios-guide-desc">아래 버튼을 누르면 홈 화면에 앱 아이콘이 추가됩니다.</p>' +
-          apkDivider + apkBlock;
-        modalAction.textContent = '📲 홈 화면에 추가';
+          '<p class="ios-guide-desc">APK를 설치하거나 홈 화면에 바로가기를 추가할 수 있습니다.</p>' +
+          '<p style="margin:0 0 10px;color:var(--text-dim);font-size:11px;line-height:1.6;">' +
+            '처음 설치 시 "출처를 알 수 없는 앱" 허용이 필요할 수 있습니다' +
+          '</p>';
+        modalAction.textContent = '⬇️ APK 다운로드';
         modalAction.style.display = '';
-        modalAction.onclick = async function () {
-          deferredPrompt.prompt();
-          await deferredPrompt.userChoice;
-          deferredPrompt = null;
+        modalAction.onclick = function () {
+          window.location.href = APP_URL + 'fireapp.apk';
           closeModal();
         };
       } else {
         modalTitle.textContent = '앱 설치';
         modalBody.innerHTML =
-          '<p class="ios-guide-desc">Chrome 메뉴에서 홈 화면에 추가하거나 APK를 직접 설치할 수 있습니다.</p>' +
-          '<div class="ios-guide-steps">' +
-            step(1, 'Chrome 주소창 오른쪽 <strong>⋮ 메뉴</strong> 탭') +
-            step(2, '<strong>홈 화면에 추가</strong> 선택') +
-          '</div>' +
-          apkDivider + apkBlock;
+          '<p class="ios-guide-desc">APK 파일을 다운로드하여 설치하세요.</p>' +
+          '<p style="margin:-8px 0 0;color:var(--text-dim);font-size:11px;line-height:1.6;">' +
+            '처음 설치 시 "출처를 알 수 없는 앱" 허용이 필요할 수 있습니다' +
+          '</p>';
+        modalAction.textContent = '⬇️ APK 다운로드';
+        modalAction.style.display = '';
+        modalAction.onclick = function () {
+          window.location.href = APP_URL + 'fireapp.apk';
+          closeModal();
+        };
       }
     } else {
       // PC
