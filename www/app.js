@@ -9450,9 +9450,10 @@ showScreen("home");
     window.addEventListener("load", setup);
   }
 
+  // 네이티브 MainActivity.onBackPressed()에서 직접 호출하는 글로벌 함수
+  window._appHandleBack = handleBack;
+
   // history/popstate 방식: 브라우저 및 Capacitor 폴백 모두 커버
-  // Capacitor에서 네이티브 리스너가 실패해도 WebView가 history를 보고
-  // goBack()을 호출하면 popstate가 발생하여 여기서 처리됨
   history.pushState({ app: true }, "");
   window.addEventListener("popstate", function () {
     history.pushState({ app: true }, "");
