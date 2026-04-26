@@ -9434,25 +9434,30 @@ showScreen("home");
     }
   }
 
-  // Capacitor 브리지 준비 후 등록
+  // Capacitor 네이티브 뒤로가기 리스너
   if (window.Capacitor) {
-    if (document.readyState === "complete") {
-      setup();
-    } else {
-      window.addEventListener("load", setup);
+    var _capBackDone = false;
+    function setup() {
+      if (_capBackDone) return;
+      var App = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App;
+      if (App) {
+        App.addListener("backButton", handleBack);
+        _capBackDone = true;
+      }
     }
+    // 즉시 시도 + load 후 재시도 (브릿지 초기화 지연 대비)
+    setup();
+    window.addEventListener("load", setup);
   }
 
-  // 웹 브라우저 뒤로가기 (Android Chrome / 일반 브라우저)
-  if (!window.Capacitor) {
-    // 페이지 진입 시 더미 state 추가 → 뒤로가기 = popstate
+  // history/popstate 방식: 브라우저 및 Capacitor 폴백 모두 커버
+  // Capacitor에서 네이티브 리스너가 실패해도 WebView가 history를 보고
+  // goBack()을 호출하면 popstate가 발생하여 여기서 처리됨
+  history.pushState({ app: true }, "");
+  window.addEventListener("popstate", function () {
     history.pushState({ app: true }, "");
-    window.addEventListener("popstate", function () {
-      // 즉시 다시 state 추가 → 앱에서 벗어나지 않도록
-      history.pushState({ app: true }, "");
-      handleBack();
-    });
-  }
+    handleBack();
+  });
 })();
 
 // ── 바로가기 추가 ─────────────────────────────────────
@@ -9529,9 +9534,29 @@ showScreen("home");
           step(3, '오른쪽 위 <strong>추가</strong> 탭') +
         '</div>';
     } else if (isAndroid || deferredPrompt) {
+      var apkDivider =
+        '<div style="display:flex;align-items:center;gap:10px;margin:16px 0 12px;">' +
+          '<div style="flex:1;height:1px;background:var(--border);"></div>' +
+          '<span style="color:var(--text-dim);font-size:11px;letter-spacing:0.5px;">또는</span>' +
+          '<div style="flex:1;height:1px;background:var(--border);"></div>' +
+        '</div>';
+      var apkBlock =
+        '<p style="margin:0 0 10px;color:var(--text-muted);font-size:12px;text-align:center;">안드로이드 APK 직접 설치</p>' +
+        '<a href="' + APP_URL + 'fireapp.apk" download ' +
+          'style="display:block;width:100%;box-sizing:border-box;padding:13px;text-align:center;' +
+          'border-radius:12px;border:1px solid var(--border);background:var(--surface2);' +
+          'color:var(--text);text-decoration:none;font-size:14px;font-weight:700;">' +
+          '⬇️ APK 다운로드' +
+        '</a>' +
+        '<p style="margin:8px 0 0;color:var(--text-dim);font-size:11px;text-align:center;line-height:1.6;">' +
+          '처음 설치 시 "출처를 알 수 없는 앱" 허용이 필요할 수 있습니다' +
+        '</p>';
+
       if (deferredPrompt) {
         modalTitle.textContent = '홈 화면에 설치';
-        modalBody.innerHTML = '<p class="ios-guide-desc">아래 버튼을 누르면 홈 화면에 앱 아이콘이 추가됩니다.</p>';
+        modalBody.innerHTML =
+          '<p class="ios-guide-desc">아래 버튼을 누르면 홈 화면에 앱 아이콘이 추가됩니다.</p>' +
+          apkDivider + apkBlock;
         modalAction.textContent = '📲 홈 화면에 추가';
         modalAction.style.display = '';
         modalAction.onclick = async function () {
@@ -9541,13 +9566,14 @@ showScreen("home");
           closeModal();
         };
       } else {
-        modalTitle.textContent = '홈 화면에 추가';
+        modalTitle.textContent = '앱 설치';
         modalBody.innerHTML =
-          '<p class="ios-guide-desc">Chrome 메뉴에서 직접 추가할 수 있습니다.</p>' +
+          '<p class="ios-guide-desc">Chrome 메뉴에서 홈 화면에 추가하거나 APK를 직접 설치할 수 있습니다.</p>' +
           '<div class="ios-guide-steps">' +
             step(1, 'Chrome 주소창 오른쪽 <strong>⋮ 메뉴</strong> 탭') +
             step(2, '<strong>홈 화면에 추가</strong> 선택') +
-          '</div>';
+          '</div>' +
+          apkDivider + apkBlock;
       }
     } else {
       // PC
