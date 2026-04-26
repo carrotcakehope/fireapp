@@ -3059,3 +3059,71 @@ html[data-theme="light"] .fac-comp-row {
 html[data-theme="light"] .fac-mini-photo {
   background: var(--surface3);
 }
+
+/* ── 사진 갤러리 ── */
+.fac-photo-gallery {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 14px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border2) transparent;
+}
+
+.fac-photo-gallery.fac-photo-gallery-multi .fac-photo-fig {
+  flex: 0 0 200px;
+  width: 200px;
+}
+
+.fac-photo-fig {
+  flex: 0 0 100%;
+  width: 100%;
+  margin: 0;
+}
+
+.fac-photo-img-wrap {
+  position: relative;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: var(--surface3);
+}
+
+.fac-photo-img {
+  display: block;
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+}
+
+.fac-photo-gallery-multi .fac-photo-img {
+  height: 150px;
+}
+
+.fac-photo-source-badge {
+  position: absolute;
+  bottom: 6px;
+  right: 6px;
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.62);
+  color: rgba(255, 255, 255, 0.75);
+  font-size: 10px;
+  font-family: var(--mono);
+  letter-spacing: 0.3px;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.fac-photo-cap {
+  padding: 5px 2px 0;
+  font-size: 11px;
+  color: var(--text-dim);
+  letter-spacing: 0.1px;
+}
+
+html[data-theme="light"] .fac-photo-source-badge {
+  background: rgba(0, 0, 0, 0.5);
+  color: rgba(255, 255, 255, 0.9);
+}
