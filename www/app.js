@@ -3283,6 +3283,34 @@ function inspectionRestart() {
 
 // ── 다중이용업소 판독기 ──────────────────────────────────────────
 
+// 업종별 법 편입 시기 안내 (결과 카드 하단에 표시)
+const MULTIUSE_HISTORY_NOTE = {
+  tanran:       "1997년 9월 27일 소방법 시행령 개정으로 다중이용업이 처음 신설될 때부터 단란주점·유흥주점은 다중이용업소로 지정되었습니다.",
+  karaoke:      "1997년 9월 27일 소방법 시행령 개정으로 다중이용업이 처음 신설될 때부터 노래연습장업은 다중이용업소로 지정되었습니다.",
+  food_basement: "1997년 9월 27일 소방법 시행령 개정으로 다중이용업이 처음 신설될 때부터 지하층 바닥면적 66㎡ 이상 음식점은 다중이용업소로 지정되었습니다.",
+  video:        "비디오물감상실업은 1997년 9월 27일 법 신설 시부터, 비디오물소극장업은 2007년 3월 25일부터, 복합영상물제공업은 2013년 11월 20일부터 순차적으로 다중이용업소로 지정되었습니다.",
+  movie:        "영화상영관은 2007년 3월 25일부터 다중이용업소로 지정되었습니다.",
+  game_multi:   "복합유통게임제공업은 2002년 3월 30일부터 다중이용업소로 지정되었습니다.",
+  game_pc:      "게임제공업·인터넷컴퓨터게임시설제공업(PC방·오락실)은 2001년 5월 21일부터 다중이용업소로 지정되었습니다.",
+  sauna:        "찜질방·황토방 등 발한시설을 갖춘 목욕장업은 2003년 1월 17일부터 다중이용업소로 지정되었습니다.",
+  bath_general: null,
+  postpartum:   "산후조리업은 2003년 1월 17일부터 다중이용업소로 지정되었습니다.",
+  massage:      "안마시술소는 2010년 11월 12일부터 다중이용업소로 지정되었습니다.",
+  gosiwon:      "고시원업은 2003년 1월 17일부터 다중이용업소로 지정되었습니다.",
+  phonebooth:   "전화방·화상대화방업은 2003년 1월 17일부터 다중이용업소로 지정되었습니다.",
+  sleeproom:    "수면방업은 2003년 1월 17일부터 다중이용업소로 지정되었습니다.",
+  kollatec:     "콜라텍업은 2003년 1월 17일부터 다중이용업소로 지정되었습니다.",
+  academy:      "학원은 2007년 3월 25일부터 다중이용업소로 지정되었습니다.",
+  gunrange:     "실내 권총사격장은 2010년 11월 12일부터 다중이용업소로 지정되었습니다.",
+  screengolf:   "스크린 골프장(가상체험 체육시설업)은 2010년 11월 12일부터 다중이용업소로 지정되었습니다.",
+  shared_food:  "공유주방 운영업은 2021년 12월 30일부터 다중이용업소로 지정되었습니다.",
+  escaperoom:   "방탈출카페업은 2022년 6월 8일부터 다중이용업소로 지정되었습니다.",
+  kidscafe:     "키즈카페업은 2022년 6월 8일부터 다중이용업소로 지정되었습니다.",
+  mangacafe:    "만화카페업은 2022년 6월 8일부터 다중이용업소로 지정되었습니다.",
+  food_ground:  "지상층 음식점(휴게음식점·일반음식점·제과점)은 2001년 5월 21일부터 다중이용업소로 지정되었습니다.",
+  food_duplex:  "내부계단 복층구조 음식점에 대한 명시적 규정은 2007년 3월 25일에 마련되었습니다.",
+};
+
 const multiuseNodes = {
   // ── 1단계: 업종 대분류 ──
   start: {
@@ -3324,7 +3352,7 @@ const multiuseNodes = {
     help: "",
     options: [
       { label: "휴게음식점 · 제과점 · 일반음식점", sub: "카페·베이커리·식당 등", next: "food_basement" },
-      { label: "단란주점 · 유흥주점", sub: "주류 제공 유흥시설", next: { result: "yes", type: "단란주점·유흥주점", law: "시행령 제2조제1호나목", reason: "단란주점영업과 유흥주점영업은 면적·층수 조건 없이 다중이용업소에 해당합니다." } },
+      { label: "단란주점 · 유흥주점", sub: "주류 제공 유흥시설", next: { result: "yes", historyKey: "tanran", type: "단란주점·유흥주점", law: "시행령 제2조제1호나목", reason: "단란주점영업과 유흥주점영업은 면적·층수 조건 없이 다중이용업소에 해당합니다." } },
       { label: "공유주방 운영업", sub: "여러 사업자가 공동으로 사용하는 주방을 운영하는 영업", next: "shared_basement" },
     ],
   },
@@ -3332,10 +3360,10 @@ const multiuseNodes = {
     title: "어떤 영상·게임 업종인가요?",
     help: "",
     options: [
-      { label: "영화상영관", sub: "극장", next: { result: "yes", type: "영화상영관", law: "시행령 제2조제2호", reason: "영화상영관은 다중이용업소에 해당합니다." } },
-      { label: "비디오물감상실업 · 비디오물소극장업 · 복합영상물제공업", sub: "비디오방 등", next: { result: "yes", type: "비디오물감상실업·비디오물소극장업·복합영상물제공업", law: "시행령 제2조제2호", reason: "비디오물감상실업, 비디오물소극장업, 복합영상물제공업은 다중이용업소에 해당합니다." } },
+      { label: "영화상영관", sub: "극장", next: { result: "yes", historyKey: "movie", type: "영화상영관", law: "시행령 제2조제2호", reason: "영화상영관은 다중이용업소에 해당합니다." } },
+      { label: "비디오물감상실업 · 비디오물소극장업 · 복합영상물제공업", sub: "비디오방 등", next: { result: "yes", historyKey: "video", type: "비디오물감상실업·비디오물소극장업·복합영상물제공업", law: "시행령 제2조제2호", reason: "비디오물감상실업, 비디오물소극장업, 복합영상물제공업은 다중이용업소에 해당합니다." } },
       { label: "게임제공업 · 인터넷컴퓨터게임시설제공업", sub: "PC방·오락실 등", next: "game_complex" },
-      { label: "복합유통게임제공업", sub: "게임과 다른 영업을 복합 운영", next: { result: "yes", type: "복합유통게임제공업", law: "시행령 제2조제5호", reason: "복합유통게임제공업은 층수·출입구 조건에 관계없이 다중이용업소에 해당합니다." } },
+      { label: "복합유통게임제공업", sub: "게임과 다른 영업을 복합 운영", next: { result: "yes", historyKey: "game_multi", type: "복합유통게임제공업", law: "시행령 제2조제5호", reason: "복합유통게임제공업은 층수·출입구 조건에 관계없이 다중이용업소에 해당합니다." } },
     ],
   },
   cat_health: {
@@ -3343,30 +3371,30 @@ const multiuseNodes = {
     help: "",
     options: [
       { label: "목욕장업 (찜질방·황토방·맥반석방 등)", sub: "열기·원적외선 이용 발한시설을 갖춘 목욕장", next: "sauna_capacity" },
-      { label: "목욕장업 (일반 목욕탕)", sub: "맥반석·황토·옥 등을 직접 또는 간접 가열해 발생한 열기·원적외선으로 땀을 낼 수 있는 시설을 갖춘 목욕장", next: { result: "yes", type: "목욕장업(일반 목욕탕)", law: "시행령 제2조제4호나목", reason: "개인 위생처리 공간(세면·탈의 등 시설)을 갖춘 일반 목욕탕은 다중이용업소에 해당합니다." } },
-      { label: "산후조리업", sub: "「모자보건법」 제2조제10호에 따른 산후조리업", next: { result: "yes", type: "산후조리업", law: "시행령 제2조제7호", reason: "산후조리업은 다중이용업소에 해당합니다." } },
-      { label: "안마시술소", sub: "「의료법」 제82조제4항에 따른 안마시술소", next: { result: "yes", type: "안마시술소", law: "시행령 제2조제7호의5", reason: "안마시술소는 다중이용업소에 해당합니다." } },
+      { label: "목욕장업 (일반 목욕탕)", sub: "맥반석·황토·옥 등을 직접 또는 간접 가열해 발생한 열기·원적외선으로 땀을 낼 수 있는 시설을 갖춘 목욕장", next: { result: "yes", historyKey: "bath_general", type: "목욕장업(일반 목욕탕)", law: "시행령 제2조제4호나목", reason: "개인 위생처리 공간(세면·탈의 등 시설)을 갖춘 일반 목욕탕은 다중이용업소에 해당합니다." } },
+      { label: "산후조리업", sub: "「모자보건법」 제2조제10호에 따른 산후조리업", next: { result: "yes", historyKey: "postpartum", type: "산후조리업", law: "시행령 제2조제7호", reason: "산후조리업은 다중이용업소에 해당합니다." } },
+      { label: "안마시술소", sub: "「의료법」 제82조제4항에 따른 안마시술소", next: { result: "yes", historyKey: "massage", type: "안마시술소", law: "시행령 제2조제7호의5", reason: "안마시술소는 다중이용업소에 해당합니다." } },
     ],
   },
   cat_lodging: {
     title: "어떤 숙박·공간 임대 업종인가요?",
     help: "",
     options: [
-      { label: "고시원업", sub: "구획된 실 안에 학습·숙박 또는 숙식을 제공하는 영업", next: { result: "yes", type: "고시원업", law: "시행령 제2조제7호의2", reason: "고시원업은 다중이용업소에 해당합니다." } },
-      { label: "전화방 · 화상대화방업", sub: "구획된 실에 전화·모니터 등 대화 시설을 갖춘 영업", next: { result: "yes", type: "전화방·화상대화방업", law: "시행규칙 별표 1의2 제1호", reason: "전화방·화상대화방업은 다중이용업소에 해당합니다." } },
-      { label: "수면방업", sub: "구획된 실에 침대·간이침대 등 휴식 시설을 갖춘 영업", next: { result: "yes", type: "수면방업", law: "시행규칙 별표 1의2 제2호", reason: "수면방업은 다중이용업소에 해당합니다." } },
+      { label: "고시원업", sub: "구획된 실 안에 학습·숙박 또는 숙식을 제공하는 영업", next: { result: "yes", historyKey: "gosiwon", type: "고시원업", law: "시행령 제2조제7호의2", reason: "고시원업은 다중이용업소에 해당합니다." } },
+      { label: "전화방 · 화상대화방업", sub: "구획된 실에 전화·모니터 등 대화 시설을 갖춘 영업", next: { result: "yes", historyKey: "phonebooth", type: "전화방·화상대화방업", law: "시행규칙 별표 1의2 제1호", reason: "전화방·화상대화방업은 다중이용업소에 해당합니다." } },
+      { label: "수면방업", sub: "구획된 실에 침대·간이침대 등 휴식 시설을 갖춘 영업", next: { result: "yes", historyKey: "sleeproom", type: "수면방업", law: "시행규칙 별표 1의2 제2호", reason: "수면방업은 다중이용업소에 해당합니다." } },
     ],
   },
   cat_leisure: {
     title: "어떤 여가·스포츠·문화 업종인가요?",
     help: "",
     options: [
-      { label: "노래연습장업", sub: "노래방·코인노래방 등", next: { result: "yes", type: "노래연습장업", law: "시행령 제2조제6호", reason: "노래연습장업은 다중이용업소에 해당합니다." } },
-      { label: "콜라텍업", sub: "주류 판매 없는 댄스홀", next: { result: "yes", type: "콜라텍업", law: "시행규칙 별표 1의2 제3호", reason: "콜라텍업은 다중이용업소에 해당합니다." } },
-      { label: "방탈출카페업", sub: "제한 시간 내에 방을 탈출하는 놀이 형태의 영업", next: { result: "yes", type: "방탈출카페업", law: "시행규칙 별표 1의2 제4호", reason: "방탈출카페업은 다중이용업소에 해당합니다." } },
-      { label: "키즈카페업", sub: "실내 공간에서 어린이에게 놀이를 제공하는 영업", next: { result: "yes", type: "키즈카페업", law: "시행규칙 별표 1의2 제5호", reason: "키즈카페업은 다중이용업소에 해당합니다." } },
+      { label: "노래연습장업", sub: "노래방·코인노래방 등", next: { result: "yes", historyKey: "karaoke", type: "노래연습장업", law: "시행령 제2조제6호", reason: "노래연습장업은 다중이용업소에 해당합니다." } },
+      { label: "콜라텍업", sub: "주류 판매 없는 댄스홀", next: { result: "yes", historyKey: "kollatec", type: "콜라텍업", law: "시행규칙 별표 1의2 제3호", reason: "콜라텍업은 다중이용업소에 해당합니다." } },
+      { label: "방탈출카페업", sub: "제한 시간 내에 방을 탈출하는 놀이 형태의 영업", next: { result: "yes", historyKey: "escaperoom", type: "방탈출카페업", law: "시행규칙 별표 1의2 제4호", reason: "방탈출카페업은 다중이용업소에 해당합니다." } },
+      { label: "키즈카페업", sub: "실내 공간에서 어린이에게 놀이를 제공하는 영업", next: { result: "yes", historyKey: "kidscafe", type: "키즈카페업", law: "시행규칙 별표 1의2 제5호", reason: "키즈카페업은 다중이용업소에 해당합니다." } },
       { label: "만화카페업 · 만화방", sub: "다수의 도서를 갖춘 음식점·열람공간 운영 영업", next: "manga_area" },
-      { label: "권총사격장 (실내)", sub: "실내사격장에 한정 (종합사격장 내 설치 포함)", next: { result: "yes", type: "권총사격장(실내)", law: "시행령 제2조제7호의3", reason: "실내 권총사격장은 다중이용업소에 해당합니다." } },
+      { label: "권총사격장 (실내)", sub: "실내사격장에 한정 (종합사격장 내 설치 포함)", next: { result: "yes", historyKey: "gunrange", type: "권총사격장(실내)", law: "시행령 제2조제7호의3", reason: "실내 권총사격장은 다중이용업소에 해당합니다." } },
       { label: "가상체험 체육시설업", sub: "실내에 1개 이상의 구획된 실을 만들어 운동이 가능한 시설", next: "virtual_sports_type" },
     ],
   },
@@ -3375,7 +3403,7 @@ const multiuseNodes = {
     title: "어떤 가상체험 체육시설업인가요?",
     help: "",
     options: [
-      { label: "스크린 골프장", sub: "구획된 실에서 골프 운동이 가능한 시설", next: { result: "yes", type: "가상체험 체육시설업", law: "시행령 제2조제7호의4", reason: "스크린 골프장은 다중이용업소에 해당합니다." } },
+      { label: "스크린 골프장", sub: "구획된 실에서 골프 운동이 가능한 시설", next: { result: "yes", historyKey: "screengolf", type: "가상체험 체육시설업", law: "시행령 제2조제7호의4", reason: "스크린 골프장은 다중이용업소에 해당합니다." } },
       { label: "스크린 야구장", sub: "구획된 실에서 야구 체험을 제공하는 시설", next: { result: "no", type: "", law: "", reason: "스크린 야구장은 현재 다중이용업소 대상인 가상체험 체육시설업에 해당하지 않습니다." } },
       { label: "스크린 풋살, 족구, 양궁 등", sub: "골프 외 다른 종목의 가상체험 체육시설", next: { result: "no", type: "", law: "", reason: "스크린 풋살, 족구, 양궁 등은 현재 다중이용업소 대상인 가상체험 체육시설업에 해당하지 않습니다." } },
     ],
@@ -3394,7 +3422,7 @@ const multiuseNodes = {
     title: "영업장 바닥면적 합계가 66㎡ 이상인가요?",
     help: "영업장으로 사용하는 바닥면적의 합계 기준입니다.",
     options: [
-      { label: "예 (66㎡ 이상)", next: { result: "yes", type: "휴게음식점·제과점·일반음식점", law: "시행령 제2조제1호가목", reason: "지하층 영업장으로 바닥면적 합계가 66㎡ 이상이므로 다중이용업소에 해당합니다." } },
+      { label: "예 (66㎡ 이상)", next: { result: "yes", historyKey: "food_basement", type: "휴게음식점·제과점·일반음식점", law: "시행령 제2조제1호가목", reason: "지하층 영업장으로 바닥면적 합계가 66㎡ 이상이므로 다중이용업소에 해당합니다." } },
       { label: "아니오 (66㎡ 미만)", next: { result: "no", type: "", law: "", reason: "지하층 영업장이나 바닥면적 합계가 66㎡ 미만이므로 다중이용업소에 해당하지 않습니다." } },
     ],
   },
@@ -3410,7 +3438,7 @@ const multiuseNodes = {
     title: "내부계단으로 연결된 복층구조 영업장인가요?",
     help: "복층구조(내부계단 연결)이면 층수·출입구 조건에 관계없이 다중이용업소에 해당합니다.",
     options: [
-      { label: "예 (복층 + 내부계단 연결)", info: "하나의 영업장이 2개 층에 걸쳐 있고, 층 사이를 영업장 내부 계단으로 오르내리는 구조입니다.\n예) 1층과 2층이 모두 같은 음식점이고, 손님이 내부 계단으로 2층을 이용하는 구조", next: { result: "yes", type: "휴게음식점·제과점·일반음식점", law: "시행령 제2조제1호가목", reason: "내부계단으로 연결된 복층구조 영업장은 층수·출입구 제외 규정이 적용되지 않으므로 다중이용업소에 해당합니다." } },
+      { label: "예 (복층 + 내부계단 연결)", info: "하나의 영업장이 2개 층에 걸쳐 있고, 층 사이를 영업장 내부 계단으로 오르내리는 구조입니다.\n예) 1층과 2층이 모두 같은 음식점이고, 손님이 내부 계단으로 2층을 이용하는 구조", next: { result: "yes", historyKey: "food_duplex", type: "휴게음식점·제과점·일반음식점", law: "시행령 제2조제1호가목", reason: "내부계단으로 연결된 복층구조 영업장은 층수·출입구 제외 규정이 적용되지 않으므로 다중이용업소에 해당합니다." } },
       { label: "아니오 (단층 또는 외부계단)", next: "food_floor" },
     ],
   },
@@ -3419,7 +3447,7 @@ const multiuseNodes = {
     help: "반지하·필로티 등 지면과 직접 맞닿는 층도 '지상과 직접 접하는 층'에 해당할 수 있습니다.",
     options: [
       { label: "예 (지상 1층 또는 지상 직접 접하는 층)", next: "food_entrance" },
-      { label: "아니오 (2층 이상 또는 기타 층)", next: { result: "yes", type: "휴게음식점·제과점·일반음식점", law: "시행령 제2조제1호가목", reason: "지상 1층·지상 직접 접하는 층이 아닌 곳에 영업장이 있으므로 다중이용업소에 해당합니다." } },
+      { label: "아니오 (2층 이상 또는 기타 층)", next: { result: "yes", historyKey: "food_ground", type: "휴게음식점·제과점·일반음식점", law: "시행령 제2조제1호가목", reason: "지상 1층·지상 직접 접하는 층이 아닌 곳에 영업장이 있으므로 다중이용업소에 해당합니다." } },
     ],
   },
   food_entrance: {
@@ -3427,7 +3455,7 @@ const multiuseNodes = {
     help: "내부 복도·로비를 거치지 않고 외부 지면으로 바로 나갈 수 있는 경우입니다.",
     options: [
       { label: "예 (외부 지면과 직접 연결)", next: { result: "no", type: "", law: "시행령 제2조제1호가목 단서", reason: "지상 1층 또는 지상과 직접 접하는 층에 있고 주된 출입구가 건물 외부 지면과 직접 연결되어 있어 다중이용업소 적용에서 제외됩니다." } },
-      { label: "아니오 (내부 통로 경유)", next: { result: "yes", type: "휴게음식점·제과점·일반음식점", law: "시행령 제2조제1호가목", reason: "주된 출입구가 건물 외부 지면과 직접 연결되지 않으므로 다중이용업소에 해당합니다." } },
+      { label: "아니오 (내부 통로 경유)", next: { result: "yes", historyKey: "food_ground", type: "휴게음식점·제과점·일반음식점", law: "시행령 제2조제1호가목", reason: "주된 출입구가 건물 외부 지면과 직접 연결되지 않으므로 다중이용업소에 해당합니다." } },
     ],
   },
 
@@ -3444,7 +3472,7 @@ const multiuseNodes = {
     title: "영업장 바닥면적 합계가 66㎡ 이상인가요?",
     help: "",
     options: [
-      { label: "예 (66㎡ 이상)", next: { result: "yes", type: "공유주방 운영업", law: "시행령 제2조제1호의2", reason: "지하층 공유주방으로 바닥면적 합계 66㎡ 이상이므로 다중이용업소에 해당합니다." } },
+      { label: "예 (66㎡ 이상)", next: { result: "yes", historyKey: "shared_food", type: "공유주방 운영업", law: "시행령 제2조제1호의2", reason: "지하층 공유주방으로 바닥면적 합계 66㎡ 이상이므로 다중이용업소에 해당합니다." } },
       { label: "아니오 (66㎡ 미만)", next: { result: "no", type: "", law: "", reason: "바닥면적 합계가 66㎡ 미만이므로 다중이용업소에 해당하지 않습니다." } },
     ],
   },
@@ -3460,7 +3488,7 @@ const multiuseNodes = {
     title: "내부계단으로 연결된 복층구조 영업장인가요?",
     help: "",
     options: [
-      { label: "예 (복층 + 내부계단 연결)", info: "하나의 영업장이 2개 층에 걸쳐 있고, 층 사이를 영업장 내부 계단으로 오르내리는 구조입니다.\n예) 1층과 2층이 모두 같은 공유주방이고, 내부 계단으로 연결된 구조", next: { result: "yes", type: "공유주방 운영업", law: "시행령 제2조제1호의2", reason: "내부계단으로 연결된 복층구조 영업장은 층수·출입구 제외 규정이 적용되지 않으므로 다중이용업소에 해당합니다." } },
+      { label: "예 (복층 + 내부계단 연결)", info: "하나의 영업장이 2개 층에 걸쳐 있고, 층 사이를 영업장 내부 계단으로 오르내리는 구조입니다.\n예) 1층과 2층이 모두 같은 공유주방이고, 내부 계단으로 연결된 구조", next: { result: "yes", historyKey: "shared_food", type: "공유주방 운영업", law: "시행령 제2조제1호의2", reason: "내부계단으로 연결된 복층구조 영업장은 층수·출입구 제외 규정이 적용되지 않으므로 다중이용업소에 해당합니다." } },
       { label: "아니오", next: "shared_floor" },
     ],
   },
@@ -3469,7 +3497,7 @@ const multiuseNodes = {
     help: "",
     options: [
       { label: "예", next: "shared_entrance" },
-      { label: "아니오", next: { result: "yes", type: "공유주방 운영업", law: "시행령 제2조제1호의2", reason: "지상 1층·지상 직접 접하는 층이 아닌 층에 있으므로 다중이용업소에 해당합니다." } },
+      { label: "아니오", next: { result: "yes", historyKey: "shared_food", type: "공유주방 운영업", law: "시행령 제2조제1호의2", reason: "지상 1층·지상 직접 접하는 층이 아닌 층에 있으므로 다중이용업소에 해당합니다." } },
     ],
   },
   shared_entrance: {
@@ -3477,7 +3505,7 @@ const multiuseNodes = {
     help: "",
     options: [
       { label: "예 (외부 지면과 직접 연결)", next: { result: "no", type: "", law: "시행령 제2조제1호의2 단서", reason: "지상 1층 또는 지상과 직접 접하는 층에 있고 주된 출입구가 건물 외부 지면과 직접 연결되어 다중이용업소 적용에서 제외됩니다." } },
-      { label: "아니오 (내부 통로 경유)", next: { result: "yes", type: "공유주방 운영업", law: "시행령 제2조제1호의2", reason: "주된 출입구가 건물 외부 지면과 직접 연결되지 않으므로 다중이용업소에 해당합니다." } },
+      { label: "아니오 (내부 통로 경유)", next: { result: "yes", historyKey: "shared_food", type: "공유주방 운영업", law: "시행령 제2조제1호의2", reason: "주된 출입구가 건물 외부 지면과 직접 연결되지 않으므로 다중이용업소에 해당합니다." } },
     ],
   },
 
@@ -3486,7 +3514,7 @@ const multiuseNodes = {
     title: "학원 수용인원이 몇 명인가요?",
     help: "「소방시설 설치 및 관리에 관한 법률 시행령」 별표 7에 따라 산정한 수용인원 기준입니다.",
     options: [
-      { label: "300명 이상", next: { result: "yes", type: "학원", law: "시행령 제2조제3호가목", reason: "수용인원이 300명 이상이므로 다중이용업소에 해당합니다." } },
+      { label: "300명 이상", next: { result: "yes", historyKey: "academy", type: "학원", law: "시행령 제2조제3호가목", reason: "수용인원이 300명 이상이므로 다중이용업소에 해당합니다." } },
       { label: "100명 이상 300명 미만", next: "academy_sub" },
       { label: "100명 미만", next: { result: "no", type: "", law: "", reason: "수용인원이 100명 미만이므로 다중이용업소에 해당하지 않습니다." } },
     ],
@@ -3506,7 +3534,7 @@ const multiuseNodes = {
     help: "「건축법 시행령」 제46조에 따른 방화구획으로 나누어진 경우에는 다중이용업소 적용에서 제외됩니다.",
     options: [
       { label: "예 (방화구획으로 구분)", next: { result: "no", type: "", law: "시행령 제2조제3호나목 단서", reason: "학원 사용 부분과 다른 용도 부분이 방화구획으로 구분되어 있어 다중이용업소 적용에서 제외됩니다." } },
-      { label: "아니오 (방화구획 없음)", next: { result: "yes", type: "학원", law: "시행령 제2조제3호나목", reason: "수용인원 100~300명 미만이나 부가 조건(기숙사·복수 학원·다중이용업소 혼재)에 해당하고 방화구획으로 구분되어 있지 않으므로 다중이용업소에 해당합니다." } },
+      { label: "아니오 (방화구획 없음)", next: { result: "yes", historyKey: "academy", type: "학원", law: "시행령 제2조제3호나목", reason: "수용인원 100~300명 미만이나 부가 조건(기숙사·복수 학원·다중이용업소 혼재)에 해당하고 방화구획으로 구분되어 있지 않으므로 다중이용업소에 해당합니다." } },
     ],
   },
 
@@ -3515,7 +3543,7 @@ const multiuseNodes = {
     title: "찜질·발한 시설 부분의 수용인원이 100명 이상인가요?",
     help: "물로 목욕할 수 있는 시설 부분의 수용인원은 제외하고 계산합니다.",
     options: [
-      { label: "예 (100명 이상)", next: { result: "yes", type: "목욕장업(찜질방·황토방 등)", law: "시행령 제2조제4호가목", reason: "열기·원적외선 이용 발한시설의 수용인원이 100명 이상이므로 다중이용업소에 해당합니다." } },
+      { label: "예 (100명 이상)", next: { result: "yes", historyKey: "sauna", type: "목욕장업(찜질방·황토방 등)", law: "시행령 제2조제4호가목", reason: "열기·원적외선 이용 발한시설의 수용인원이 100명 이상이므로 다중이용업소에 해당합니다." } },
       { label: "아니오 (100명 미만)", next: { result: "no", type: "", law: "", reason: "발한시설 부분의 수용인원이 100명 미만이므로 다중이용업소에 해당하지 않습니다." } },
     ],
   },
@@ -3525,7 +3553,7 @@ const multiuseNodes = {
     title: "내부계단으로 연결된 복층구조 영업장인가요?",
     help: "복층구조(내부계단 연결)이면 층수·출입구 조건에 관계없이 다중이용업소에 해당합니다.",
     options: [
-      { label: "예 (복층 + 내부계단 연결)", info: "하나의 영업장이 2개 층에 걸쳐 있고, 층 사이를 영업장 내부 계단으로 오르내리는 구조입니다.\n예) 1층과 2층이 모두 같은 PC방이고, 내부 계단으로 2층을 이용하는 구조", next: { result: "yes", type: "게임제공업·인터넷컴퓨터게임시설제공업", law: "시행령 제2조제5호", reason: "내부계단으로 연결된 복층구조 영업장은 층수·출입구 제외 규정이 적용되지 않으므로 다중이용업소에 해당합니다." } },
+      { label: "예 (복층 + 내부계단 연결)", info: "하나의 영업장이 2개 층에 걸쳐 있고, 층 사이를 영업장 내부 계단으로 오르내리는 구조입니다.\n예) 1층과 2층이 모두 같은 PC방이고, 내부 계단으로 2층을 이용하는 구조", next: { result: "yes", historyKey: "game_pc", type: "게임제공업·인터넷컴퓨터게임시설제공업", law: "시행령 제2조제5호", reason: "내부계단으로 연결된 복층구조 영업장은 층수·출입구 제외 규정이 적용되지 않으므로 다중이용업소에 해당합니다." } },
       { label: "아니오 (단층 또는 외부계단)", next: "game_floor" },
     ],
   },
@@ -3534,7 +3562,7 @@ const multiuseNodes = {
     help: "",
     options: [
       { label: "예 (지상 1층 또는 지상 직접 접하는 층)", next: "game_entrance" },
-      { label: "아니오 (2층 이상 또는 지하층 등)", next: { result: "yes", type: "게임제공업·인터넷컴퓨터게임시설제공업", law: "시행령 제2조제5호", reason: "지상 1층·지상 직접 접하는 층이 아닌 층에 있으므로 다중이용업소에 해당합니다." } },
+      { label: "아니오 (2층 이상 또는 지하층 등)", next: { result: "yes", historyKey: "game_pc", type: "게임제공업·인터넷컴퓨터게임시설제공업", law: "시행령 제2조제5호", reason: "지상 1층·지상 직접 접하는 층이 아닌 층에 있으므로 다중이용업소에 해당합니다." } },
     ],
   },
   game_entrance: {
@@ -3542,7 +3570,7 @@ const multiuseNodes = {
     help: "",
     options: [
       { label: "예 (외부 지면과 직접 연결)", next: { result: "no", type: "", law: "시행령 제2조제5호 단서", reason: "지상 1층 또는 지상과 직접 접하는 층에 있고 주된 출입구가 건물 외부 지면과 직접 연결되어 있어 다중이용업소 적용에서 제외됩니다." } },
-      { label: "아니오 (내부 통로 경유)", next: { result: "yes", type: "게임제공업·인터넷컴퓨터게임시설제공업", law: "시행령 제2조제5호", reason: "주된 출입구가 건물 외부 지면과 직접 연결되지 않으므로 다중이용업소에 해당합니다." } },
+      { label: "아니오 (내부 통로 경유)", next: { result: "yes", historyKey: "game_pc", type: "게임제공업·인터넷컴퓨터게임시설제공업", law: "시행령 제2조제5호", reason: "주된 출입구가 건물 외부 지면과 직접 연결되지 않으므로 다중이용업소에 해당합니다." } },
     ],
   },
 
@@ -3560,7 +3588,7 @@ const multiuseNodes = {
     help: "단순히 도서를 대여하거나 판매만 하는 경우는 만화카페업에서 제외됩니다.",
     options: [
       { label: "예 (도서 대여·판매만)", next: { result: "no", type: "", law: "", reason: "도서 대여·판매만 하는 영업은 만화카페업에 해당하지 않아 다중이용업소 적용에서 제외됩니다." } },
-      { label: "아니오 (음식 제공·열람공간 운영·구획된 실 설치 등)", next: { result: "yes", type: "만화카페업", law: "시행규칙 별표 1의2 제6호", reason: "50㎡ 이상이고 단순 대여·판매 외 음식 제공이나 열람공간·구획된 실 운영 등을 하므로 다중이용업소에 해당합니다." } },
+      { label: "아니오 (음식 제공·열람공간 운영·구획된 실 설치 등)", next: { result: "yes", historyKey: "mangacafe", type: "만화카페업", law: "시행규칙 별표 1의2 제6호", reason: "50㎡ 이상이고 단순 대여·판매 외 음식 제공이나 열람공간·구획된 실 운영 등을 하므로 다중이용업소에 해당합니다." } },
     ],
   },
 };
@@ -3589,11 +3617,22 @@ function renderMultiuse() {
         ${current.law ? `<div class="mu-law">${current.law}</div>` : ""}
       </div>
     `;
+    // 법 편입 시기 안내 (해당 업종만)
+    if (isYes && current.historyKey) {
+      const note = MULTIUSE_HISTORY_NOTE[current.historyKey];
+      if (note) {
+        const noteBox = document.createElement("div");
+        noteBox.className = "info-box amber";
+        noteBox.style.cssText = "margin-top:10px;font-size:13px;";
+        noteBox.innerHTML = `<div class="ib-title">📅 법 편입 시기 안내</div>${note}`;
+        card.appendChild(noteBox);
+      }
+    }
     if (multiuseState.history.length > 0) {
       const backBtn = document.createElement("button");
       backBtn.type = "button";
       backBtn.className = "btn btn-ghost";
-      backBtn.style.cssText = "width:100%;margin-bottom:8px;";
+      backBtn.style.cssText = "width:100%;margin-bottom:8px;margin-top:10px;";
       backBtn.textContent = "이전으로";
       backBtn.addEventListener("click", multiuseBack);
       card.appendChild(backBtn);
