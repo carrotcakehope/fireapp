@@ -5207,7 +5207,14 @@ function yearRenderChoiceStep(step) {
     btn.className = "choice-button";
     if (String(yearState.answers[step.key]) === option.value) btn.classList.add("selected");
     btn.innerHTML = `<strong>${option.label}</strong><span>${option.description}</span>`;
-    btn.addEventListener("click", () => { yearState.answers[step.key] = option.value; yearRenderCurrentStep(); });
+    btn.addEventListener("click", () => {
+      yearState.answers[step.key] = option.value;
+      // 분법 이전/이후 선택 시 허가일 기본값 자동 전환
+      if (step.key === "yEraChoice") {
+        yearState.answers.yPermitDate = option.value === "before2004" ? "1992-07-28" : "2019-02-18";
+      }
+      yearRenderCurrentStep();
+    });
     wrapper.appendChild(btn);
   });
   return wrapper;
@@ -5442,7 +5449,12 @@ function yearCurrentStepIsValid() {
     return v !== "" && !Number.isNaN(Number(v));
   }
   if (step.type === "ydate") {
-    return !!yearState.answers.yPermitDate;
+    if (!yearState.answers.yPermitDate) return false;
+    const pd = yPermitDateInt();
+    if (yearState.answers.yEraChoice === "before2004") {
+      return pd >= YD.D19811106 && pd < YD.D20040530;
+    }
+    return pd >= YD.D20040530;
   }
   return true;
 }
@@ -5454,7 +5466,16 @@ function yearScrollToTop() {
 
 function yearMoveStep(direction) {
   if (direction > 0 && !yearCurrentStepIsValid()) {
-    showToast("현재 질문의 값을 먼저 입력해 주세요.");
+    const step = yearGetActiveSteps()[yearState.currentStep];
+    if (step.type === "ydate") {
+      if (yearState.answers.yEraChoice === "before2004") {
+        showToast("1981년 11월 6일 ~ 2004년 5월 29일 사이의 허가일을 입력해 주세요.");
+      } else {
+        showToast("2004년 5월 30일 이후의 허가일을 입력해 주세요.");
+      }
+    } else {
+      showToast("현재 질문의 값을 먼저 입력해 주세요.");
+    }
     return;
   }
 
@@ -5782,8 +5803,9 @@ function yearEvaluateLodgingBefore2004(inp) {
 
   // ── 피난기구 ──
   if (preBefore1992) {
-    results.push(makeResult(categories.evacuation, "피난기구", "", "review",
-      "1992년 7월 28일 이전에는 수용인원 30인 이상인 숙박시설에서 피난층·2층·11층 이상의 층을 제외한 나머지 층에 설치합니다. (건축법상 특별피난계단이 없는 호텔·여관은 11층 이상에도 설치) 수용인원을 직접 확인하세요.", ""));
+    const hasEligibleFloor = ag >= 3 || bf > 0;
+    results.push(makeResult(categories.evacuation, "피난기구", "", hasEligibleFloor ? "required" : "review",
+      "1992년 7월 28일 이전에는 수용인원 30인 이상인 숙박시설에서 피난층·2층·11층 이상의 층을 제외한 나머지 층에 설치합니다. (건축법상 특별피난계단이 없는 호텔·여관은 11층 이상에도 설치) 설치 여부는 수용인원 기준으로 판단하므로 실제 충족 여부는 소방법 시행규칙 [별표1] 수용인원산정법에 따라 직접 확인하세요.", ""));
   } else {
     const evacReq = ag >= 3 || bf > 0;
     const evacReason = evacReq
@@ -6131,8 +6153,9 @@ function yearEvaluateNeighborhoodBefore2004(inp) {
   let evacReq, evacReason;
   if (preBefore1992) {
     // ~1992.07.27: 수용인원 기준(음식점 50인 이상 등)으로 복잡
-    evacReason = "1992년 7월 28일 이전에는 수용인원 기준(음식점 등 50인 이상)으로 설치 여부를 판단합니다. 피난층·2층·11층 이상 층을 제외한 층에 설치하며, 수용인원을 직접 확인하세요.";
-    results.push(makeResult(categories.evacuation, "피난기구", "", "review", evacReason, ""));
+    const hasEligibleFloor = ag >= 3 || bf > 0;
+    evacReason = "1992년 7월 28일 이전에는 수용인원 기준(음식점 등 50인 이상)으로 설치 여부를 판단합니다. 피난층·2층·11층 이상 층을 제외한 층에 설치하며, 설치 여부는 수용인원 기준으로 판단하므로 실제 충족 여부는 소방법 시행규칙 [별표1] 수용인원산정법에 따라 직접 확인하세요.";
+    results.push(makeResult(categories.evacuation, "피난기구", "", hasEligibleFloor ? "required" : "review", evacReason, ""));
   } else {
     // 1992.07.28~: 피난층·2층·11층 이상 층을 제외한 층에 설치 (연면적 기준 없음)
     evacReq = ag >= 3 || bf > 0;
@@ -6445,8 +6468,9 @@ function yearEvaluateReligiousBefore2004(inp) {
 
   // ── 피난기구 ──
   if (preBefore1992) {
-    results.push(makeResult(categories.evacuation, "피난기구", "", "review",
-      "1992년 7월 28일 이전에는 수용인원 20인 이상인 소방대상물에 피난기구를 설치해야 합니다. 수용인원을 직접 확인하세요.", ""));
+    const hasEligibleFloor = ag >= 3 || bf > 0;
+    results.push(makeResult(categories.evacuation, "피난기구", "", hasEligibleFloor ? "required" : "review",
+      "1992년 7월 28일 이전에는 수용인원 20인 이상인 소방대상물에 피난기구를 설치해야 합니다. 설치 여부는 수용인원 기준으로 판단하므로 실제 충족 여부는 소방법 시행규칙 [별표1] 수용인원산정법에 따라 직접 확인하세요.", ""));
   } else {
     const evacReq = ag >= 3 || bf > 0;
     results.push(makeResult(categories.evacuation, "피난기구", "",
@@ -6770,8 +6794,9 @@ function yearEvaluateMedicalBefore2004(inp) {
 
   // ── 피난기구 ──
   if (preBefore1992) {
-    results.push(makeResult(categories.evacuation, "피난기구", "", "review",
-      "1992년 7월 28일 이전에는 수용인원 20인 이상인 의료원에서 피난층·2층·11층 이상의 층을 제외한 나머지 층에 설치합니다. 수용인원을 직접 확인하세요.", ""));
+    const hasEligibleFloor = ag >= 3 || bf > 0;
+    results.push(makeResult(categories.evacuation, "피난기구", "", hasEligibleFloor ? "required" : "review",
+      "1992년 7월 28일 이전에는 수용인원 20인 이상인 의료원에서 피난층·2층·11층 이상의 층을 제외한 나머지 층에 설치합니다. 설치 여부는 수용인원 기준으로 판단하므로 실제 충족 여부는 소방법 시행규칙 [별표1] 수용인원산정법에 따라 직접 확인하세요.", ""));
   } else {
     const evacReq = ag >= 3 || bf > 0;
     const evacReason = evacReq
@@ -7156,8 +7181,9 @@ function yearEvaluateElderlyBefore2004(inp) {
 
   // ── 피난기구 ──
   if (preBefore1992) {
-    results.push(makeResult(categories.evacuation, "피난기구", "", "review",
-      "1992년 7월 28일 이전에는 수용인원 20인 이상인 소방대상물에 피난기구를 설치해야 합니다. 수용인원을 직접 확인하세요.", ""));
+    const hasEligibleFloor = ag >= 3 || bf > 0;
+    results.push(makeResult(categories.evacuation, "피난기구", "", hasEligibleFloor ? "required" : "review",
+      "1992년 7월 28일 이전에는 수용인원 20인 이상인 소방대상물에 피난기구를 설치해야 합니다. 설치 여부는 수용인원 기준으로 판단하므로 실제 충족 여부는 소방법 시행규칙 [별표1] 수용인원산정법에 따라 직접 확인하세요.", ""));
   } else {
     const evacReq = ag >= 3 || bf > 0;
     results.push(makeResult(categories.evacuation, "피난기구", "",
@@ -8824,10 +8850,35 @@ function yearShowResults() {
     yearScrollToTop();
     return;
   }
+  // ── 분법 이전 종교시설 처리 ──
+  if (yearState.answers.yEraChoice === "before2004" && yearState.answers.yOccupancyType === "religious") {
+    const pd = yPermitDateInt();
+    if (pd < YD.D19811106 || pd >= YD.D20040530) {
+      showToast("1981년 11월 6일 ~ 2004년 5월 29일 사이의 허가일을 입력해 주세요.");
+      return;
+    }
+    const inp = yearNormalizeAnswers();
+    const rawPermit = yearState.answers.yPermitDate;
+    const [py, pm, pd2] = rawPermit.split("-").map(Number);
+    const permitStr = `${py}년 ${pm}월 ${pd2}일`;
+    const results = yearEvaluateReligiousBefore2004(inp);
+    const summaryHtml = `<div class="ib-title">입력값 기준</div>종교시설, 건축허가일 ${permitStr}, 연면적 ${inp.totalArea}㎡, 지상 ${inp.aboveGroundFloors}층, 지하 ${inp.basementFloors}층`;
+    const exceptionItems = [{ category: "안내", name: "설치 제외·대체 없음", status: "notRequired", reason: "구 소방법 적용 구간으로 별도 제외·대체 안내는 제공되지 않습니다." }];
+    const allRequiredItems = results.filter((r) => r.status === "required" || r.status === "review");
+    document.getElementById("year-result-summary").innerHTML = summaryHtml;
+    renderSimpleRequiredList(allRequiredItems, "year-required-list");
+    renderResultGroup("year-criteria-list", results, [], allRequiredItems.map((i) => i.name));
+    renderResultGroup("year-exception-list", exceptionItems);
+    document.getElementById("year-question-card").classList.add("hidden");
+    document.getElementById("year-result-card").classList.remove("hidden");
+    document.getElementById("year-prog-wrap").classList.add("hidden");
+    yearScrollToTop();
+    return;
+  }
   if (yearState.answers.yEraChoice === "before2004") {
     document.getElementById("year-result-summary").innerHTML =
       `<div class="ib-title">소방법 분법 이전 (1981. 11. 6. ~ 2004. 5. 29.)</div>` +
-      `근린생활시설·숙박시설 외 다른 용도에 대한 분법 이전 기준은 현재 준비 중입니다.`;
+      `해당 용도에 대한 분법 이전 기준은 현재 준비 중입니다.`;
     document.getElementById("year-required-list").innerHTML = "";
     document.getElementById("year-criteria-list").innerHTML = "";
     document.getElementById("year-exception-list").innerHTML = "";
@@ -9014,6 +9065,11 @@ function yearWizardRestart() {
   ya.yReligiousHasStage = "no";
   ya.yReligiousStageArea = "";
   ya.yReligiousHasGasFacility = "no";
+  // 분법 이전 종교시설 전용
+  ya.yBefore2004ReligiousHasLargeFloor600 = "no";
+  ya.yBefore2004ReligiousIndoorParkingArea = "";
+  ya.yBefore2004ReligiousMechanicalParkingCapacity = "";
+  ya.yBefore2004ReligiousElectricalRoomArea = "";
 
   document.getElementById("year-question-card").classList.remove("hidden");
   document.getElementById("year-result-card").classList.add("hidden");
@@ -9713,26 +9769,26 @@ const RG_MERGED_WITH = {
 
 // 설비별 점검표 이미지 (image 폴더 기준)
 const RG_SECTION_IMAGES = {
-  'w01': './image/소화기구.png',
-  'w03': './image/옥내소화전.png',
-  'w04': './image/스프링클러설비.png',
-  'w05': './image/간이스프링클러설비.png',
-  'w11': './image/옥외소화전.png',
-  'a03': './image/비상방송설비.png',
-  'a05': './image/자동화재탐지설비.png',
-  'a06': './image/자동화재속보설비.png',
-  'a08': './image/가스누설경보기.png',
-  'a10': './image/자동화재탐지설비.png',  // 시각경보기는 자탐 점검표 내 포함
-  'e01': './image/피난기구.png',
-  'e02': './image/인명구조기구.png',
-  'e03': './image/유도등.png',
-  'e04': './image/비상조명등.png',
-  'e05': './image/휴대용비상조명등.png',
-  's01': './image/소화용수설비.png',
-  'ac02': './image/연결송수관설비.png',
-  'ac03': './image/연결살수설비.png',
-  'ac04': './image/비상콘센트설비.png',
-  'ac05': './image/무선통신보조설비.png',
+  'w01': './image/inspection/소화기구.png',
+  'w03': './image/inspection/옥내소화전.png',
+  'w04': './image/inspection/스프링클러설비.png',
+  'w05': './image/inspection/간이스프링클러설비.png',
+  'w11': './image/inspection/옥외소화전.png',
+  'a03': './image/inspection/비상방송설비.png',
+  'a05': './image/inspection/자동화재탐지설비.png',
+  'a06': './image/inspection/자동화재속보설비.png',
+  'a08': './image/inspection/가스누설경보기.png',
+  'a10': './image/inspection/자동화재탐지설비.png',  // 시각경보기는 자탐 점검표 내 포함
+  'e01': './image/inspection/피난기구.png',
+  'e02': './image/inspection/인명구조기구.png',
+  'e03': './image/inspection/유도등.png',
+  'e04': './image/inspection/비상조명등.png',
+  'e05': './image/inspection/휴대용비상조명등.png',
+  's01': './image/inspection/소화용수설비.png',
+  'ac02': './image/inspection/연결송수관설비.png',
+  'ac03': './image/inspection/연결살수설비.png',
+  'ac04': './image/inspection/비상콘센트설비.png',
+  'ac05': './image/inspection/무선통신보조설비.png',
 };
 
 // 설비별 작성방법 설명
@@ -9942,7 +9998,7 @@ const RG_WATER_IDS = new Set(['w03', 'w04', 'w05', 'w06', 'w07', 'w08', 'w09', '
 // 수계소화설비 공동사항 항목
 const RG_WATER_COMMON = [
   {
-    id: '_wc_su', label: '수원', img: './image/수원.png',
+    id: '_wc_su', label: '수원', img: './image/inspection/수원.png',
     desc: [
       '수원의 종류(수조/고가수조/압력수조)와 저수량(㎥)을 기재합니다.',
       '주수원과 보조수원으로 구분하여 각각 용량과 위치를 기재합니다.',
@@ -9950,7 +10006,7 @@ const RG_WATER_COMMON = [
     ],
   },
   {
-    id: '_wc_ga', label: '가압송수장치', img: './image/가압송수장치.png',
+    id: '_wc_ga', label: '가압송수장치', img: './image/inspection/가압송수장치.png',
     desc: [
       '펌프방식/고가수조방식/압력수조방식 중 해당하는 □에 ✔ 표시합니다.',
       '설치장소(동명, 지상/지하 층, 실명)를 기재합니다.',
@@ -9958,14 +10014,14 @@ const RG_WATER_COMMON = [
     ],
   },
   {
-    id: '_wc_so', label: '송수구', img: './image/송수구.png',
+    id: '_wc_so', label: '송수구', img: './image/inspection/송수구.png',
     desc: [
       '송수구 설치 위치(동명, 층)와 단구형/쌍구형 구분을 기재합니다.',
       '설치 개수와 구경(65㎜)을 확인하여 기재합니다.',
     ],
   },
   {
-    id: '_wc_bi', label: '비상전원', img: './image/비상전원.png',
+    id: '_wc_bi', label: '비상전원', img: './image/inspection/비상전원.png',
     desc: [
       '비상전원 종류(자가발전설비/축전지설비/전기저장장치)에 해당하는 □에 ✔ 표시합니다.',
       '설치장소(동명, 층, 실명)와 용량(㎾ 또는 ㎾h)을 기재합니다.',
@@ -10035,7 +10091,7 @@ const RG_PAGE1_SECTIONS = [
   {
     id: 'p1-type',
     label: '점검 종류',
-    img: './image/page 1/page1-점검종류.png',
+    img: './image/inspection/page 1/page1-점검종류.png',
     desc: [
       '작동기능점검, 종합정밀점검, 최초점검 중 해당하는 부분에 ✔ 표시합니다.',
       '3급 소방대상물의 관계인이 직접 점검하는 경우 대부분 <b>작동기능점검</b>에 해당합니다.',
@@ -10045,7 +10101,7 @@ const RG_PAGE1_SECTIONS = [
   {
     id: 'p1-building',
     label: '특정소방대상물 정보',
-    img: './image/page 1/page1-대상물설명.png',
+    img: './image/inspection/page 1/page1-대상물설명.png',
     desc: [
       '<b>명칭(상호)</b>: 건물명을 기재합니다.',
       '<b>대상물 구분(용도)</b>: 「소방시설 설치 및 관리에 관한 법률 시행령」 별표 2에 따른 특정소방대상물 구분을 기재합니다.',
@@ -10055,7 +10111,7 @@ const RG_PAGE1_SECTIONS = [
   {
     id: 'p1-period',
     label: '점검기간',
-    img: './image/page 1/page1-점검기간.png',
+    img: './image/inspection/page 1/page1-점검기간.png',
     desc: [
       '소방시설등 자체점검을 실시한 전체 기간(시작일~종료일)을 기재합니다.',
       '<b>총 점검일수</b>는 해당 기간 중 실제 점검한 날 수의 합을 기입합니다. 연속 날짜가 아닐 수 있습니다.',
@@ -10065,7 +10121,7 @@ const RG_PAGE1_SECTIONS = [
   {
     id: 'p1-inspector',
     label: '점검자',
-    img: './image/page 1/page1-점검자.png',
+    img: './image/inspection/page 1/page1-점검자.png',
     desc: [
       '<b>관계인·소방안전관리자·소방시설관리업자 </b> 중 점검을 실시한 자에 ✔ 표시하고 전화번호를 기입합니다.',
       '<b>전자우편 송달에 동의</b>하는 경우, 불량사항 조치에 대한 사전통지와 조치명령서가 우편 대신 정보통신망을 통해 발송됩니다.',
@@ -10074,7 +10130,7 @@ const RG_PAGE1_SECTIONS = [
   {
     id: 'p1-personnel',
     label: '점검인력',
-    img: './image/page 1/page1-점검인력.png',
+    img: './image/inspection/page 1/page1-점검인력.png',
     desc: [
       '주된 점검인력과 보조 점검인력으로 구분하여 <b>참여한 인력을 모두 기입</b>합니다.',
       '「소방시설 설치 및 관리에 관한 법률 시행규칙」 별표 4에 따라 보조 점검인력을 추가한 경우, 추가된 보조 인력도 함께 기입해야 합니다.',
@@ -10085,7 +10141,7 @@ const RG_PAGE1_SECTIONS = [
   {
     id: 'p1-sign',
     label: '제출일과 서명',
-    img: './image/page 1/page1-날짜서명.png',
+    img: './image/inspection/page 1/page1-날짜서명.png',
     desc: [
       '119안전센터에서 받는 보고서에는 관계인이 서명 또는 날인합니다. 서명(또는 인)부분에는 <b>관계인의 서명(또는 인)</b>이 있어야 합니다.</b>',
       '관계인은 <b>점검 끝난 날부터 15일 이내</b>에 이행계획서(점검결과 부적합 사항이 있는 경우)를 첨부하여 제출해야 합니다.',
@@ -10147,7 +10203,7 @@ const RG_PAGE2_SECTIONS = [
   {
     id: 'p2-owner',
     label: '관계인 정보 (대표자)',
-    img: './image/page 2/page2-관계인정보.png',
+    img: './image/inspection/page 2/page2-관계인정보.png',
     desc: [
       '<b>대표자</b>는 특정소방대상물의 관리 권한을 가진 관계인의 인적사항을 기재합니다.',
       '소유자·관리자·점유자 중 해당하는 □에 ✔ 표시하고 성명과 전화번호를 기재합니다.',
@@ -10157,7 +10213,7 @@ const RG_PAGE2_SECTIONS = [
   {
     id: 'p2-safety',
     label: '소방안전 정보',
-    img: './image/page 2/page2-대상물정보.png',
+    img: './image/inspection/page 2/page2-대상물정보.png',
     desc: [
       '<b>소방안전관리등급</b>: 「화재의 예방 및 안전관리에 관한 법률 시행령」 별표 4에 따른 등급(특급·1급·2급·3급)을 기재하고, 현재 선임된 소방안전관리자 정보를 기입합니다.',
       '<b>소방계획서 / 자체점검(전년도) / 교육훈련(전년도)</b>: 「화재의 예방 및 안전관리에 관한 법률」 제24조에 따른 소방안전관리업무 실시사항을 기입합니다.',
@@ -10167,7 +10223,7 @@ const RG_PAGE2_SECTIONS = [
   {
     id: 'p2-multi',
     label: '다중이용업소 현황',
-    img: './image/page 2/page2-다중이용업소.png',
+    img: './image/inspection/page 2/page2-다중이용업소.png',
     desc: [
       '해당 특정소방대상물에 현재 입점 중인 다중이용업소 업종의 □에 ✔ 표시하고, 그 업소 숫자를 기입합니다.',
       '휴게음식점, 제과점, 일반음식점, 단란주점, 유흥주점, 비디오물감상실, 학원, 목욕장 등이 해당됩니다.',
@@ -10177,7 +10233,7 @@ const RG_PAGE2_SECTIONS = [
   {
     id: 'p2-building1',
     label: '건축물 정보 ①',
-    img: './image/page 2/page2-건축물정보01.png',
+    img: './image/inspection/page 2/page2-건축물정보01.png',
     desc: [
       '건축허가일 등 해당 특정소방대상물의 건축물 정보를 기입합니다.',
       '<b>건축허가일 / 사용승인일</b>: 건축물 대장에서 확인하여 기재합니다.',
@@ -10189,7 +10245,7 @@ const RG_PAGE2_SECTIONS = [
   {
     id: 'p2-building2',
     label: '건축물 정보 ②',
-    img: './image/page 2/page2-건축물정보02.png',
+    img: './image/inspection/page 2/page2-건축물정보02.png',
     desc: [
       '<b>계단</b>: 직통계단과 특별피난계단의 개소 수를 각각 기재합니다.',
       '<b>승강기</b>: 승용·비상용·피난용 승강기의 대수를 각각 기재합니다.',
@@ -10213,7 +10269,7 @@ function rgPageBlock(imgSrc, altText) {
 function renderRgPage1(c) {
   c.appendChild(rgInfoBox('blue', '📄 1페이지 — 보고서 표지',
     '점검 기본 정보를 기재하는 페이지입니다. 각 항목을 클릭하면 작성 방법을 확인할 수 있습니다.'));
-  c.appendChild(rgPageBlock('./image/page 1/page1-full.png', '1페이지 전체'));
+  c.appendChild(rgPageBlock('./image/inspection/page 1/page1-full.png', '1페이지 전체'));
 
   var accLabel = document.createElement('div');
   accLabel.className = 'rg-section-label';
@@ -10225,7 +10281,7 @@ function renderRgPage1(c) {
 function renderRgPage2(c) {
   c.appendChild(rgInfoBox('blue', '📄 2페이지 — 특정소방대상물 정보',
     '대상물의 소방안전 현황과 건축물 정보를 기재하는 페이지입니다. 각 항목을 클릭하면 작성 방법을 확인할 수 있습니다.'));
-  c.appendChild(rgPageBlock('./image/page 2/page2-full.png', '2페이지 전체'));
+  c.appendChild(rgPageBlock('./image/inspection/page 2/page2-full.png', '2페이지 전체'));
 
   var accLabel = document.createElement('div');
   accLabel.className = 'rg-section-label';
@@ -10236,7 +10292,7 @@ function renderRgPage2(c) {
 
 function renderRgChecklist(c) {
   // ── 3페이지 전체 이미지 ──
-  c.appendChild(rgPageBlock('./image/page 3/page3-full.png', '3페이지 전체'));
+  c.appendChild(rgPageBlock('./image/inspection/page 3/page3-full.png', '3페이지 전체'));
 
   // ── (추후) 페이지 항목별 아코디언 추가 예정 ──
 

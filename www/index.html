@@ -114,6 +114,15 @@
           </div>
         </button>
 
+        <button id="open-facilities" class="menu-card" type="button">
+          <div class="menu-icon mc-purple">🔥</div>
+          <div class="menu-text">
+            <div class="mt-num">07</div>
+            <div class="mt-title">소방시설 설명</div>
+            <div class="mt-desc">소방시설별 개요·종류·구성·설치기준</div>
+          </div>
+        </button>
+
       </div>
 
       <div class="menu-right" id="home-reminders"></div>
@@ -468,7 +477,17 @@
     </div>
   </div>
 
+  <section id="screen-facilities" class="screen">
+    <div class="topbar">
+      <button id="back-from-facilities" class="back-btn" type="button">←</button>
+      <span class="tb-title">소방시설 설명</span>
+    </div>
+    <div id="facilities-content" class="rg-outer"></div>
+  </section>
+
   <script src="./pdf.min.js"></script>
   <script src="./app.js"></script>
+  <script src="./facilities-data.js"></script>
+  <script src="./facilities.js"></script>
 </body>
 </html>
