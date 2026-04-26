@@ -3956,6 +3956,7 @@ function renderOccupancyCalculator() {
 }
 
 screens.occupancy = document.getElementById("screen-occupancy");
+screens.facilities = document.getElementById("screen-facilities");
 document.getElementById("open-occupancy-calculator").addEventListener("click", () => {
   occupancyState.step = "category";
   occupancyState.type = "lodging_bed";
