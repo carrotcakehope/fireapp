@@ -67,7 +67,7 @@
           <div class="menu-icon mc-red">🧯</div>
           <div class="menu-text">
             <div class="mt-num" style="display:flex;align-items:center;gap:6px;">
-              <span>01-1</span><span class="test-badge">테스트중</span>
+              <span>01-1</span><span class="test-badge">조졌음</span>
             </div>
             <div class="mt-title">소방시설탐색기<br><span style="font-size:12px;opacity:0.7;">(연도별_테스트중)</span></div>
             <div class="mt-desc">연도별 기준 적용 소방시설 도출</div>
@@ -124,7 +124,7 @@
         <button id="open-facilities" class="menu-card" type="button">
           <div class="menu-icon mc-purple">🔥</div>
           <div class="menu-text">
-            <div class="mt-num">07</div>
+            <div class="mt-num" style="display:flex;align-items:center;gap:6px;"><span>07</span><span class="test-badge">테스트중</span></div>
             <div class="mt-title">소방시설 설명</div>
             <div class="mt-desc">소방시설별 개요·종류·구성·설치기준</div>
           </div>
@@ -164,7 +164,7 @@
     <div class="topbar">
       <button id="back-from-explorer-year" class="back-btn" type="button">←</button>
       <span class="tb-title">소방시설탐색기 (연도별_테스트중)</span>
-      <span class="test-badge" style="margin-left:8px;">테스트중</span>
+      <span class="test-badge" style="margin-left:8px;">조졌음</span>
     </div>
 
     <div id="year-prog-wrap" class="wiz-prog-wrap">
@@ -208,7 +208,36 @@
             <div id="year-exception-list"></div>
           </div>
         </div>
+        <button id="year-open-multiuse-safety" class="btn btn-primary hidden" type="button">다중이용업소 안전시설 보기</button>
         <button id="year-restart-btn" class="btn-restart" type="button">다시 입력</button>
+      </section>
+
+      <section id="year-multiuse-safety-card" class="result-card hidden">
+        <div class="rc-grade g-sp">다중이용업소 안전시설</div>
+        <div id="year-multiuse-safety-summary" class="info-box blue"></div>
+
+        <p class="section-label">설치해야 하는 안전시설</p>
+        <div id="year-multiuse-required-list" style="display:flex;flex-direction:column;gap:6px;"></div>
+
+        <div id="year-multiuse-extra-section" class="hidden">
+          <p class="section-label">그 밖의 안전시설</p>
+          <div id="year-multiuse-extra-list" style="display:flex;flex-direction:column;gap:6px;"></div>
+        </div>
+
+        <div id="year-multiuse-etc-section" class="hidden">
+          <p class="section-label">기타</p>
+          <div id="year-multiuse-etc-list" style="display:flex;flex-direction:column;gap:6px;"></div>
+        </div>
+
+        <p class="section-label">안전시설 설치 근거</p>
+        <div id="year-multiuse-reason-list"></div>
+
+        <div id="year-multiuse-transitional-notes"></div>
+
+        <div class="w-nav">
+          <button id="year-back-to-main-result" class="btn btn-ghost" type="button">기본 결과로</button>
+          <button id="year-restart-from-multiuse" class="btn btn-primary" type="button">다시 입력</button>
+        </div>
       </section>
     </div>
   </section>

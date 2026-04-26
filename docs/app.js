@@ -4160,12 +4160,38 @@ const yearState = {
     yElectricalRoomArea: "",
     ySmokeControlArea: "0",
     yHasSmallUndergroundParking: "no",
+    // 근린생활시설 다중이용업소
+    yHasMultiuseBusiness: "no",
+    yMultiuseInBasement: "no",
+    yMultiuseIsSealed: "no",
+    yMultiuseIsPostpartum: "no",
+    yMultiuseIsGosiwon: "no",
+    yMultiuseIsGunRange: "no",
+    yMultiuseOnSecondToTenthFloor: "no",
+    yMultiuseOnGroundOrRefugeFloor: "no",
+    yMultiuseUsesAV: "no",
+    yMultiuseHasGasFacility: "no",
+    yMultiuseHasRooms: "no",
+    yMultiuseHasEvacuationRoute: "no",
     // 숙박시설 전용
     yLodgingArea: "1500",
     yLodgingIsLiving: "no",
     yLodgingIsTouristHotel: "no",
     yLodgingHasLargeFloorFor1000: "no",
     yLodgingHasGasFacility: "no",
+    // 숙박시설 다중이용업소
+    yLodgingHasMultiuseBusiness: "no",
+    yLodgingMultiuseInBasement: "no",
+    yLodgingMultiuseIsSealed: "no",
+    yLodgingMultiuseIsPostpartum: "no",
+    yLodgingMultiuseIsGosiwon: "no",
+    yLodgingMultiuseIsGunRange: "no",
+    yLodgingMultiuseOnSecondToTenthFloor: "no",
+    yLodgingMultiuseOnGroundOrRefugeFloor: "no",
+    yLodgingMultiuseUsesAV: "no",
+    yLodgingMultiuseHasGasFacility: "no",
+    yLodgingMultiuseHasRooms: "no",
+    yLodgingMultiuseHasEvacuationRoute: "no",
     yLodgingFirstSecondFloorArea: "750",
     yLodgingIndoorParkingArea: "",
     yLodgingMechanicalParkingCapacity: "",
@@ -4452,6 +4478,90 @@ const yearSteps = [
     ],
     condition: (ya, pd) => ya.yOccupancyType === "neighborhood" && pd >= YD.D20240517,
   },
+  {
+    key: "yHasMultiuseBusiness",
+    type: "ychoice",
+    title: "다중이용업소가 있나요?",
+    help: "다중이용업소가 있으면 설치해야 하는 소방시설을 별도로 표시합니다.",
+    options: [
+      { value: "yes", label: "예", description: "다중이용업소 추가 설치시설까지 확인" },
+      { value: "no", label: "아니오", description: "기존 근린생활시설 결과만 표시" },
+    ],
+    condition: (ya) => ya.yOccupancyType === "neighborhood",
+  },
+  {
+    key: "yMultiuseSimpleSprinklerCheck",
+    type: "ycompound",
+    title: "간이스프링클러설비 설치 대상인지 확인합니다.",
+    help: "해당되는 항목은 중복 선택할 수 있습니다. 하나라도 해당하면 간이스프링클러설비 설치대상입니다.",
+    condition: (ya) => ya.yOccupancyType === "neighborhood" && ya.yHasMultiuseBusiness === "yes",
+  },
+  {
+    key: "yMultiuseOnSecondToTenthFloor",
+    type: "ychoice",
+    title: "다중이용업소가 2층~10층 사이에 설치돼있나요?",
+    help: "맞다면 피난기구를 설치해야 합니다.",
+    options: [
+      { value: "yes", label: "예", description: "2층부터 10층 사이에 설치돼 있음" },
+      { value: "no", label: "아니오", description: "해당 층 범위가 아님" },
+    ],
+    condition: (ya) => ya.yOccupancyType === "neighborhood" && ya.yHasMultiuseBusiness === "yes",
+  },
+  {
+    key: "yMultiuseOnGroundOrRefugeFloor",
+    type: "ychoice",
+    title: "지상 1층이나 피난층에 설치돼있나요?",
+    help: "산후조리업이나 고시원에 해당할 때만 확인하며, 맞다면 간이스프링클러설비 대상에서 제외합니다.",
+    options: [
+      { value: "yes", label: "예", description: "지상 1층 또는 피난층에 설치돼 있음" },
+      { value: "no", label: "아니오", description: "지상 1층 또는 피난층이 아님" },
+    ],
+    condition: (ya) => ya.yOccupancyType === "neighborhood" && ya.yHasMultiuseBusiness === "yes" && (ya.yMultiuseIsPostpartum === "yes" || ya.yMultiuseIsGosiwon === "yes"),
+  },
+  {
+    key: "yMultiuseUsesAV",
+    type: "ychoice",
+    title: "'노래반주기 등 영상음향장치를 사용하는 영업장'인가요?",
+    help: "맞다면 자동화재탐지설비와 영상음향차단장치를 설치해야 합니다.",
+    options: [
+      { value: "yes", label: "예", description: "영상음향장치를 사용함" },
+      { value: "no", label: "아니오", description: "영상음향장치를 사용하지 않음" },
+    ],
+    condition: (ya) => ya.yOccupancyType === "neighborhood" && ya.yHasMultiuseBusiness === "yes",
+  },
+  {
+    key: "yMultiuseHasGasFacility",
+    type: "ychoice",
+    title: "가스시설을 사용하는 주방이나 난방시설이 있나요?",
+    help: "맞다면 가스누설경보기를 설치해야 합니다.",
+    options: [
+      { value: "yes", label: "예", description: "가스시설을 사용함" },
+      { value: "no", label: "아니오", description: "가스시설을 사용하지 않음" },
+    ],
+    condition: (ya) => ya.yOccupancyType === "neighborhood" && ya.yHasMultiuseBusiness === "yes",
+  },
+  {
+    key: "yMultiuseHasRooms",
+    type: "ychoice",
+    title: "영업장 내부에 구획된 실(室)이 있나요?",
+    help: "노래방 룸, 고시원 방 등 별도로 구획된 공간이 있는 경우입니다. 해당하면 영업장 내부 피난통로를 확보해야 합니다.",
+    options: [
+      { value: "yes", label: "예", description: "구획된 룸·방 등이 있음" },
+      { value: "no", label: "아니오", description: "구획된 실이 없음" },
+    ],
+    condition: (ya) => ya.yOccupancyType === "neighborhood" && ya.yHasMultiuseBusiness === "yes",
+  },
+  {
+    key: "yMultiuseHasEvacuationRoute",
+    type: "ychoice",
+    title: "영업장 내부 피난통로 또는 복도가 있는 영업장인가요?",
+    help: "맞다면 피난유도선을 설치해야 합니다.",
+    options: [
+      { value: "yes", label: "예", description: "피난통로 또는 복도가 있음" },
+      { value: "no", label: "아니오", description: "해당 통로가 없음" },
+    ],
+    condition: (ya) => ya.yOccupancyType === "neighborhood" && ya.yHasMultiuseBusiness === "yes",
+  },
 
   // ── 숙박시설 전용 스텝 ──
   {
@@ -4535,6 +4645,90 @@ const yearSteps = [
     min: 0,
     step: 0.1,
     condition: (ya) => ya.yOccupancyType === "lodging",
+  },
+  {
+    key: "yLodgingHasMultiuseBusiness",
+    type: "ychoice",
+    title: "다중이용업소가 있나요?",
+    help: "다중이용업소가 있으면 설치해야 하는 안전시설을 별도로 표시합니다.",
+    options: [
+      { value: "yes", label: "예", description: "다중이용업소 추가 설치시설까지 확인" },
+      { value: "no", label: "아니오", description: "기존 숙박시설 결과만 표시" },
+    ],
+    condition: (ya) => ya.yOccupancyType === "lodging",
+  },
+  {
+    key: "yLodgingMultiuseSimpleSprinklerCheck",
+    type: "ycompound",
+    title: "간이스프링클러설비 설치 대상인지 확인합니다.",
+    help: "해당되는 항목은 중복 선택할 수 있습니다.",
+    condition: (ya) => ya.yOccupancyType === "lodging" && ya.yLodgingHasMultiuseBusiness === "yes",
+  },
+  {
+    key: "yLodgingMultiuseOnSecondToTenthFloor",
+    type: "ychoice",
+    title: "다중이용업소가 2층~10층 사이에 설치돼있나요?",
+    help: "맞다면 피난기구를 설치해야 합니다.",
+    options: [
+      { value: "yes", label: "예", description: "2층부터 10층 사이에 설치돼 있음" },
+      { value: "no", label: "아니오", description: "해당 층 범위가 아님" },
+    ],
+    condition: (ya) => ya.yOccupancyType === "lodging" && ya.yLodgingHasMultiuseBusiness === "yes",
+  },
+  {
+    key: "yLodgingMultiuseOnGroundOrRefugeFloor",
+    type: "ychoice",
+    title: "지상 1층이나 피난층에 설치돼있나요?",
+    help: "산후조리업이나 고시원에 해당할 때만 확인합니다.",
+    options: [
+      { value: "yes", label: "예", description: "지상 1층 또는 피난층에 설치돼 있음" },
+      { value: "no", label: "아니오", description: "지상 1층 또는 피난층이 아님" },
+    ],
+    condition: (ya) => ya.yOccupancyType === "lodging" && ya.yLodgingHasMultiuseBusiness === "yes" && (ya.yLodgingMultiuseIsPostpartum === "yes" || ya.yLodgingMultiuseIsGosiwon === "yes"),
+  },
+  {
+    key: "yLodgingMultiuseUsesAV",
+    type: "ychoice",
+    title: "'노래반주기 등 영상음향장치를 사용하는 영업장'인가요?",
+    help: "맞다면 자동화재탐지설비와 영상음향차단장치를 설치해야 합니다.",
+    options: [
+      { value: "yes", label: "예", description: "영상음향장치를 사용함" },
+      { value: "no", label: "아니오", description: "영상음향장치를 사용하지 않음" },
+    ],
+    condition: (ya) => ya.yOccupancyType === "lodging" && ya.yLodgingHasMultiuseBusiness === "yes",
+  },
+  {
+    key: "yLodgingMultiuseHasGasFacility",
+    type: "ychoice",
+    title: "다중이용업소에 가스시설을 사용하는 주방이나 난방시설이 있나요?",
+    help: "맞다면 가스누설경보기를 설치해야 합니다.",
+    options: [
+      { value: "yes", label: "예", description: "가스시설을 사용함" },
+      { value: "no", label: "아니오", description: "가스시설을 사용하지 않음" },
+    ],
+    condition: (ya) => ya.yOccupancyType === "lodging" && ya.yLodgingHasMultiuseBusiness === "yes",
+  },
+  {
+    key: "yLodgingMultiuseHasRooms",
+    type: "ychoice",
+    title: "영업장 내부에 구획된 실(室)이 있나요?",
+    help: "노래방 룸, 고시원 방 등 별도로 구획된 공간이 있는 경우입니다. 해당하면 영업장 내부 피난통로를 확보해야 합니다.",
+    options: [
+      { value: "yes", label: "예", description: "구획된 룸·방 등이 있음" },
+      { value: "no", label: "아니오", description: "구획된 실이 없음" },
+    ],
+    condition: (ya) => ya.yOccupancyType === "lodging" && ya.yLodgingHasMultiuseBusiness === "yes",
+  },
+  {
+    key: "yLodgingMultiuseHasEvacuationRoute",
+    type: "ychoice",
+    title: "영업장 내부 피난통로 또는 복도가 있는 영업장인가요?",
+    help: "맞다면 피난유도선을 설치해야 합니다.",
+    options: [
+      { value: "yes", label: "예", description: "피난통로 또는 복도가 있음" },
+      { value: "no", label: "아니오", description: "해당 통로가 없음" },
+    ],
+    condition: (ya) => ya.yOccupancyType === "lodging" && ya.yLodgingHasMultiuseBusiness === "yes",
   },
 
   // ── 분법 이전 숙박시설 전용 스텝 ──
@@ -5530,6 +5724,44 @@ function yearRenderCompoundStep(step) {
     wrapper.appendChild(makeYearField("전기실·발전실·변전실·전산실 바닥면적(㎡)", "yBefore2004ReligiousElectricalRoomArea", ya.yBefore2004ReligiousElectricalRoomArea, { min: 0, step: 0.1, placeholder: "없으면 0" }));
   }
 
+  if (step.key === "yMultiuseSimpleSprinklerCheck") {
+    const selectedKeys = ["yMultiuseInBasement", "yMultiuseIsSealed", "yMultiuseIsPostpartum", "yMultiuseIsGosiwon", "yMultiuseIsGunRange"];
+    const toggleOption = (name) => { yearState.answers[name] = yearState.answers[name] === "yes" ? "no" : "yes"; yearRenderCurrentStep(); };
+    const optionList = document.createElement("div");
+    optionList.className = "choice-list";
+    [
+      { name: "yMultiuseInBasement", label: "지하층에 설치돼 있음", description: "해당되면 선택" },
+      { name: "yMultiuseIsSealed", label: "밀폐구조의 영업장", description: "해당되면 선택" },
+      { name: "yMultiuseIsPostpartum", label: "산후조리업", description: "해당되면 선택" },
+      { name: "yMultiuseIsGosiwon", label: "고시원", description: "해당되면 선택" },
+      { name: "yMultiuseIsGunRange", label: "권총사격장", description: "해당되면 선택" },
+    ].forEach((option) => {
+      optionList.appendChild(makeToggleChoiceButton({ label: option.label, description: option.description, selected: ya[option.name] === "yes", onClick: () => toggleOption(option.name) }));
+    });
+    const noneSelected = selectedKeys.every((name) => ya[name] !== "yes");
+    optionList.appendChild(makeToggleChoiceButton({ label: "해당사항 없음", description: "선택한 항목이 없으면 선택", selected: noneSelected, onClick: () => { selectedKeys.forEach((name) => { yearState.answers[name] = "no"; }); yearRenderCurrentStep(); } }));
+    wrapper.appendChild(optionList);
+  }
+
+  if (step.key === "yLodgingMultiuseSimpleSprinklerCheck") {
+    const selectedKeys = ["yLodgingMultiuseInBasement", "yLodgingMultiuseIsSealed", "yLodgingMultiuseIsPostpartum", "yLodgingMultiuseIsGosiwon", "yLodgingMultiuseIsGunRange"];
+    const toggleOption = (name) => { yearState.answers[name] = yearState.answers[name] === "yes" ? "no" : "yes"; yearRenderCurrentStep(); };
+    const optionList = document.createElement("div");
+    optionList.className = "choice-list";
+    [
+      { name: "yLodgingMultiuseInBasement", label: "지하층에 설치돼 있음", description: "해당되면 선택" },
+      { name: "yLodgingMultiuseIsSealed", label: "밀폐구조의 영업장", description: "해당되면 선택" },
+      { name: "yLodgingMultiuseIsPostpartum", label: "산후조리업", description: "해당되면 선택" },
+      { name: "yLodgingMultiuseIsGosiwon", label: "고시원", description: "해당되면 선택" },
+      { name: "yLodgingMultiuseIsGunRange", label: "권총사격장", description: "해당되면 선택" },
+    ].forEach((option) => {
+      optionList.appendChild(makeToggleChoiceButton({ label: option.label, description: option.description, selected: ya[option.name] === "yes", onClick: () => toggleOption(option.name) }));
+    });
+    const noneSelected = selectedKeys.every((name) => ya[name] !== "yes");
+    optionList.appendChild(makeToggleChoiceButton({ label: "해당사항 없음", description: "선택한 항목이 없으면 선택", selected: noneSelected, onClick: () => { selectedKeys.forEach((name) => { yearState.answers[name] = "no"; }); yearRenderCurrentStep(); } }));
+    wrapper.appendChild(optionList);
+  }
+
   return wrapper;
 }
 
@@ -5644,6 +5876,19 @@ function yearNormalizeAnswers() {
     electricalRoomArea: parseFloat(ya.yElectricalRoomArea) || 0,
     smokeControlArea: parseFloat(ya.ySmokeControlArea) || 0,
     hasSmallUndergroundParking: ya.yHasSmallUndergroundParking === "yes",
+    // 근린생활시설 다중이용업소
+    hasMultiuseBusiness: ya.yHasMultiuseBusiness === "yes",
+    multiuseInBasement: ya.yMultiuseInBasement === "yes",
+    multiuseIsSealed: ya.yMultiuseIsSealed === "yes",
+    multiuseIsPostpartum: ya.yMultiuseIsPostpartum === "yes",
+    multiuseIsGosiwon: ya.yMultiuseIsGosiwon === "yes",
+    multiuseIsGunRange: ya.yMultiuseIsGunRange === "yes",
+    multiuseOnSecondToTenthFloor: ya.yMultiuseOnSecondToTenthFloor === "yes",
+    multiuseOnGroundOrRefugeFloor: ya.yMultiuseOnGroundOrRefugeFloor === "yes",
+    multiuseUsesAV: ya.yMultiuseUsesAV === "yes",
+    multiuseHasGasFacility: ya.yMultiuseHasGasFacility === "yes",
+    multiuseHasRooms: ya.yMultiuseHasRooms === "yes",
+    multiuseHasEvacuationRoute: ya.yMultiuseHasEvacuationRoute === "yes",
     basementAvg: bf > 0 ? ba / bf : 0,
     totalFloors: (parseInt(ya.yAboveGroundFloors) || 0) + bf,
     // 숙박시설 전용
@@ -5657,6 +5902,19 @@ function yearNormalizeAnswers() {
     lodgingMechanicalParkingCapacity: parseInt(ya.yLodgingMechanicalParkingCapacity) || 0,
     lodgingElectricalRoomArea: parseFloat(ya.yLodgingElectricalRoomArea) || 0,
     lodgingBasementAreaForSmoke: parseFloat(ya.yLodgingBasementAreaForSmoke) || 0,
+    // 숙박시설 다중이용업소
+    lodgingHasMultiuseBusiness: ya.yLodgingHasMultiuseBusiness === "yes",
+    lodgingMultiuseInBasement: ya.yLodgingMultiuseInBasement === "yes",
+    lodgingMultiuseIsSealed: ya.yLodgingMultiuseIsSealed === "yes",
+    lodgingMultiuseIsPostpartum: ya.yLodgingMultiuseIsPostpartum === "yes",
+    lodgingMultiuseIsGosiwon: ya.yLodgingMultiuseIsGosiwon === "yes",
+    lodgingMultiuseIsGunRange: ya.yLodgingMultiuseIsGunRange === "yes",
+    lodgingMultiuseOnSecondToTenthFloor: ya.yLodgingMultiuseOnSecondToTenthFloor === "yes",
+    lodgingMultiuseOnGroundOrRefugeFloor: ya.yLodgingMultiuseOnGroundOrRefugeFloor === "yes",
+    lodgingMultiuseUsesAV: ya.yLodgingMultiuseUsesAV === "yes",
+    lodgingMultiuseHasGasFacility: ya.yLodgingMultiuseHasGasFacility === "yes",
+    lodgingMultiuseHasRooms: ya.yLodgingMultiuseHasRooms === "yes",
+    lodgingMultiuseHasEvacuationRoute: ya.yLodgingMultiuseHasEvacuationRoute === "yes",
     // 노유자시설 전용
     elderlySubtype: ya.yElderlySubtype,
     elderlyArea: parseFloat(ya.yElderlyArea) || 0,
@@ -8870,6 +9128,10 @@ function yearShowResults() {
     showToast("현재 질문의 값을 먼저 입력해 주세요.");
     return;
   }
+  // 다중이용업소 버튼/카드 초기화
+  const _ymBtn = document.getElementById("year-open-multiuse-safety");
+  if (_ymBtn) _ymBtn.classList.add("hidden");
+  document.getElementById("year-multiuse-safety-card").classList.add("hidden");
   // ── 분법 이전 근린생활시설 처리 ──
   if (yearState.answers.yEraChoice === "before2004" && yearState.answers.yOccupancyType === "neighborhood") {
     const pd = yPermitDateInt();
@@ -9092,8 +9354,23 @@ function yearShowResults() {
   renderResultGroup("year-criteria-list", results, [...excludedNames], requiredItems.map((i) => i.name));
   renderResultGroup("year-exception-list", exceptionItems);
 
+  // 다중이용업소 버튼 표시 여부
+  const yearMultiuseBtn = document.getElementById("year-open-multiuse-safety");
+  if (yearMultiuseBtn) {
+    if (inp.occupancyType === "neighborhood" && inp.hasMultiuseBusiness) {
+      const mu = evaluateMultiuseFacilities(inp);
+      yearMultiuseBtn.classList.toggle("hidden", mu.requiredItems.length === 0 && (mu.extraSafetyItems || []).length === 0);
+    } else if (inp.occupancyType === "lodging" && inp.lodgingHasMultiuseBusiness) {
+      const mu = evaluateLodgingMultiuseFacilities(inp);
+      yearMultiuseBtn.classList.toggle("hidden", mu.requiredItems.length === 0 && (mu.extraSafetyItems || []).length === 0);
+    } else {
+      yearMultiuseBtn.classList.add("hidden");
+    }
+  }
+
   document.getElementById("year-question-card").classList.add("hidden");
   document.getElementById("year-result-card").classList.remove("hidden");
+  document.getElementById("year-multiuse-safety-card").classList.add("hidden");
   document.getElementById("year-prog-wrap").classList.add("hidden");
   yearScrollToTop();
 }
@@ -9130,6 +9407,19 @@ function yearWizardRestart() {
   ya.yElectricalRoomArea = "";
   ya.ySmokeControlArea = "0";
   ya.yHasSmallUndergroundParking = "no";
+  // 근린생활시설 다중이용업소
+  ya.yHasMultiuseBusiness = "no";
+  ya.yMultiuseInBasement = "no";
+  ya.yMultiuseIsSealed = "no";
+  ya.yMultiuseIsPostpartum = "no";
+  ya.yMultiuseIsGosiwon = "no";
+  ya.yMultiuseIsGunRange = "no";
+  ya.yMultiuseOnSecondToTenthFloor = "no";
+  ya.yMultiuseOnGroundOrRefugeFloor = "no";
+  ya.yMultiuseUsesAV = "no";
+  ya.yMultiuseHasGasFacility = "no";
+  ya.yMultiuseHasRooms = "no";
+  ya.yMultiuseHasEvacuationRoute = "no";
   // 숙박시설 전용
   ya.yLodgingArea = "1500";
   ya.yLodgingIsTouristHotel = "no";
@@ -9140,6 +9430,19 @@ function yearWizardRestart() {
   ya.yLodgingMechanicalParkingCapacity = "";
   ya.yLodgingElectricalRoomArea = "";
   ya.yLodgingBasementAreaForSmoke = "0";
+  // 숙박시설 다중이용업소
+  ya.yLodgingHasMultiuseBusiness = "no";
+  ya.yLodgingMultiuseInBasement = "no";
+  ya.yLodgingMultiuseIsSealed = "no";
+  ya.yLodgingMultiuseIsPostpartum = "no";
+  ya.yLodgingMultiuseIsGosiwon = "no";
+  ya.yLodgingMultiuseIsGunRange = "no";
+  ya.yLodgingMultiuseOnSecondToTenthFloor = "no";
+  ya.yLodgingMultiuseOnGroundOrRefugeFloor = "no";
+  ya.yLodgingMultiuseUsesAV = "no";
+  ya.yLodgingMultiuseHasGasFacility = "no";
+  ya.yLodgingMultiuseHasRooms = "no";
+  ya.yLodgingMultiuseHasEvacuationRoute = "no";
   // 노유자시설 전용
   ya.yElderlySubtype = "general";
   ya.yElderlyArea = "1500";
@@ -9197,6 +9500,7 @@ function yearWizardRestart() {
 
   document.getElementById("year-question-card").classList.remove("hidden");
   document.getElementById("year-result-card").classList.add("hidden");
+  document.getElementById("year-multiuse-safety-card").classList.add("hidden");
   document.getElementById("year-prog-wrap").classList.remove("hidden");
   yearRenderCurrentStep();
 }
@@ -9213,6 +9517,43 @@ document.getElementById("year-next-btn").addEventListener("click", () => {
   else yearMoveStep(1);
 });
 document.getElementById("year-restart-btn").addEventListener("click", () => yearWizardRestart());
+
+document.getElementById("year-open-multiuse-safety").addEventListener("click", () => {
+  const inp = yearNormalizeAnswers();
+  const yearMultiuseSafetyCard = document.getElementById("year-multiuse-safety-card");
+  const yearResultCard = document.getElementById("year-result-card");
+  document.getElementById("year-multiuse-safety-summary").innerHTML = `<div class="ib-title">다중이용업소 안전시설 기준</div>입력한 조건을 기준으로 다중이용업소에 설치해야 하는 안전시설만 별도로 정리했습니다.`;
+  let multiuse;
+  if (inp.occupancyType === "lodging" && inp.lodgingHasMultiuseBusiness) {
+    multiuse = evaluateLodgingMultiuseFacilities(inp);
+  } else {
+    multiuse = evaluateMultiuseFacilities(inp);
+  }
+  renderSimpleRequiredList(multiuse.requiredItems, "year-multiuse-required-list");
+  renderSimpleRequiredList(multiuse.extraSafetyItems || [], "year-multiuse-extra-list");
+  renderSimpleRequiredList(multiuse.etcItems || [], "year-multiuse-etc-list");
+  renderResultGroup("year-multiuse-reason-list", multiuse.reasonItems);
+  setSectionVisibility("year-multiuse-extra-section", (multiuse.extraSafetyItems || []).length > 0);
+  setSectionVisibility("year-multiuse-etc-section", (multiuse.etcItems || []).length > 0);
+  const transitionalContainer = document.getElementById("year-multiuse-transitional-notes");
+  if (transitionalContainer && multiuse.transitionalNotes && multiuse.transitionalNotes.length > 0) {
+    const items = multiuse.transitionalNotes.map((n) => `<div class="transitional-item"><strong>${n.title}</strong><br>${n.text}</div>`).join("");
+    transitionalContainer.innerHTML = `<div class="info-box amber"><div class="ib-title">경과규정 안내 — 기존 영업장 적용 제외 가능</div>${items}</div>`;
+  } else if (transitionalContainer) {
+    transitionalContainer.innerHTML = "";
+  }
+  yearResultCard.classList.add("hidden");
+  yearMultiuseSafetyCard.classList.remove("hidden");
+  yearScrollToTop();
+});
+
+document.getElementById("year-back-to-main-result").addEventListener("click", () => {
+  document.getElementById("year-multiuse-safety-card").classList.add("hidden");
+  document.getElementById("year-result-card").classList.remove("hidden");
+  yearScrollToTop();
+});
+
+document.getElementById("year-restart-from-multiuse").addEventListener("click", () => yearWizardRestart());
 document.getElementById("back-from-date").addEventListener("click", () => showScreen("home"));
 document.getElementById("back-from-guide").addEventListener("click", () => showScreen("home"));
 document.getElementById("open-guide").addEventListener("click", () => showScreen("guide"));
