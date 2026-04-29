@@ -125,18 +125,36 @@
       body.appendChild(el);
     }
 
-    if (item.description) {
+    // 사진 + 설명: compact가 아니면 2열 나란히, compact는 설명만
+    if (item.level !== 'compact') {
+      const row = document.createElement('div');
+      row.className = 'fac-photo-desc-row';
+
+      const photoCol = document.createElement('div');
+      photoCol.className = 'fac-photo-col';
+      if (item.photos?.length) {
+        photoCol.appendChild(makePhotoGallery(item.photos));
+      } else {
+        photoCol.appendChild(makePlaceholder(`${item.name} 대표 사진`));
+      }
+      row.appendChild(photoCol);
+
+      if (item.description) {
+        const descCol = document.createElement('div');
+        descCol.className = 'fac-desc-col';
+        const el = document.createElement('p');
+        el.className = 'fac-description';
+        el.textContent = item.description;
+        descCol.appendChild(el);
+        row.appendChild(descCol);
+      }
+
+      body.appendChild(row);
+    } else if (item.description) {
       const el = document.createElement('p');
       el.className = 'fac-description';
       el.textContent = item.description;
       body.appendChild(el);
-    }
-
-    // 사진 갤러리: 실제 사진이 있으면 표시, 없고 compact가 아니면 플레이스홀더
-    if (item.photos?.length) {
-      body.appendChild(makePhotoGallery(item.photos));
-    } else if (item.level !== 'compact') {
-      body.appendChild(makePlaceholder(`${item.name} 대표 사진`));
     }
 
     if (item.types?.length) {
