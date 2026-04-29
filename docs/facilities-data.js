@@ -70,7 +70,7 @@ const FACILITIES_DATA = [
         id: 'auto-diffusion',
         name: '자동확산소화기',
         category: '소화기구',
-        level: 'compact',
+        level: 'standard',
         definition: '화재를 감지하여 자동으로 소화약제를 방사하는 고정형 소화기',
         description: '주방, 보일러실 등 화재 위험이 높은 소규모 공간에 고정 설치되어 화재 시 자동으로 약제를 방사합니다. 별도 감지기나 제어반 없이 단독으로 작동합니다.',
         photos: [
@@ -334,7 +334,7 @@ const FACILITIES_DATA = [
         id: 'visual-alarm',
         name: '시각경보기',
         category: '경보설비',
-        level: 'compact',
+        level: 'standard',
         definition: '청각 장애인을 위해 경보를 빛(점멸)으로 알려주는 장치',
         description: '청각 장애인도 화재를 인지할 수 있도록 강한 점멸 빛으로 경보를 전달하는 장치입니다. 자동화재탐지설비 경종과 연동하여 동시에 작동합니다.',
         photos: [
@@ -385,7 +385,7 @@ const FACILITIES_DATA = [
         id: 'auto-fire-report',
         name: '자동화재속보설비',
         category: '경보설비',
-        level: 'compact',
+        level: 'standard',
         definition: '화재 감지 시 소방관서에 자동으로 통보하는 설비',
         description: '자동화재탐지설비와 연동하여 화재 감지 시 자동으로 119 소방관서에 화재 발생을 통보하는 설비입니다.',
         photos: [
@@ -482,7 +482,7 @@ const FACILITIES_DATA = [
         id: 'rescue-equipment',
         name: '인명구조기구',
         category: '인명구조기구',
-        level: 'compact',
+        level: 'standard',
         definition: '화재 시 인명구조에 사용하는 기구 일체',
         description: '소방대원 또는 안전관리자가 화재 현장에서 인명구조 활동에 사용하는 보호장비 및 구조기구입니다. 방열복, 방화복(안전모, 보호장갑, 안전화 포함), 공기호흡기, 인공소생기가 포함됩니다.',
         photos: [
@@ -532,7 +532,7 @@ const FACILITIES_DATA = [
         id: 'emergency-light',
         name: '비상조명등',
         category: '비상조명등',
-        level: 'compact',
+        level: 'standard',
         definition: '화재 시 정전에 대비하여 피난 통로를 밝혀주는 조명등',
         description: '정전 또는 화재 시 피난을 위한 최소한의 조명을 제공하는 등기구입니다. 피난 통로, 계단 등 피난에 필요한 장소에 설치합니다.',
         photos: [
@@ -550,7 +550,7 @@ const FACILITIES_DATA = [
         id: 'portable-emergency-light',
         name: '휴대용비상조명등',
         category: '비상조명등',
-        level: 'compact',
+        level: 'standard',
         definition: '화재 시 개인이 휴대하여 사용하는 조명등',
         description: '지하상가, 숙박시설, 대규모 점포 등에 비치하여 화재·정전 시 개인이 휴대하고 피난할 수 있는 손전등 형태의 조명 기구입니다.',
         photos: [
@@ -573,7 +573,7 @@ const FACILITIES_DATA = [
         id: 'water-supply',
         name: '상수도소화용수설비',
         category: '소화용수설비',
-        level: 'compact',
+        level: 'standard',
         definition: '상수도 배관에 연결하여 소화용수를 공급하는 설비',
         description: '상수도 배관망에서 직접 소화용수를 공급하는 설비로, 소화전(消火栓)을 도로에 설치합니다. 소방차가 이를 이용해 화재 진압에 필요한 물을 공급받습니다.',
         criteria: [
@@ -586,7 +586,7 @@ const FACILITIES_DATA = [
         id: 'fire-water-tank',
         name: '소화수조·저수조',
         category: '소화용수설비',
-        level: 'standard',
+        level: 'compact',
         definition: '소화 활동에 필요한 물을 저장하는 수조',
         description: '상수도 공급이 어렵거나 대규모 화재 진압에 필요한 추가 수원을 확보하기 위해 설치하는 수조입니다. 소방차가 연결하여 물을 공급받을 수 있도록 채수구를 설치합니다.',
         components: [
@@ -612,7 +612,7 @@ const FACILITIES_DATA = [
         id: 'smoke-control',
         name: '제연설비',
         category: '소화활동설비',
-        level: 'full',
+        level: 'standard',
         definition: '화재 시 연기를 배출하거나 차단하여 피난 및 소화활동을 지원하는 설비',
         description: '화재 시 발생하는 유독 연기는 인명 피해의 주요 원인입니다. 제연설비는 연기를 강제 배출(배연)하거나 제연구역에 청정 공기를 공급(급기가압)하여 피난 통로의 안전을 확보합니다.',
         types: [
