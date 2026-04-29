@@ -132,11 +132,7 @@
 
       const photoCol = document.createElement('div');
       photoCol.className = 'fac-photo-col';
-      if (item.photos?.length) {
-        photoCol.appendChild(makePhotoGallery(item.photos));
-      } else {
-        photoCol.appendChild(makePlaceholder(`${item.name} 대표 사진`));
-      }
+      photoCol.appendChild(makeMainPhoto(item));
       row.appendChild(photoCol);
 
       if (item.description) {
@@ -280,6 +276,45 @@
     wrap.appendChild(header);
     wrap.appendChild(body);
     return wrap;
+  }
+
+  function makeMainPhoto(item) {
+    const fig = document.createElement('figure');
+    fig.className = 'fac-photo-fig';
+
+    const imgWrap = document.createElement('div');
+    imgWrap.className = 'fac-photo-img-wrap';
+
+    const candidates = [
+      `./image/facilities/${item.name}/${item.name}_main.jpg`,
+      `./image/facilities/${item.name}/${item.name}_main.webp`,
+    ];
+    let idx = 0;
+
+    const img = document.createElement('img');
+    img.className = 'fac-photo-img';
+    img.alt = item.name;
+    img.loading = 'lazy';
+    img.src = encodePath(candidates[idx]);
+    img.onerror = () => {
+      idx++;
+      if (idx < candidates.length) {
+        img.src = encodePath(candidates[idx]);
+      } else {
+        fig.replaceWith(makePlaceholder(`${item.name} 대표 사진`));
+      }
+    };
+
+    if (item.mainSource) {
+      const badge = document.createElement('span');
+      badge.className = 'fac-photo-source-badge';
+      badge.textContent = '출처: ' + item.mainSource;
+      imgWrap.appendChild(badge);
+    }
+
+    imgWrap.appendChild(img);
+    fig.appendChild(imgWrap);
+    return fig;
   }
 
   function makePlaceholder(label) {
