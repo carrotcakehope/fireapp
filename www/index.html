@@ -11,6 +11,13 @@
   <meta name="apple-mobile-web-app-title" content="예방 어시스턴트">
   <link rel="apple-touch-icon" href="./icon-192.png">
   <meta name="theme-color" content="#d93025">
+  <!-- Google Tag Manager -->
+  <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-MPVSSTJH');</script>
+  <!-- End Google Tag Manager -->
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-LKQZX5YS2H"></script>
+  <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-LKQZX5YS2H');</script>
+  <!-- End Google Analytics -->
   <script>(function(){var t=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',t);})();</script>
   <script>
     if ('serviceWorker' in navigator) {
@@ -39,6 +46,9 @@
   </script>
 </head>
 <body>
+  <!-- Google Tag Manager (noscript) -->
+  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MPVSSTJH" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+  <!-- End Google Tag Manager (noscript) -->
   <section id="screen-home" class="screen active">
     <div class="home-header">
       <div class="home-header-left">
@@ -225,7 +235,10 @@
           </div>
         </div>
         <button id="year-open-multiuse-safety" class="btn btn-primary hidden" type="button">다중이용업소 안전시설 보기</button>
-        <button id="year-restart-btn" class="btn-restart" type="button">다시 입력</button>
+        <div style="display:flex;gap:8px;margin-top:8px;">
+          <button id="year-result-prev-btn" class="btn btn-ghost" type="button" style="flex:1;">이전</button>
+          <button id="year-restart-btn" class="btn btn-ghost" type="button" style="flex:1;margin-top:0;">다시 입력</button>
+        </div>
       </section>
 
       <section id="year-multiuse-safety-card" class="result-card hidden">
@@ -316,8 +329,8 @@
         <button id="open-multiuse-safety" class="btn btn-primary hidden" type="button">다중이용업소 안전시설 보기</button>
 
         <div style="display:flex;gap:8px;margin-top:8px;">
-          <button id="result-back-to-select" class="btn btn-ghost" type="button" style="flex:1;">← 모드 선택</button>
-          <button id="restart-explorer" class="btn-restart" type="button" style="flex:2;margin-top:0;">다시 입력</button>
+          <button id="result-back-to-select" class="btn btn-ghost" type="button" style="flex:1;">이전</button>
+          <button id="restart-explorer" class="btn btn-ghost" type="button" style="flex:1;margin-top:0;">다시 입력</button>
         </div>
       </section>
 

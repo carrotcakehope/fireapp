@@ -1469,7 +1469,8 @@ function evaluateNeighborhoodFacility(input) {
 
   results.push(makeResult(categories.waterSupply, "상수도소화용수설비", "", input.totalArea >= 5000 ? "required" : "notRequired", input.totalArea >= 5000 ? "연면적이 5,000㎡ 이상입니다." : "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
 
-  results.push(makeResult(categories.fireSupport, "제연설비", "", input.smokeControlArea >= 1000 ? "required" : "notRequired", input.smokeControlArea >= 1000 ? "지하층과 무창층 면적 합계가 1,000㎡ 이상입니다." : "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
+  const smokeReqNeighborhood = input.smokeControlArea >= 1000 || input.aboveGroundFloors >= 11;
+  results.push(makeResult(categories.fireSupport, "제연설비", "", smokeReqNeighborhood ? "required" : "notRequired", input.smokeControlArea >= 1000 ? "지하층과 무창층 면적 합계가 1,000㎡ 이상입니다." : input.aboveGroundFloors >= 11 ? "지상 11층 이상으로 특별피난계단에 제연설비를 설치해야 합니다." : "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
   results.push(makeResult(categories.fireSupport, "연결송수관설비", "", (input.totalFloors >= 5 && input.totalArea >= 6000) || input.totalFloors >= 7 || (input.basementFloors >= 3 && input.basementAreaSum >= 1000) ? "required" : "notRequired", input.totalFloors >= 5 && input.totalArea >= 6000 ? "전체 층수가 5층 이상이고 연면적이 6,000㎡ 이상입니다." : input.totalFloors >= 7 ? "전체 층수가 7층 이상입니다." : input.basementFloors >= 3 && input.basementAreaSum >= 1000 ? "지하층이 3층 이상이고 지하층 바닥면적 합계가 1,000㎡ 이상입니다." : "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
   results.push(makeResult(categories.fireSupport, "연결살수설비", "", input.basementAreaSum >= 150 ? "required" : "notRequired", input.basementAreaSum >= 150 ? "지하층 바닥면적 합계가 150㎡ 이상입니다." : "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
   results.push(makeResult(categories.fireSupport, "비상콘센트설비", "", input.aboveGroundFloors >= 11 || (input.basementFloors >= 3 && input.basementAreaSum >= 1000) ? "required" : "notRequired", input.aboveGroundFloors >= 11 ? "지상층수가 11층 이상입니다." : input.basementFloors >= 3 && input.basementAreaSum >= 1000 ? "지하층이 3층 이상이고 지하층 바닥면적 합계가 1,000㎡ 이상입니다." : "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
@@ -1624,12 +1625,13 @@ function evaluateLodgingFacility(input) {
     ta >= 5000 ? "연면적이 5,000㎡ 이상입니다." : "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
 
   // ── 소화활동설비 ──
-  // 제연설비: 지하/무창 1000㎡ 이상
+  // 제연설비: 지하/무창 1000㎡ 이상 또는 11층 이상
   const smokeControlArea = ba + wl;
-  const smokeRequired = (bf > 0 && basementAvg >= 1000) || hasWindowless1000Plus;
+  const smokeRequired = (bf > 0 && basementAvg >= 1000) || hasWindowless1000Plus || ag >= 11;
   results.push(makeResult(categories.fireSupport, "제연설비", "",
     smokeRequired ? "required" : "notRequired",
-    smokeRequired ? "지하층 또는 무창층의 바닥면적이 1,000㎡ 이상입니다."
+    (bf > 0 && basementAvg >= 1000) || hasWindowless1000Plus ? "지하층 또는 무창층의 바닥면적이 1,000㎡ 이상입니다."
+    : ag >= 11 ? "지상 11층 이상으로 특별피난계단에 제연설비를 설치해야 합니다."
     : "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
 
   // 연결송수관설비: 7층 이상
@@ -1920,9 +1922,10 @@ function evaluateElderlyFacility(input) {
     ta >= 5000 ? "연면적이 5,000㎡ 이상입니다." : "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
 
   // ── 소화활동설비 ──
-  const smokeRequired = hasBasement1000Plus || hasWindowless1000Plus;
+  const smokeRequired = hasBasement1000Plus || hasWindowless1000Plus || ag >= 11;
   results.push(makeResult(categories.fireSupport, "제연설비", "", smokeRequired ? "required" : "notRequired",
-    smokeRequired ? "지하층 또는 무창층의 바닥면적이 1,000㎡ 이상입니다."
+    hasBasement1000Plus || hasWindowless1000Plus ? "지하층 또는 무창층의 바닥면적이 1,000㎡ 이상입니다."
+    : ag >= 11 ? "지상 11층 이상으로 특별피난계단에 제연설비를 설치해야 합니다."
     : "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
 
   const standpipeFireRequired = (tf >= 5 && ta >= 6000) || tf >= 7 || (bf >= 3 && ba >= 1000);
@@ -2143,9 +2146,10 @@ function evaluateMedicalFacility(input) {
     ta >= 5000 ? "연면적이 5,000㎡ 이상입니다." : "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
 
   // ── 소화활동설비 ──
-  const smokeRequired = hasBasement1000Plus || hasWindowless1000Plus;
+  const smokeRequired = hasBasement1000Plus || hasWindowless1000Plus || ag >= 11;
   results.push(makeResult(categories.fireSupport, "제연설비", "", smokeRequired ? "required" : "notRequired",
-    smokeRequired ? "지하층 또는 무창층의 바닥면적이 1,000㎡ 이상입니다."
+    hasBasement1000Plus || hasWindowless1000Plus ? "지하층 또는 무창층의 바닥면적이 1,000㎡ 이상입니다."
+    : ag >= 11 ? "지상 11층 이상으로 특별피난계단에 제연설비를 설치해야 합니다."
     : "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
 
   const standpipeFireRequired = (tf >= 5 && ta >= 6000) || tf >= 7 || (bf >= 3 && ba >= 1000);
@@ -5814,7 +5818,7 @@ function yearRenderCurrentStep() {
 
   const prevBtn = document.getElementById("year-prev-btn");
   const nextBtn = document.getElementById("year-next-btn");
-  prevBtn.disabled = yearState.currentStep === 0;
+  prevBtn.disabled = false;
   nextBtn.textContent = yearState.currentStep === activeSteps.length - 1 ? "결과 보기" : "다음";
   yearUpdateProgress();
 }
@@ -6323,12 +6327,15 @@ function yearEvaluateLodgingBefore2004(inp) {
     results.push(makeResult(categories.fireSupport, "제연설비", "", "notRequired",
       "1982년 9월 28일 이전에는 배연설비(현 제연설비) 규정이 없었습니다.", ""));
   } else {
-    const smokeCtrlReq = (hasBasement && ba >= 1000) || (hasWL && wl >= 1000);
+    const floorsAfter1992 = pd >= YD.D19920728 && ag >= 11;
+    const smokeCtrlReq = (hasBasement && ba >= 1000) || (hasWL && wl >= 1000) || floorsAfter1992;
     const smokeCtrlReason = (hasBasement && ba >= 1000)
       ? "숙박시설의 지하층 바닥면적이 1,000㎡ 이상입니다."
       : (hasWL && wl >= 1000)
         ? "숙박시설의 무창층 바닥면적이 1,000㎡ 이상입니다."
-        : "현재 입력 기준으로는 설치 대상이 아닙니다. (지하층 또는 무창층 바닥면적 1,000㎡ 이상 시 설치)";
+        : floorsAfter1992
+          ? "지상 11층 이상으로 특별피난계단에 제연설비를 설치해야 합니다."
+          : "현재 입력 기준으로는 설치 대상이 아닙니다. (지하층 또는 무창층 바닥면적 1,000㎡ 이상 시 설치)";
     results.push(makeResult(categories.fireSupport, "제연설비", "", smokeCtrlReq ? "required" : "notRequired", smokeCtrlReason, ""));
   }
 
@@ -6629,8 +6636,9 @@ function yearEvaluateNeighborhoodBefore2004(inp) {
     smokeReason = "1982년 9월 28일 이전에는 배연설비(현 제연설비) 규정이 없었습니다.";
     results.push(makeResult(categories.fireSupport, "제연설비", "", "notRequired", smokeReason, ""));
   } else {
-    smokeReq = inp.smokeControlArea >= 1000;
-    smokeReason = smokeReq ? "지하층·무창층 바닥면적 합계가 1,000㎡ 이상입니다." : "현재 입력 기준으로는 설치 대상이 아닙니다.";
+    const floorsAfter1992 = pd >= YD.D19920728 && ag >= 11;
+    smokeReq = inp.smokeControlArea >= 1000 || floorsAfter1992;
+    smokeReason = inp.smokeControlArea >= 1000 ? "지하층·무창층 바닥면적 합계가 1,000㎡ 이상입니다." : floorsAfter1992 ? "지상 11층 이상으로 특별피난계단에 제연설비를 설치해야 합니다." : "현재 입력 기준으로는 설치 대상이 아닙니다.";
     results.push(makeResult(categories.fireSupport, "제연설비", "", smokeReq ? "required" : "notRequired", smokeReason, ""));
   }
 
@@ -6951,8 +6959,11 @@ function yearEvaluateReligiousBefore2004(inp) {
       (hasWL && wl >= 1000) ? "무창층 바닥면적이 1,000㎡ 이상입니다." :
       "현재 입력 기준으로는 설치 대상이 아닙니다. (분법 이전 종교시설의 일반 거실에는 별도 제연설비 기준이 없었습니다)", ""));
   } else {
-    results.push(makeResult(categories.fireSupport, "제연설비", "", "notRequired",
-      "분법 이전(1992~2004) 종교시설 일반 거실은 제연설비 설치 대상이 아닙니다. (무대부 200㎡ 이상 기준은 2011년 7월 이후 신설)", ""));
+    // 1992~2004: 11층 이상이면 특별피난계단에 제연설비 필요
+    const smokeCtrlReq = ag >= 11;
+    results.push(makeResult(categories.fireSupport, "제연설비", "", smokeCtrlReq ? "required" : "notRequired",
+      smokeCtrlReq ? "지상 11층 이상으로 특별피난계단에 제연설비를 설치해야 합니다."
+      : "분법 이전(1992~2004) 종교시설 일반 거실은 제연설비 설치 대상이 아닙니다. (무대부 200㎡ 이상 기준은 2011년 7월 이후 신설)", ""));
   }
 
   // ── 연결송수관설비 ──
@@ -7296,8 +7307,10 @@ function yearEvaluateMedicalBefore2004(inp) {
     results.push(makeResult(categories.fireSupport, "제연설비", "", "notRequired",
       "이 시기 의료시설의 일반 거실(병실 등)은 배연설비(현 제연설비) 설치 대상에서 제외됩니다.", ""));
   } else {
-    results.push(makeResult(categories.fireSupport, "제연설비", "", "review",
-      "의료시설의 일반 거실·병실은 제연설비 설치 대상이 아닙니다. 다만 특별피난계단 및 비상용승강기의 계단실·승강장 부분에는 제연설비를 설치해야 합니다.", ""));
+    const smokeCtrlReq = ag >= 11;
+    results.push(makeResult(categories.fireSupport, "제연설비", "", smokeCtrlReq ? "required" : "review",
+      smokeCtrlReq ? "지상 11층 이상으로 특별피난계단에 제연설비를 설치해야 합니다."
+      : "의료시설의 일반 거실·병실은 제연설비 설치 대상이 아닙니다. 다만 특별피난계단 및 비상용승강기의 계단실·승강장 부분에는 제연설비를 설치해야 합니다.", ""));
   }
 
   // ── 연결송수관설비 ──
@@ -7659,8 +7672,10 @@ function yearEvaluateElderlyBefore2004(inp) {
     results.push(makeResult(categories.fireSupport, "제연설비", "", "notRequired",
       "1992년 7월 28일 이전에는 노유자시설에 대한 배연설비(현 제연설비) 기준이 없었습니다.", ""));
   } else {
-    results.push(makeResult(categories.fireSupport, "제연설비", "", "review",
-      "노유자시설의 일반 거실은 제연설비 설치 대상이 아닙니다. 다만 특별피난계단 및 비상용승강기의 계단실·승강장 부분에는 제연설비를 설치해야 합니다.", ""));
+    const smokeCtrlReq = ag >= 11;
+    results.push(makeResult(categories.fireSupport, "제연설비", "", smokeCtrlReq ? "required" : "review",
+      smokeCtrlReq ? "지상 11층 이상으로 특별피난계단에 제연설비를 설치해야 합니다."
+      : "노유자시설의 일반 거실은 제연설비 설치 대상이 아닙니다. 다만 특별피난계단 및 비상용승강기의 계단실·승강장 부분에는 제연설비를 설치해야 합니다.", ""));
   }
 
   // ── 연결송수관설비 ──
@@ -7928,11 +7943,13 @@ function yearEvaluateNeighborhood(inp) {
     inp.totalArea >= 5000 ? "연면적이 5,000㎡ 이상입니다." :
       "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
 
-  // ── 제연설비 (기준 동일) ──
+  // ── 제연설비 ──
+  const smokeReqN = inp.smokeControlArea >= 1000 || inp.aboveGroundFloors >= 11;
   results.push(makeResult(categories.fireSupport, "제연설비", "",
-    inp.smokeControlArea >= 1000 ? "required" : "notRequired",
-    inp.smokeControlArea >= 1000 ? "지하층·무창층 내 근린생활시설 바닥면적 합계가 1,000㎡ 이상입니다." :
-      "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
+    smokeReqN ? "required" : "notRequired",
+    inp.smokeControlArea >= 1000 ? "지하층·무창층 내 근린생활시설 바닥면적 합계가 1,000㎡ 이상입니다."
+    : inp.aboveGroundFloors >= 11 ? "지상 11층 이상으로 특별피난계단에 제연설비를 설치해야 합니다."
+    : "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
 
   // ── 연결송수관 (기준 동일) ──
   const standpipeReq = (inp.totalFloors >= 5 && inp.totalArea >= 6000) || inp.totalFloors >= 7 ||
@@ -8154,11 +8171,12 @@ function yearEvaluateLodging(inp) {
     ta >= 5000 ? "연면적이 5,000㎡ 이상입니다." : "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
 
   // ── 제연설비 ──
-  const smokeReq = inp.lodgingBasementAreaForSmoke >= 1000;
+  const smokeReqL = inp.lodgingBasementAreaForSmoke >= 1000 || ag >= 11;
   results.push(makeResult(categories.fireSupport, "제연설비", "",
-    smokeReq ? "required" : "notRequired",
-    smokeReq ? "지하층·무창층 내 숙박시설 사용 바닥면적 합계가 1,000㎡ 이상입니다." :
-    "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
+    smokeReqL ? "required" : "notRequired",
+    inp.lodgingBasementAreaForSmoke >= 1000 ? "지하층·무창층 내 숙박시설 사용 바닥면적 합계가 1,000㎡ 이상입니다."
+    : ag >= 11 ? "지상 11층 이상으로 특별피난계단에 제연설비를 설치해야 합니다."
+    : "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
 
   // ── 연결송수관설비 ──
   const standpipeReq = (tf >= 5 && ta >= 6000) || tf >= 7 || (bf >= 3 && ba >= 1000);
@@ -8424,7 +8442,10 @@ function yearEvaluateElderly(inp) {
   // ── 제연설비 ──
   let smokeReq = false;
   let smokeReason = "";
-  if (pd >= YD.D20150701) {
+  if (ag >= 11) {
+    smokeReq = true;
+    smokeReason = "지상 11층 이상으로 특별피난계단에 제연설비를 설치해야 합니다.";
+  } else if (pd >= YD.D20150701) {
     smokeReq = inp.elderlyBasementAreaForSmoke >= 1000;
     smokeReason = smokeReq
       ? "지하층·무창층 내 노유자시설 사용 바닥면적 합계가 1,000㎡ 이상입니다."
@@ -8745,10 +8766,13 @@ function yearEvaluateMedical(inp) {
     ta >= 5000 ? "required" : "notRequired",
     ta >= 5000 ? "연면적이 5,000㎡ 이상입니다." : "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
 
-  // ── 제연설비 (2015.7.1 이후 의료시설 편입) ──
+  // ── 제연설비 ──
   let smokeReq = false;
   let smokeReason = "";
-  if (pd >= YD.D20150701) {
+  if (ag >= 11) {
+    smokeReq = true;
+    smokeReason = "지상 11층 이상으로 특별피난계단에 제연설비를 설치해야 합니다.";
+  } else if (pd >= YD.D20150701) {
     smokeReq = inp.medicalBasementAreaForSmoke >= 1000;
     smokeReason = smokeReq
       ? "지하층·무창층 내 의료시설 사용 바닥면적 합계가 1,000㎡ 이상입니다."
@@ -8944,10 +8968,13 @@ function yearEvaluateReligious(inp) {
     ta >= 5000 ? "required" : "notRequired",
     ta >= 5000 ? "연면적이 5,000㎡ 이상입니다." : "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
 
-  // ── 제연설비 (2011년 7월 7일 이후 무대부 200㎡ 이상) ──
+  // ── 제연설비 ──
   let smokeReq = false;
   let smokeReason = "";
-  if (pd >= YD.D20110707) {
+  if (ag >= 11) {
+    smokeReq = true;
+    smokeReason = "지상 11층 이상으로 특별피난계단에 제연설비를 설치해야 합니다.";
+  } else if (pd >= YD.D20110707) {
     const stageArea = inp.religiousHasStage ? inp.religiousStageArea : 0;
     smokeReq = stageArea >= 200;
     smokeReason = smokeReq
@@ -9537,11 +9564,23 @@ function yearWizardRestart() {
 }
 
 document.getElementById("back-from-explorer-year").addEventListener("click", () => showScreen("explorerSelect"));
-document.getElementById("year-prev-btn").addEventListener("click", () => yearMoveStep(-1));
+document.getElementById("year-prev-btn").addEventListener("click", () => {
+  if (yearState.currentStep === 0) showScreen("explorerSelect");
+  else yearMoveStep(-1);
+});
 document.getElementById("year-next-btn").addEventListener("click", () => {
   const activeSteps = yearGetActiveSteps();
   if (yearState.currentStep === activeSteps.length - 1) yearShowResults();
   else yearMoveStep(1);
+});
+document.getElementById("year-result-prev-btn").addEventListener("click", () => {
+  const activeSteps = yearGetActiveSteps();
+  yearState.currentStep = activeSteps.length - 1;
+  document.getElementById("year-result-card").classList.add("hidden");
+  document.getElementById("year-question-card").classList.remove("hidden");
+  document.getElementById("year-prog-wrap").classList.remove("hidden");
+  yearRenderCurrentStep();
+  yearScrollToTop();
 });
 document.getElementById("year-restart-btn").addEventListener("click", () => yearWizardRestart());
 
@@ -9658,7 +9697,13 @@ document.getElementById("back-to-main-result").addEventListener("click", () => {
 });
 document.getElementById("restart-explorer").addEventListener("click", restartExplorer);
 document.getElementById("restart-explorer-from-multiuse").addEventListener("click", restartExplorer);
-document.getElementById("result-back-to-select").addEventListener("click", () => showScreen("explorerSelect"));
+document.getElementById("result-back-to-select").addEventListener("click", () => {
+  const activeSteps = getActiveSteps();
+  state.currentStep = activeSteps.length - 1;
+  showExplorerCard("question");
+  renderCurrentStep();
+  scrollToTop();
+});
 
 renderCurrentStep();
 
