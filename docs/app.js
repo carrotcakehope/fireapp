@@ -925,6 +925,10 @@ function getAssistantStaffingResult(targetType, rawValue) {
   };
 }
 
+function sanitizeAssistantNumericInput(value) {
+  return String(value ?? "").replace(/\D/g, "");
+}
+
 function getActiveSteps() {
   return steps.filter((step) => {
     if (["isThirdClassNeighborhood", "permitBefore1992", "pre1992PermitRange", "thirdClassDetailUse"].includes(step.key)) return false;
@@ -3024,10 +3028,9 @@ function renderDateCalculator() {
           <input
             id="assistant-staffing-value"
             class="calc-input"
-            type="number"
-            min="0"
-            step="1"
+            type="text"
             inputmode="numeric"
+            pattern="[0-9]*"
             placeholder="${inputPlaceholder}"
             value="${assistantValue}"
           >
@@ -3235,7 +3238,7 @@ function renderDateCalculator() {
       const key = state.dateCalc.assistantTargetType === "apartment"
         ? "assistantHouseholds"
         : "assistantArea";
-      state.dateCalc[key] = event.target.value;
+      state.dateCalc[key] = sanitizeAssistantNumericInput(event.target.value);
       renderDateCalculator();
     });
   }
