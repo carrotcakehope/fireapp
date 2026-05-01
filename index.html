@@ -11,33 +11,50 @@
   <meta name="apple-mobile-web-app-title" content="예방 어시스턴트">
   <link rel="apple-touch-icon" href="./icon-192.png">
   <meta name="theme-color" content="#d93025">
+  <!-- Google Tag Manager -->
+  <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','GTM-MPVSSTJH');</script>
+  <!-- End Google Tag Manager -->
+  <!-- Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-LKQZX5YS2H"></script>
+  <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','G-LKQZX5YS2H');</script>
+  <!-- End Google Analytics -->
   <script>(function(){var t=localStorage.getItem('theme')||'dark';document.documentElement.setAttribute('data-theme',t);})();</script>
   <script>
     if ('serviceWorker' in navigator) {
+      var _reloading = false;
+      function _forceReload() {
+        if (_reloading) return;
+        _reloading = true;
+        window.location.reload();
+      }
       window.addEventListener('load', function() {
         navigator.serviceWorker.register('./sw.js', { updateViaCache: 'none' })
           .then(function(reg) {
-            reg.update(); // 앱 시작 시 즉시 업데이트 확인
-            // 앱이 백그라운드에서 돌아올 때마다 업데이트 확인 (안드로이드 대응)
+            reg.update();
             document.addEventListener('visibilitychange', function() {
               if (document.visibilityState === 'visible') reg.update();
             });
           });
-        // SW 컨트롤러 교체 감지 → 즉시 새로고침 (postMessage보다 안정적)
-        navigator.serviceWorker.addEventListener('controllerchange', function() {
-          window.location.reload();
+        // SW activate 후 postMessage 수신 (iOS 홈화면 앱 대응)
+        navigator.serviceWorker.addEventListener('message', function(e) {
+          if (e.data && e.data.type === 'CACHE_UPDATED') _forceReload();
         });
+        // controllerchange fallback (PC/Android)
+        navigator.serviceWorker.addEventListener('controllerchange', _forceReload);
       });
     }
   </script>
 </head>
 <body>
+  <!-- Google Tag Manager (noscript) -->
+  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MPVSSTJH" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+  <!-- End Google Tag Manager (noscript) -->
   <section id="screen-home" class="screen active">
     <div class="home-header">
       <div class="home-header-left">
         <div class="home-badge">FIRE SAFETY ASSISTANT</div>
         <h1 class="home-title">예방업무 <span>어시스턴트</span></h1>
-        <div class="home-meta">v1.0.0 / 최종 수정 2026-04-21</div>
+        <div class="home-meta">v1.2.1 / 최종 수정 2026-04-26</div>
       </div>
       <div class="home-header-right">
         <button id="theme-toggle" class="theme-toggle-btn" type="button" aria-label="테마 전환"></button>
@@ -56,24 +73,13 @@
           </div>
         </button>
 
-        <button id="open-explorer-year" class="menu-card" type="button">
-          <div class="menu-icon mc-red">🧯</div>
-          <div class="menu-text">
-            <div class="mt-num" style="display:flex;align-items:center;gap:6px;">
-              <span>01-1</span><span class="test-badge">테스트중</span>
-            </div>
-            <div class="mt-title">소방시설탐색기<br><span style="font-size:12px;opacity:0.7;">(연도별_테스트중)</span></div>
-            <div class="mt-desc">연도별 기준 적용 소방시설 도출</div>
-          </div>
-        </button>
-
         <button id="open-report-guide" class="menu-card" type="button">
           <div class="menu-icon mc-amber">📋</div>
           <div class="menu-text">
             <div class="mt-num" style="display:flex;align-items:center;gap:6px;">
               <span>02</span><span class="test-badge">테스트중</span>
             </div>
-            <div class="mt-title">보고서 읽는법</div>
+            <div class="mt-title">자체점검 보고서 읽는법</div>
             <div class="mt-desc">자체점검 실시결과 보고서 작성·읽기 안내</div>
           </div>
         </button>
@@ -114,6 +120,15 @@
           </div>
         </button>
 
+        <button id="open-facilities" class="menu-card" type="button">
+          <div class="menu-icon mc-purple">🔥</div>
+          <div class="menu-text">
+            <div class="mt-num" style="display:flex;align-items:center;gap:6px;"><span>07</span><span class="test-badge">테스트중</span></div>
+            <div class="mt-title">소방시설 설명</div>
+            <div class="mt-desc">소방시설별 개요·종류·구성·설치기준</div>
+          </div>
+        </button>
+
       </div>
 
       <div class="menu-right" id="home-reminders"></div>
@@ -144,10 +159,37 @@
     </section>
   </section>
 
+  <section id="screen-explorer-select" class="screen">
+    <div class="topbar">
+      <button id="back-from-explorer-select" class="back-btn" type="button">←</button>
+      <span class="tb-title">소방시설탐색기</span>
+    </div>
+    <div class="scroll-content">
+      <section class="wq-card">
+        <p class="wq-label">모드 선택</p>
+        <h2 class="wq-title">어떤 방식으로 탐색할까요?</h2>
+        <p class="wq-sub">목적에 맞는 버전을 선택하세요.</p>
+        <div class="choice-list" style="margin-top:16px;">
+          <button id="explorer-select-simple" class="choice-button" type="button">
+            <strong>⚡ 간단한 버전</strong>
+            <span>현행 법령 기준으로 빠르게 도출합니다. 건축허가일 없이도 바로 사용할 수 있습니다.</span>
+          </button>
+          <button id="explorer-select-detailed" class="choice-button" type="button">
+            <div class="choice-label-wrap">
+              <strong>🔍 자세한 버전</strong>
+              <span class="test-badge">테스트중</span>
+            </div>
+            <span>건축허가일을 기준으로 당시 법령을 적용한 상세 결과를 도출합니다.</span>
+          </button>
+        </div>
+      </section>
+    </div>
+  </section>
+
   <section id="screen-explorer-year" class="screen">
     <div class="topbar">
       <button id="back-from-explorer-year" class="back-btn" type="button">←</button>
-      <span class="tb-title">소방시설탐색기 (연도별_테스트중)</span>
+      <span class="tb-title">소방시설탐색기 (연도별)</span>
       <span class="test-badge" style="margin-left:8px;">테스트중</span>
     </div>
 
@@ -192,7 +234,39 @@
             <div id="year-exception-list"></div>
           </div>
         </div>
-        <button id="year-restart-btn" class="btn-restart" type="button">다시 입력</button>
+        <button id="year-open-multiuse-safety" class="btn btn-primary hidden" type="button">다중이용업소 안전시설 보기</button>
+        <div style="display:flex;gap:8px;margin-top:8px;">
+          <button id="year-result-prev-btn" class="btn btn-ghost" type="button" style="flex:1;">이전</button>
+          <button id="year-restart-btn" class="btn btn-ghost" type="button" style="flex:1;margin-top:0;">다시 입력</button>
+        </div>
+      </section>
+
+      <section id="year-multiuse-safety-card" class="result-card hidden">
+        <div class="rc-grade g-sp">다중이용업소 안전시설</div>
+        <div id="year-multiuse-safety-summary" class="info-box blue"></div>
+
+        <p class="section-label">설치해야 하는 안전시설</p>
+        <div id="year-multiuse-required-list" style="display:flex;flex-direction:column;gap:6px;"></div>
+
+        <div id="year-multiuse-extra-section" class="hidden">
+          <p class="section-label">그 밖의 안전시설</p>
+          <div id="year-multiuse-extra-list" style="display:flex;flex-direction:column;gap:6px;"></div>
+        </div>
+
+        <div id="year-multiuse-etc-section" class="hidden">
+          <p class="section-label">기타</p>
+          <div id="year-multiuse-etc-list" style="display:flex;flex-direction:column;gap:6px;"></div>
+        </div>
+
+        <p class="section-label">안전시설 설치 근거</p>
+        <div id="year-multiuse-reason-list"></div>
+
+        <div id="year-multiuse-transitional-notes"></div>
+
+        <div class="w-nav">
+          <button id="year-back-to-main-result" class="btn btn-ghost" type="button">기본 결과로</button>
+          <button id="year-restart-from-multiuse" class="btn btn-primary" type="button">다시 입력</button>
+        </div>
       </section>
     </div>
   </section>
@@ -254,7 +328,10 @@
 
         <button id="open-multiuse-safety" class="btn btn-primary hidden" type="button">다중이용업소 안전시설 보기</button>
 
-        <button id="restart-explorer" class="btn-restart" type="button">다시 입력</button>
+        <div style="display:flex;gap:8px;margin-top:8px;">
+          <button id="result-back-to-select" class="btn btn-ghost" type="button" style="flex:1;">이전</button>
+          <button id="restart-explorer" class="btn btn-ghost" type="button" style="flex:1;margin-top:0;">다시 입력</button>
+        </div>
       </section>
 
       <section id="multiuse-safety-card" class="result-card hidden">
@@ -269,8 +346,15 @@
           <div id="multiuse-extra-list" style="display:flex;flex-direction:column;gap:6px;"></div>
         </div>
 
+        <div id="multiuse-etc-section" class="hidden">
+          <p class="section-label">기타</p>
+          <div id="multiuse-etc-list" style="display:flex;flex-direction:column;gap:6px;"></div>
+        </div>
+
         <p class="section-label">안전시설 설치 근거</p>
         <div id="multiuse-reason-list"></div>
+
+        <div id="multiuse-transitional-notes"></div>
 
         <div class="w-nav">
           <button id="back-to-main-result" class="btn btn-ghost" type="button">기본 결과로</button>
@@ -283,7 +367,7 @@
   <section id="screen-report-guide" class="screen">
     <div class="topbar">
       <button id="back-from-report-guide" class="back-btn" type="button">←</button>
-      <span class="tb-title">보고서 읽는법</span>
+      <span class="tb-title">자체점검 보고서 읽는법</span>
     </div>
     <div id="report-guide-content" class="rg-outer"></div>
   </section>
@@ -302,6 +386,13 @@
           <div class="guide-feature-text">
             <div class="guide-feature-title">소방시설탐색기</div>
             <div class="guide-feature-desc">건물 용도·면적·층수 등을 입력하면 현행법 기준으로 설치 의무가 있는 소방시설을 자동으로 도출합니다. 다중이용업소 안전시설도 함께 확인할 수 있습니다.</div>
+          </div>
+        </div>
+        <div class="guide-feature-item">
+          <div class="guide-feature-icon mc-amber">📋</div>
+          <div class="guide-feature-text">
+            <div class="guide-feature-title">자체점검 보고서 읽는법</div>
+            <div class="guide-feature-desc">자체점검 실시결과 보고서를 페이지별로 안내합니다. 탭을 눌러 보고서 표지(1p), 대상물 정보(2p), 소방시설 선택(3p), 점검표(4~8p)로 이동하고, 각 항목을 탭하면 작성 방법과 읽는 요령을 확인할 수 있습니다. 3페이지에서는 등급을 선택하거나 직접 시설을 골라 해당하는 점검표 항목만 모아볼 수 있습니다.</div>
           </div>
         </div>
         <div class="guide-feature-item">
@@ -461,7 +552,17 @@
     </div>
   </div>
 
+  <section id="screen-facilities" class="screen">
+    <div class="topbar">
+      <button id="back-from-facilities" class="back-btn" type="button">←</button>
+      <span class="tb-title">소방시설 설명</span>
+    </div>
+    <div id="facilities-content" class="rg-outer"></div>
+  </section>
+
   <script src="./pdf.min.js"></script>
   <script src="./app.js"></script>
+  <script src="./facilities-data.js"></script>
+  <script src="./facilities.js"></script>
 </body>
 </html>
