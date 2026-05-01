@@ -126,27 +126,37 @@
       body.appendChild(el);
     }
 
-    // 사진 + 설명: compact가 아니면 2열 나란히, compact는 설명만
+    // 사진 + 설명: compact가 아니면 갤러리(위) + 설명(아래) 또는 2열 나란히, compact는 설명만
     if (item.level !== 'compact') {
-      const row = document.createElement('div');
-      row.className = 'fac-photo-desc-row';
+      if (item.photos?.length) {
+        body.appendChild(makePhotoGallery(item.photos));
+        if (item.description) {
+          const el = document.createElement('p');
+          el.className = 'fac-description';
+          el.textContent = item.description;
+          body.appendChild(el);
+        }
+      } else {
+        const row = document.createElement('div');
+        row.className = 'fac-photo-desc-row';
 
-      const photoCol = document.createElement('div');
-      photoCol.className = 'fac-photo-col';
-      photoCol.appendChild(makeMainPhoto(item));
-      row.appendChild(photoCol);
+        const photoCol = document.createElement('div');
+        photoCol.className = 'fac-photo-col';
+        photoCol.appendChild(makeMainPhoto(item));
+        row.appendChild(photoCol);
 
-      if (item.description) {
-        const descCol = document.createElement('div');
-        descCol.className = 'fac-desc-col';
-        const el = document.createElement('p');
-        el.className = 'fac-description';
-        el.textContent = item.description;
-        descCol.appendChild(el);
-        row.appendChild(descCol);
+        if (item.description) {
+          const descCol = document.createElement('div');
+          descCol.className = 'fac-desc-col';
+          const el = document.createElement('p');
+          el.className = 'fac-description';
+          el.textContent = item.description;
+          descCol.appendChild(el);
+          row.appendChild(descCol);
+        }
+
+        body.appendChild(row);
       }
-
-      body.appendChild(row);
     } else if (item.description) {
       const el = document.createElement('p');
       el.className = 'fac-description';

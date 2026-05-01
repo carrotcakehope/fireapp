@@ -393,15 +393,9 @@ const FACILITIES_DATA = [
         id: 'standalone-detector',
         name: '단독경보형 감지기',
         category: '경보설비',
-        level: 'standard',
+        level: 'compact',
         definition: '배선·수신기 없이 기기 자체에서 화재를 감지하고 경보를 울리는 독립형 감지기',
         description: '복잡한 배선이나 수신기가 필요 없어 일반 주택, 소규모 숙박시설 등에 유용합니다. 천장에 나사로 고정하는 것만으로 설치가 완료됩니다. 연립·다세대주택에는 반드시 연동형으로 설치해야 합니다.',
-        types: [
-          { name: '건전지형', desc: '내장 배터리로 작동. 배선 불필요. 가장 흔한 형태' },
-          { name: '상용전원형', desc: '건물 전기를 연결해 사용. 정전 대비 내부 2차 배터리 내장' },
-          { name: '단독형', desc: '화재를 감지한 해당 감지기에서만 경보 발령' },
-          { name: '연동형', desc: '유선·무선으로 여러 감지기가 연결. 하나가 작동하면 전체 동시 경보. 연립·다세대주택 의무 적용' },
-        ],
         components: [
           { name: '감지 센서', desc: '연기 또는 열을 감지하는 부분' },
           { name: '음향장치', desc: '화재 감지 시 경보음·음성 안내를 발령하는 내장 스피커' },
@@ -461,7 +455,7 @@ const FACILITIES_DATA = [
         id: 'visual-alarm',
         name: '시각경보기',
         category: '경보설비',
-        level: 'compact',
+        level: 'standard',
         definition: '청각장애인을 위해 경보 시 빛을 점멸하여 화재를 알리는 장치',
         description: '음향 경보를 듣기 어려운 청각장애인이 화재 경보를 시각적으로 인지할 수 있도록 강한 빛을 점멸합니다.',
         criteria: [
@@ -519,7 +513,7 @@ const FACILITIES_DATA = [
         id: 'auto-fire-report',
         name: '자동화재속보설비',
         category: '경보설비',
-        level: 'compact',
+        level: 'standard',
         definition: '화재 감지 시 자동으로 119 소방관서에 통보하는 설비',
         description: '감지기 작동 시 사람의 개입 없이 자동으로 119에 화재 신고가 이루어지는 설비입니다. 신속한 소방대 출동을 위해 사람이 없는 시간대에도 작동합니다.',
         criteria: [
@@ -649,10 +643,17 @@ const FACILITIES_DATA = [
       },
       {
         id: 'exit-sign',
-        name: '유도등',
+        name: '유도등 및 유도표지',
         category: '피난유도설비',
         level: 'full',
         definition: '화재 시 피난 방향을 빛으로 안내하는 등기구',
+        photos: [
+          { src: './image/facilities/유도등/피난구유도등_main.jpg', caption: '피난구유도등' },
+          { src: './image/facilities/유도등/유도표지_main.jpg', caption: '유도표지' },
+          { src: './image/facilities/유도등/객석유도등_main.jpg', caption: '객석유도등' },
+          { src: './image/facilities/유도등/피난유도선_main.jpg', caption: '피난유도선' },
+          { src: './image/facilities/유도등/계단통로유도등_main.jpg', caption: '계단통로유도등' },
+        ],
         description: '정전 시에도 내장 배터리로 일정 시간 점등이 유지되어 피난 경로를 안내합니다. 평상시에는 상용전원으로 점등되고, 화재 또는 정전 시 비상전원으로 자동 전환됩니다.',
         types: [
           { name: '피난구유도등', desc: '비상구 위에 설치. 피난 출구 위치 안내. 녹색 바탕에 흰색 화살표·인물 표시' },
@@ -686,10 +687,6 @@ const FACILITIES_DATA = [
         level: 'standard',
         definition: '정전 또는 화재 시 피난 경로에 조명을 제공하는 비상 조명 장치',
         description: '정전 시 피난 통로·계단·거실 등이 어두워지지 않도록 비상전원으로 자동 점등됩니다. 피난 경로의 조도를 확보하여 안전한 대피를 지원합니다.',
-        types: [
-          { name: '예비전원 내장형', desc: '내장 배터리로 정전 즉시 자동 점등' },
-          { name: '예비전원 미내장형(중앙제어형)', desc: '중앙 비상전원 설비와 연결하여 점등' },
-        ],
         criteria: [
           '5층 이상 + 연면적 3,000㎡ 이상인 경우 설치',
           '지하층·무창층 450㎡ 이상, 터널 500m 이상',
@@ -705,7 +702,7 @@ const FACILITIES_DATA = [
         id: 'portable-emergency-light',
         name: '휴대용비상조명등',
         category: '피난유도설비',
-        level: 'compact',
+        level: 'standard',
         definition: '화재 시 손에 들고 다닐 수 있는 휴대용 비상 조명',
         description: '거치대에서 분리하는 즉시 자동으로 점등됩니다. 숙박시설 객실이나 다중이용업소에서 정전 시 개인 대피용으로 사용합니다.',
         criteria: [
@@ -727,7 +724,7 @@ const FACILITIES_DATA = [
         id: 'water-supply',
         name: '상수도소화용수설비',
         category: '소화용수설비',
-        level: 'compact',
+        level: 'standard',
         definition: '소방차가 소화에 사용할 물을 상수도에서 공급받는 설비',
         description: '일반 상수도 배관에 연결된 소화전(공공소화전)을 통해 소방차가 직접 물을 공급받는 설비입니다.',
         criteria: [
@@ -742,7 +739,7 @@ const FACILITIES_DATA = [
         id: 'water-tank',
         name: '소화수조·저수조',
         category: '소화용수설비',
-        level: 'standard',
+        level: 'compact',
         definition: '소방차가 소화에 사용할 물을 별도로 저장하는 수조',
         description: '상수도 공급이 어렵거나 부족한 지역에 설치합니다. 소방차가 직접 접근하여 채수구를 통해 물을 공급받습니다.',
         components: [
@@ -773,7 +770,7 @@ const FACILITIES_DATA = [
         id: 'smoke-control',
         name: '제연설비',
         category: '소화활동설비',
-        level: 'full',
+        level: 'standard',
         definition: '화재 시 연기를 배출하거나 차단하여 피난 경로를 확보하는 설비',
         description: '화재 시 연기로 인한 시야 차단과 유독가스 흡입이 가장 큰 피해 원인입니다. 제연설비는 연기를 신속히 배출하고 피난 경로에 신선한 공기를 공급하여 안전한 대피를 돕습니다.',
         types: [
