@@ -11299,7 +11299,22 @@ document.getElementById('back-from-report-guide').addEventListener('click', func
 });
 
 document.getElementById('open-contact').addEventListener('click', function () {
-  window.open('https://mail.google.com/mail/?view=cm&fs=1&to=carrotcakehope@gmail.com&su=예방GPT 건의사항', '_blank');
+  document.getElementById('contact-confirm-modal').classList.remove('hidden');
+});
+
+document.getElementById('contact-confirm-cancel').addEventListener('click', function () {
+  document.getElementById('contact-confirm-modal').classList.add('hidden');
+});
+
+document.getElementById('contact-confirm-ok').addEventListener('click', function () {
+  document.getElementById('contact-confirm-modal').classList.add('hidden');
+  var isAndroid = /android/i.test(navigator.userAgent);
+  var isStandaloneApp = window.matchMedia('(display-mode: standalone)').matches;
+  if (isAndroid || isStandaloneApp) {
+    window.location.href = 'mailto:carrotcakehope@gmail.com?subject=예방GPT 건의사항';
+  } else {
+    window.open('https://mail.google.com/mail/?view=cm&fs=1&to=carrotcakehope@gmail.com&su=예방GPT 건의사항', '_blank');
+  }
 });
 
 // home-meta를 PATCH_NOTES와 동기화
