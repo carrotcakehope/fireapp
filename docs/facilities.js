@@ -40,7 +40,7 @@
       const panel = document.createElement('div');
       panel.className = 'fac-panel' + (i !== 0 ? ' hidden' : '');
       panel.dataset.idx = i;
-      if (tab.intro) panel.appendChild(buildIntroCard(tab.intro));
+      if (tab.intro && tab.showIntro !== false) panel.appendChild(buildIntroCard(tab.intro));
       tab.items.forEach(item => panel.appendChild(buildAccordion(item)));
       contentArea.appendChild(panel);
     });

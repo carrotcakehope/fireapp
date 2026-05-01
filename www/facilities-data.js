@@ -2,6 +2,7 @@ const FACILITIES_DATA = [
   {
     tabId: '소화설비',
     tabLabel: '소화설비',
+    showIntro: false,
     intro: {
       type: 'components',
       title: '수계 소화설비 공통 구성요소',
@@ -163,7 +164,7 @@ const FACILITIES_DATA = [
         name: '옥내소화전설비',
         category: '소화전설비',
         level: 'full',
-        photoWithComponents: true,
+        showWaterSystemComponents: true,
         definition: '건물 내부에 설치된 소화전으로, 초기 화재 진압 시 호스를 연결해 물을 방사하는 설비',
         description: '화재 발생 시 건물 내 재실자 또는 소방대원이 직접 사용할 수 있는 가장 기본적인 소화설비입니다. 펌프가 자동으로 기동되어 물을 공급하며, 전층에 설치 의무가 있는 경우가 많습니다.',
         types: [
@@ -171,12 +172,8 @@ const FACILITIES_DATA = [
           { name: '호스릴형', desc: '25mm 소형 호스릴 사용. 혼자서도 조작 가능. 주로 소규모 건물에 적용' },
         ],
         components: [
-          { name: '수원', desc: '물을 저장하는 수조. 옥상수조는 전체 수원의 1/3 이상 저장' },
-          { name: '가압송수장치(펌프)', desc: '물을 가압하여 각 층 소화전까지 공급하는 펌프. 주펌프·예비펌프·충압펌프로 구성' },
-          { name: '배관·송수구', desc: '소방차가 물을 보충할 수 있는 65mm 쌍구형 송수구 설치' },
           { name: '소화전함', desc: '호스·관창·밸브가 내장된 함. 각 층 보행거리 25m 이내마다 설치' },
           { name: '호스·노즐(관창)', desc: '호스를 펼쳐 노즐로 방수. 일반형 40mm, 호스릴형 25mm' },
-          { name: '감시제어반·비상전원', desc: '펌프 기동·정지 제어 및 상태 감시. 비상전원 20분 이상 확보' },
         ],
         criteria: [
           '연면적 3,000㎡ 이상 또는 지하·무창층·4층 이상 600㎡ 이상인 경우 설치',
