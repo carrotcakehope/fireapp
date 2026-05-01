@@ -2276,6 +2276,7 @@ input:focus-visible {
   transition: background var(--transition), color var(--transition), border-color var(--transition);
 }
 
+
 .shortcut-add-btn:hover {
   background: var(--surface2);
   color: var(--text-muted);

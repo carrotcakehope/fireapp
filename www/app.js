@@ -4,7 +4,7 @@ const PATCH_NOTES = {
   date: "2026-04-26",
   items: [
     { type: "new",     text: "소방시설 설명 메뉴 추가 (테스트중)" },
-    { type: "new",     text: "소방시설탐색기 — 자세한 버전 추가 (테스트중)" },
+    { type: "new",     text: "소방안전관리보조자 선임인원 계산기 추가(날짜 계산기에 위치)" },
     { type: "improve", text: "Google Analytics 및 GTM 트래킹 적용" },
     { type: "fix",     text: "전반적인 UI 개선 및 버그 수정" },
   ],
@@ -11292,12 +11292,15 @@ document.getElementById('back-from-report-guide').addEventListener('click', func
   showScreen('home');
 });
 
+document.getElementById('open-contact').addEventListener('click', function () {
+  window.open('https://mail.google.com/mail/?view=cm&fs=1&to=carrotcakehope@gmail.com&su=예방GPT 건의사항', '_blank');
+});
+
+// home-meta를 PATCH_NOTES와 동기화
+document.getElementById('home-meta').textContent = PATCH_NOTES.version + ' / 최종 수정 ' + PATCH_NOTES.date;
+
 // ── 패치노트 모달 ────────────────────────────────────────────────────────
 (function () {
-  var today = new Date().toISOString().slice(0, 10);
-  var stored = localStorage.getItem('lastPatchSeen');
-  if (stored === today) return;
-
   var typeLabel = { new: '새기능', fix: '버그수정', improve: '개선' };
   var typeClass = { new: 'pn-tag-new', fix: 'pn-tag-fix', improve: 'pn-tag-improve' };
 
@@ -11314,6 +11317,5 @@ document.getElementById('back-from-report-guide').addEventListener('click', func
 
   document.getElementById('pn-close-btn').addEventListener('click', function () {
     modal.classList.add('hidden');
-    localStorage.setItem('lastPatchSeen', today);
   });
 })();
