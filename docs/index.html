@@ -553,7 +553,10 @@
     <div class="reminder-modal-box">
       <h3 class="reminder-modal-title">✉️ 개발자에게 연락하기</h3>
       <p class="reminder-modal-desc">Gmail을 통해 개발자에게 메일을 보냅니다.<br>제대로 열리지 않을 시 아래 주소로 직접 메일해주세요.</p>
-      <div class="contact-confirm-email">carrotcakehope@gmail.com</div>
+      <div class="contact-confirm-email">
+        <span id="contact-email-text">carrotcakehope@gmail.com</span>
+        <button id="contact-copy-btn" class="contact-copy-btn" type="button" title="복사">📋</button>
+      </div>
       <div class="w-nav" style="margin-top:16px;">
         <button id="contact-confirm-cancel" class="btn btn-ghost" type="button">취소</button>
         <button id="contact-confirm-ok" class="btn btn-primary" type="button">메일 보내러 가기</button>

@@ -11317,6 +11317,33 @@ document.getElementById('contact-confirm-ok').addEventListener('click', function
   }
 });
 
+(function () {
+  var EMAIL = 'carrotcakehope@gmail.com';
+
+  function copyEmail() {
+    navigator.clipboard.writeText(EMAIL).then(function () {
+      showToast('이메일 주소가 복사됐습니다.');
+    }).catch(function () {
+      showToast('복사 실패 — 직접 선택 후 복사해주세요.');
+    });
+  }
+
+  // 복사 버튼
+  document.getElementById('contact-copy-btn').addEventListener('click', function (e) {
+    e.stopPropagation();
+    copyEmail();
+  });
+
+  // 안드로이드/앱: 이메일 텍스트 클릭 시 복사
+  var emailText = document.getElementById('contact-email-text');
+  var isAndroid = /android/i.test(navigator.userAgent);
+  var isStandaloneApp = window.matchMedia('(display-mode: standalone)').matches;
+  if (isAndroid || isStandaloneApp) {
+    emailText.style.cursor = 'pointer';
+    emailText.addEventListener('click', copyEmail);
+  }
+})();
+
 // home-meta를 PATCH_NOTES와 동기화
 document.getElementById('home-meta').textContent = PATCH_NOTES.version + ' / 최종 수정 ' + PATCH_NOTES.date;
 
