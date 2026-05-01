@@ -3252,6 +3252,73 @@ html[data-theme="light"] .fac-photo-source-badge {
   margin: 0;
 }
 
+.fac-description-top {
+  margin-bottom: 10px !important;
+}
+
+/* ── 사진 + 구성요소 2열 레이아웃 (photoWithComponents) ── */
+.fac-photo-comp-row {
+  display: grid;
+  grid-template-columns: minmax(200px, 45%) 1fr;
+  gap: 14px;
+  margin-bottom: 14px;
+  align-items: start;
+}
+
+.fac-photo-comp-row .fac-photo-col .fac-photo-img-wrap {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.fac-photo-comp-row .fac-photo-col .fac-photo-img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+@media (max-width: 480px) {
+  .fac-photo-comp-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── 사진 옆 구성요소 사이드바 ── */
+.fac-sidebar-comp-label {
+  margin-bottom: 6px;
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.fac-sidebar-comp-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.fac-sidebar-comp-row {
+  padding: 5px 9px;
+  background: var(--surface3);
+  border-radius: 7px;
+  border-left: 2px solid var(--border2);
+}
+
+.fac-sidebar-comp-name {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 1px;
+}
+
+.fac-sidebar-comp-desc {
+  font-size: 11px;
+  color: var(--text-muted);
+  line-height: 1.45;
+  word-break: keep-all;
+}
+
 @media (max-width: 480px) {
   .fac-photo-desc-row {
     grid-template-columns: 1fr;

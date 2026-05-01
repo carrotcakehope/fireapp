@@ -136,6 +136,42 @@
           el.textContent = item.description;
           body.appendChild(el);
         }
+      } else if (item.photoWithComponents && item.components?.length) {
+        const row = document.createElement('div');
+        row.className = 'fac-photo-comp-row';
+
+        const photoCol = document.createElement('div');
+        photoCol.className = 'fac-photo-col';
+        photoCol.appendChild(makeMainPhoto(item));
+        row.appendChild(photoCol);
+
+        const rightCol = document.createElement('div');
+        rightCol.className = 'fac-desc-col';
+
+        if (item.description) {
+          const p = document.createElement('p');
+          p.className = 'fac-description fac-description-top';
+          p.textContent = item.description;
+          rightCol.appendChild(p);
+        }
+
+        const compLabel = document.createElement('div');
+        compLabel.className = 'fac-sidebar-comp-label';
+        compLabel.textContent = '주요 구성요소';
+        rightCol.appendChild(compLabel);
+
+        const compList = document.createElement('div');
+        compList.className = 'fac-sidebar-comp-list';
+        item.components.forEach(c => {
+          const compRow = document.createElement('div');
+          compRow.className = 'fac-sidebar-comp-row';
+          compRow.innerHTML = `<div class="fac-sidebar-comp-name">${c.name}</div><div class="fac-sidebar-comp-desc">${c.desc}</div>`;
+          compList.appendChild(compRow);
+        });
+        rightCol.appendChild(compList);
+
+        row.appendChild(rightCol);
+        body.appendChild(row);
       } else {
         const row = document.createElement('div');
         row.className = 'fac-photo-desc-row';
@@ -201,7 +237,7 @@
       body.appendChild(grid);
     }
 
-    if (item.components?.length) {
+    if (item.components?.length && !item.photoWithComponents) {
       body.appendChild(makeSectionLabel('주요 구성요소'));
       const list = document.createElement('div');
       list.className = 'fac-comp-list';
