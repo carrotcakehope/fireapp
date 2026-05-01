@@ -589,6 +589,9 @@ const state = {
     holidays: [],
     selectMode: "base",
     noncomplianceType: "repair",
+    assistantTargetType: "apartment",
+    assistantHouseholds: "",
+    assistantArea: "",
     viewYear: new Date().getFullYear(),
     viewMonth: new Date().getMonth(),
   },
@@ -690,6 +693,7 @@ const CALC_MODES = {
     infoTitle: "선임신고 시 확인사항",
     introBody: "해임·퇴직일로부터 30일 이내에 선임하고, 선임일로부터 14일 이내에 소방서에 신고해야 합니다.",
     infoBody: "소방안전관리보조자는 소방안전관리자를 보조하여 소방안전관리 업무를 수행합니다. 선임신고서에 '관계인' 서명이 필요하며, 소방안전관리보조자 자격을 갖춘 자를 선임해야 합니다.",
+    assistantCalculator: true,
     tableTitle: "선임 구분별 제출 서류",
     tableHead: ["구분", "제출 서류"],
     tableBody: [
@@ -899,6 +903,26 @@ function addBusinessDays(startDate, days, holidayKeys) {
     cursor = addDays(cursor, 1);
   }
   return cursor;
+}
+
+function getAssistantStaffingResult(targetType, rawValue) {
+  if (rawValue === "" || rawValue === null || rawValue === undefined) return null;
+  const value = Number(rawValue);
+  if (!Number.isFinite(value) || value < 0) return null;
+
+  const normalizedValue = Math.floor(value);
+  const isApartment = targetType === "apartment";
+  const divisor = isApartment ? 300 : 15000;
+  const count = Math.floor(normalizedValue / divisor);
+
+  return {
+    count,
+    divisor,
+    inputValue: normalizedValue,
+    inputLabel: isApartment ? "세대수" : "연면적",
+    targetLabel: isApartment ? "아파트" : "그 외 대상",
+    unitLabel: isApartment ? "세대" : "㎡",
+  };
 }
 
 function getActiveSteps() {
@@ -2834,6 +2858,9 @@ function restartExplorer() {
 function renderDateCalculator() {
   const root = document.getElementById("date-content");
   const prevLeftScroll = root.querySelector(".date-left")?.scrollTop ?? 0;
+  const prevRightScroll = root.querySelector(".date-right")?.scrollTop ?? 0;
+  const activeElement = document.activeElement;
+  const prevActiveId = activeElement ? activeElement.id : "";
   const mode = CALC_MODES[state.dateCalc.mode];
   const baseDate = parseDate(state.dateCalc.baseDate);
   const modeIntroBody = mode.kind === "inspect_report"
@@ -2852,6 +2879,7 @@ function renderDateCalculator() {
   let resultSection = "";
   let legendMarkup = "";
   let tableBody = mode.tableBody;
+  let assistantCalculatorSection = "";
   const tableClassName = mode.kind === "noncompliance_dual"
     ? "calc-table calc-table-noncompliance"
     : "calc-table";
@@ -2951,6 +2979,63 @@ function renderDateCalculator() {
       <div class="cl-item"><span class="cl-dot" style="background: rgba(66, 133, 244, 0.22); border: 1.5px solid rgba(66, 133, 244, 0.8);"></span>완료신고 범위</div>
       <div class="cl-item"><span class="cl-dot" style="background: rgba(66, 133, 244, 0.22); border: 1.5px solid rgba(66, 133, 244, 0.85);"></span>완료신고기한</div>
       <div class="cl-item"><span class="cl-dot" style="background: #cda7ff;"></span>입력 공휴일</div>
+    `;
+  }
+
+  if (mode.assistantCalculator) {
+    const assistantTargetType = state.dateCalc.assistantTargetType === "other" ? "other" : "apartment";
+    const assistantValue = assistantTargetType === "apartment"
+      ? state.dateCalc.assistantHouseholds
+      : state.dateCalc.assistantArea;
+    const staffingResult = getAssistantStaffingResult(assistantTargetType, assistantValue);
+    const isApartment = assistantTargetType === "apartment";
+    const inputLabel = isApartment ? "세대수" : "연면적";
+    const inputPlaceholder = isApartment ? "예: 601" : "예: 30001";
+    const helperText = isApartment
+      ? "해당 아파트의 세대수를 300으로 나누고 소수점은 버립니다."
+      : "기숙사, 의료시설, 노유자시설, 수련시설, 숙박시설을 제외한 대상 기준입니다. <br>해당 특정소방대상물의 연면적을 15,000으로 나누고 소수점은 버립니다.";
+    const exampleText = isApartment
+      ? "예시: 299세대 0명 / 599세대 1명 / 601세대 2명"
+      : "예시: 14,999㎡ 0명 / 29,999㎡ 1명 / 30,001㎡ 2명";
+    const resultMarkup = staffingResult
+      ? `
+        <div class="assistant-staffing-result">
+          <div class="assistant-staffing-count">${staffingResult.count}<span>명</span></div>
+          <div class="assistant-staffing-meta">${staffingResult.targetLabel} / ${staffingResult.inputLabel} ${staffingResult.inputValue.toLocaleString()}${staffingResult.unitLabel}</div>
+          <div class="assistant-staffing-formula">계산식: ⌊${staffingResult.inputValue.toLocaleString()} ÷ ${staffingResult.divisor.toLocaleString()}⌋ = ${staffingResult.count}명</div>
+        </div>
+      `
+      : `
+        <div class="assistant-staffing-empty">
+          대상 구분과 값을 입력하면 선임인원이 바로 계산됩니다.
+        </div>
+      `;
+
+    assistantCalculatorSection = `
+      <section class="calc-card assistant-staffing-card">
+        <h3 class="calc-title">소방안전관리보조자 선임인원 계산기</h3>
+        <p class="calc-copy">위의 선임대상·선임인원 기준으로 그대로 계산합니다.</p>
+        <div class="assistant-staffing-toggle">
+          <button class="calc-mode-btn${assistantTargetType === "apartment" ? " active" : ""}" type="button" data-assistant-target="apartment">아파트</button>
+          <button class="calc-mode-btn${assistantTargetType === "other" ? " active" : ""}" type="button" data-assistant-target="other">그 외</button>
+        </div>
+        <div class="calc-form-row">
+          <label>${inputLabel}</label>
+          <input
+            id="assistant-staffing-value"
+            class="calc-input"
+            type="number"
+            min="0"
+            step="1"
+            inputmode="numeric"
+            placeholder="${inputPlaceholder}"
+            value="${assistantValue}"
+          >
+        </div>
+        <p class="assistant-staffing-help">${helperText}</p>
+        ${resultMarkup}
+        <div class="assistant-staffing-examples">${exampleText}</div>
+      </section>
     `;
   }
 
@@ -3059,6 +3144,7 @@ function renderDateCalculator() {
             <div class="info-box blue" style="margin-bottom:0;">${sec.content}</div>
           `).join("")}
         </section>
+        ${assistantCalculatorSection}
       </div>
     </div>
   `;
@@ -3077,6 +3163,8 @@ function renderDateCalculator() {
 
   const newLeft = root.querySelector(".date-left");
   if (newLeft && prevLeftScroll > 0) newLeft.scrollTop = prevLeftScroll;
+  const newRight = root.querySelector(".date-right");
+  if (newRight && prevRightScroll > 0) newRight.scrollTop = prevRightScroll;
 
   root.querySelectorAll("[data-mode]").forEach((button) => {
     button.addEventListener("click", () => {
@@ -3088,6 +3176,12 @@ function renderDateCalculator() {
   root.querySelectorAll("[data-noncompliance-type]").forEach((button) => {
     button.addEventListener("click", () => {
       state.dateCalc.noncomplianceType = button.dataset.noncomplianceType;
+      renderDateCalculator();
+    });
+  });
+  root.querySelectorAll("[data-assistant-target]").forEach((button) => {
+    button.addEventListener("click", () => {
+      state.dateCalc.assistantTargetType = button.dataset.assistantTarget;
       renderDateCalculator();
     });
   });
@@ -3135,6 +3229,22 @@ function renderDateCalculator() {
     state.dateCalc.viewMonth = selected.getMonth();
     renderDateCalculator();
   });
+  const assistantInput = root.querySelector("#assistant-staffing-value");
+  if (assistantInput) {
+    assistantInput.addEventListener("input", (event) => {
+      const key = state.dateCalc.assistantTargetType === "apartment"
+        ? "assistantHouseholds"
+        : "assistantArea";
+      state.dateCalc[key] = event.target.value;
+      renderDateCalculator();
+    });
+  }
+
+  if (prevActiveId === "assistant-staffing-value" && assistantInput) {
+    assistantInput.focus();
+    const inputLength = assistantInput.value.length;
+    assistantInput.setSelectionRange(inputLength, inputLength);
+  }
 }
 
 function getFloatingTooltipElement() {

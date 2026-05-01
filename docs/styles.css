@@ -1207,6 +1207,80 @@ input:focus-visible {
 }
 
 /* ── Table ── */
+.assistant-staffing-card {
+  margin-bottom: 12px;
+}
+
+.assistant-staffing-toggle {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.assistant-staffing-toggle .calc-mode-btn {
+  flex: 1;
+}
+
+.assistant-staffing-help,
+.assistant-staffing-examples,
+.assistant-staffing-formula,
+.assistant-staffing-meta,
+.assistant-staffing-empty {
+  font-size: 12px;
+  line-height: 1.7;
+  word-break: keep-all;
+}
+
+.assistant-staffing-help {
+  margin: -2px 0 12px;
+  color: var(--text-muted);
+}
+
+.assistant-staffing-result,
+.assistant-staffing-empty {
+  border: 1px solid rgba(66, 133, 244, 0.18);
+  border-radius: 14px;
+  background: rgba(66, 133, 244, 0.08);
+  padding: 14px 16px;
+}
+
+.assistant-staffing-empty {
+  color: var(--text-muted);
+}
+
+.assistant-staffing-count {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  margin-bottom: 8px;
+  color: #8eb8ff;
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+}
+
+.assistant-staffing-count span {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-muted);
+  transform: translateY(-3px);
+}
+
+.assistant-staffing-meta {
+  color: var(--text);
+}
+
+.assistant-staffing-formula {
+  margin-top: 6px;
+  color: var(--text-muted);
+  font-family: var(--mono);
+}
+
+.assistant-staffing-examples {
+  margin: 12px 0 0;
+  color: var(--text-dim);
+}
+
 .calc-table-wrap {
   overflow: hidden;
   border: 1px solid var(--border);
