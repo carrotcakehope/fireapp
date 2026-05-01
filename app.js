@@ -1,3 +1,22 @@
+// ── 개발자 모드 (GA 추적 비활성화) ───────────────────────────────────────
+// 본인 기기에서 콘솔에 한 번만 실행: localStorage.setItem('devMode', 'true')
+if (localStorage.getItem('devMode') === 'true') {
+  window['ga-disable-G-LKQZX5YS2H'] = true;
+}
+
+// ── 패치노트 설정 (여기만 수정하면 됩니다) ──────────────────────────────
+const PATCH_NOTES = {
+  version: "v1.2.1",
+  date: "2026-04-26",
+  items: [
+    { type: "new",     text: "소방시설 설명 메뉴 추가 (테스트중)" },
+    { type: "new",     text: "소방안전관리보조자 선임인원 계산기 추가(날짜 계산기에 위치)" },
+    { type: "improve", text: "Google Analytics 및 GTM 트래킹 적용" },
+    { type: "fix",     text: "전반적인 UI 개선 및 버그 수정" },
+  ],
+};
+// ────────────────────────────────────────────────────────────────────────
+
 const statusMeta = {
   required: { label: "설치 필요", className: "status-required" },
   review: { label: "검토 필요", className: "status-review" },
@@ -11278,3 +11297,31 @@ document.getElementById('open-report-guide').addEventListener('click', function 
 document.getElementById('back-from-report-guide').addEventListener('click', function () {
   showScreen('home');
 });
+
+document.getElementById('open-contact').addEventListener('click', function () {
+  window.open('https://mail.google.com/mail/?view=cm&fs=1&to=carrotcakehope@gmail.com&su=예방GPT 건의사항', '_blank');
+});
+
+// home-meta를 PATCH_NOTES와 동기화
+document.getElementById('home-meta').textContent = PATCH_NOTES.version + ' / 최종 수정 ' + PATCH_NOTES.date;
+
+// ── 패치노트 모달 ────────────────────────────────────────────────────────
+(function () {
+  var typeLabel = { new: '새기능', fix: '버그수정', improve: '개선' };
+  var typeClass = { new: 'pn-tag-new', fix: 'pn-tag-fix', improve: 'pn-tag-improve' };
+
+  var itemsHtml = PATCH_NOTES.items.map(function (item) {
+    var t = item.type;
+    return '<li class="pn-item"><span class="pn-tag ' + (typeClass[t] || '') + '">' + (typeLabel[t] || t) + '</span><span class="pn-text">' + item.text + '</span></li>';
+  }).join('');
+
+  var modal = document.getElementById('patch-notes-modal');
+  document.getElementById('pn-version').textContent = PATCH_NOTES.version;
+  document.getElementById('pn-date').textContent = PATCH_NOTES.date;
+  document.getElementById('pn-list').innerHTML = itemsHtml;
+  modal.classList.remove('hidden');
+
+  document.getElementById('pn-close-btn').addEventListener('click', function () {
+    modal.classList.add('hidden');
+  });
+})();
