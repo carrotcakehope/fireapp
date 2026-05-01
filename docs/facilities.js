@@ -40,6 +40,7 @@
       const panel = document.createElement('div');
       panel.className = 'fac-panel' + (i !== 0 ? ' hidden' : '');
       panel.dataset.idx = i;
+      if (tab.intro) panel.appendChild(buildIntroCard(tab.intro));
       tab.items.forEach(item => panel.appendChild(buildAccordion(item)));
       contentArea.appendChild(panel);
     });
@@ -340,5 +341,125 @@
 
   function levelLabel(level) {
     return { full: 'FULL', standard: 'STD', compact: 'COMPACT' }[level] || '';
+  }
+
+  function buildIntroCard(intro) {
+    const card = document.createElement('div');
+    card.className = 'fac-intro-card';
+
+    // 헤더 (클릭으로 접기/펼치기)
+    const header = document.createElement('div');
+    header.className = 'fac-intro-header';
+
+    const left = document.createElement('div');
+    left.className = 'fac-intro-header-left';
+    left.innerHTML = `<span class="fac-intro-icon">${intro.type === 'comparison' ? '📊' : '🔧'}</span>
+                      <span class="fac-intro-title">${intro.title}</span>
+                      <span class="fac-intro-badge">${intro.type === 'comparison' ? '비교' : '공통'}</span>`;
+
+    const toggle = document.createElement('span');
+    toggle.className = 'fac-intro-toggle open';
+    toggle.textContent = '▲';
+
+    header.appendChild(left);
+    header.appendChild(toggle);
+    card.appendChild(header);
+
+    // 바디
+    const body = document.createElement('div');
+    body.className = 'fac-intro-body';
+
+    if (intro.description) {
+      const desc = document.createElement('p');
+      desc.className = 'fac-intro-desc';
+      desc.textContent = intro.description;
+      body.appendChild(desc);
+    }
+
+    if (intro.type === 'components' && intro.components) {
+      const grid = document.createElement('div');
+      grid.className = 'fac-intro-comp-grid';
+      intro.components.forEach(comp => {
+        const compCard = document.createElement('div');
+        compCard.className = 'fac-intro-comp-card' + (comp.note ? ' has-note' : '');
+
+        if (comp.photo) {
+          const photoWrap = document.createElement('div');
+          photoWrap.className = 'fac-intro-comp-photo';
+          const img = document.createElement('img');
+          img.src = encodePath(comp.photo);
+          img.alt = comp.name;
+          img.loading = 'lazy';
+          photoWrap.appendChild(img);
+          compCard.appendChild(photoWrap);
+        }
+
+        const info = document.createElement('div');
+        info.className = 'fac-intro-comp-info';
+
+        const name = document.createElement('div');
+        name.className = 'fac-intro-comp-name';
+        name.textContent = comp.name;
+        info.appendChild(name);
+
+        const descEl = document.createElement('div');
+        descEl.className = 'fac-intro-comp-desc';
+        descEl.textContent = comp.desc;
+        info.appendChild(descEl);
+
+        if (comp.note) {
+          const note = document.createElement('div');
+          note.className = 'fac-intro-comp-note';
+          note.textContent = '⚠️ ' + comp.note;
+          info.appendChild(note);
+        }
+
+        compCard.appendChild(info);
+        grid.appendChild(compCard);
+      });
+      body.appendChild(grid);
+
+    } else if (intro.type === 'comparison' && intro.headers && intro.rows) {
+      const tableWrap = document.createElement('div');
+      tableWrap.className = 'fac-intro-table-wrap';
+      const table = document.createElement('table');
+      table.className = 'fac-intro-table';
+
+      const thead = document.createElement('thead');
+      const headerRow = document.createElement('tr');
+      intro.headers.forEach(h => {
+        const th = document.createElement('th');
+        th.textContent = h;
+        headerRow.appendChild(th);
+      });
+      thead.appendChild(headerRow);
+      table.appendChild(thead);
+
+      const tbody = document.createElement('tbody');
+      intro.rows.forEach(row => {
+        const tr = document.createElement('tr');
+        row.forEach((cell, i) => {
+          const td = document.createElement('td');
+          td.textContent = cell;
+          tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
+      });
+      table.appendChild(tbody);
+      tableWrap.appendChild(table);
+      body.appendChild(tableWrap);
+    }
+
+    card.appendChild(body);
+
+    // 접기/펼치기
+    header.addEventListener('click', () => {
+      const isOpen = !body.classList.contains('hidden');
+      body.classList.toggle('hidden', isOpen);
+      toggle.textContent = isOpen ? '▼' : '▲';
+      toggle.classList.toggle('open', !isOpen);
+    });
+
+    return card;
   }
 })();
