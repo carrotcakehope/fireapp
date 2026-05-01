@@ -254,6 +254,29 @@
       body.appendChild(list);
     }
 
+    if (item.showWaterSystemComponents) {
+      const introData = FACILITIES_DATA[0]?.intro;
+      if (introData) {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'fac-water-comp-btn';
+        btn.innerHTML = `<span>🔧 수계소화설비 공통 구성요소</span><span class="fac-water-comp-chevron">▼</span>`;
+
+        const panel = document.createElement('div');
+        panel.className = 'fac-water-comp-panel hidden';
+        panel.appendChild(buildIntroCard(introData));
+
+        btn.addEventListener('click', () => {
+          const isHidden = panel.classList.toggle('hidden');
+          btn.querySelector('.fac-water-comp-chevron').textContent = isHidden ? '▼' : '▲';
+          btn.classList.toggle('open', !isHidden);
+        });
+
+        body.appendChild(btn);
+        body.appendChild(panel);
+      }
+    }
+
     if (item.criteria?.length) {
       body.appendChild(makeSectionLabel('핵심 설치기준'));
       const ul = document.createElement('ul');

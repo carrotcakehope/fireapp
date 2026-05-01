@@ -3055,6 +3055,47 @@ html[data-theme="light"] .rg-tab-bar {
   word-break: keep-all;
 }
 
+/* ── 수계소화설비 공통 구성요소 토글 ── */
+.fac-water-comp-btn {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 14px;
+  margin-top: 10px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text-muted);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: left;
+  transition: background var(--transition), border-color var(--transition), color var(--transition);
+}
+
+.fac-water-comp-btn:hover {
+  background: var(--surface3);
+  border-color: var(--border2);
+  color: var(--text);
+}
+
+.fac-water-comp-btn.open {
+  border-color: var(--blue);
+  color: var(--text);
+}
+
+.fac-water-comp-chevron {
+  font-size: 11px;
+  flex-shrink: 0;
+  transition: color var(--transition);
+}
+
+.fac-water-comp-panel {
+  margin-top: 8px;
+}
+
 /* ── Component list ── */
 .fac-comp-list {
   display: flex;
