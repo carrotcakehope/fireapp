@@ -1,3 +1,16 @@
+// ── 패치노트 설정 (여기만 수정하면 됩니다) ──────────────────────────────
+const PATCH_NOTES = {
+  version: "v1.2.1",
+  date: "2026-04-26",
+  items: [
+    { type: "new",     text: "소방시설 설명 메뉴 추가 (테스트중)" },
+    { type: "new",     text: "소방시설탐색기 — 자세한 버전 추가 (테스트중)" },
+    { type: "improve", text: "Google Analytics 및 GTM 트래킹 적용" },
+    { type: "fix",     text: "전반적인 UI 개선 및 버그 수정" },
+  ],
+};
+// ────────────────────────────────────────────────────────────────────────
+
 const statusMeta = {
   required: { label: "설치 필요", className: "status-required" },
   review: { label: "검토 필요", className: "status-review" },
@@ -772,6 +785,8 @@ const screens = {
   multiuse: document.getElementById("screen-multiuse"),
   guide: document.getElementById("screen-guide"),
   reportGuide: document.getElementById("screen-report-guide"),
+  occupancy: document.getElementById("screen-occupancy"),
+  facilities: document.getElementById("screen-facilities"),
 };
 
 const questionElements = {
@@ -985,10 +1000,29 @@ function getActiveSteps() {
   });
 }
 
+const screenLabels = {
+  home: "홈",
+  explorerSelect: "소방시설탐색기 - 모드선택",
+  explorer: "소방시설탐색기 - 간단한버전",
+  explorerYear: "소방시설탐색기 - 연도별",
+  date: "날짜 계산기",
+  inspection: "작동·종합 대상 판독기",
+  multiuse: "다중이용업소 판독기",
+  guide: "소방시설 설명",
+  reportGuide: "자체점검 보고서 읽는법",
+  occupancy: "수용인원 계산기",
+  facilities: "소방시설 설명 (상세)",
+};
+
 function showScreen(name) {
   Object.entries(screens).forEach(([key, element]) => {
     element.classList.toggle("active", key === name);
   });
+  if (typeof gtag === "function") {
+    gtag("event", "screen_view", {
+      screen_name: screenLabels[name] || name,
+    });
+  }
 }
 
 function getTotalFloors() {
@@ -11257,3 +11291,29 @@ document.getElementById('open-report-guide').addEventListener('click', function 
 document.getElementById('back-from-report-guide').addEventListener('click', function () {
   showScreen('home');
 });
+
+// ── 패치노트 모달 ────────────────────────────────────────────────────────
+(function () {
+  var today = new Date().toISOString().slice(0, 10);
+  var stored = localStorage.getItem('lastPatchSeen');
+  if (stored === today) return;
+
+  var typeLabel = { new: '새기능', fix: '버그수정', improve: '개선' };
+  var typeClass = { new: 'pn-tag-new', fix: 'pn-tag-fix', improve: 'pn-tag-improve' };
+
+  var itemsHtml = PATCH_NOTES.items.map(function (item) {
+    var t = item.type;
+    return '<li class="pn-item"><span class="pn-tag ' + (typeClass[t] || '') + '">' + (typeLabel[t] || t) + '</span><span class="pn-text">' + item.text + '</span></li>';
+  }).join('');
+
+  var modal = document.getElementById('patch-notes-modal');
+  document.getElementById('pn-version').textContent = PATCH_NOTES.version;
+  document.getElementById('pn-date').textContent = PATCH_NOTES.date;
+  document.getElementById('pn-list').innerHTML = itemsHtml;
+  modal.classList.remove('hidden');
+
+  document.getElementById('pn-close-btn').addEventListener('click', function () {
+    modal.classList.add('hidden');
+    localStorage.setItem('lastPatchSeen', today);
+  });
+})();

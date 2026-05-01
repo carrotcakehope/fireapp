@@ -3456,3 +3456,117 @@ html[data-theme="light"] .fac-photo-source-badge {
   font-weight: 600;
   white-space: nowrap;
 }
+
+/* ── 패치노트 모달 ── */
+.pn-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: rgba(0, 0, 0, 0.72);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  animation: fadeUp 0.22s ease;
+}
+
+.pn-overlay.hidden {
+  display: none !important;
+}
+
+.pn-box {
+  width: 100%;
+  max-width: 400px;
+  background: var(--surface);
+  border: 1px solid var(--border2);
+  border-radius: 20px;
+  padding: 24px;
+  box-shadow: var(--shadow-lg);
+}
+
+.pn-header {
+  margin-bottom: 18px;
+}
+
+.pn-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.pn-label {
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: -0.3px;
+}
+
+.pn-version {
+  font-family: var(--mono);
+  font-size: 11px;
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: var(--red-dim2);
+  color: var(--red-soft);
+  border: 1px solid rgba(217, 48, 37, 0.3);
+}
+
+.pn-date {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  letter-spacing: 0.5px;
+}
+
+.pn-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.pn-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13.5px;
+  line-height: 1.55;
+  color: var(--text);
+}
+
+.pn-tag {
+  flex-shrink: 0;
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 700;
+  font-family: var(--mono);
+  letter-spacing: 0.3px;
+  margin-top: 1px;
+}
+
+.pn-tag-new {
+  background: rgba(52, 168, 83, 0.15);
+  color: #7ed69a;
+  border: 1px solid rgba(52, 168, 83, 0.25);
+}
+
+.pn-tag-fix {
+  background: rgba(66, 133, 244, 0.15);
+  color: #7db1ff;
+  border: 1px solid rgba(66, 133, 244, 0.25);
+}
+
+.pn-tag-improve {
+  background: rgba(249, 171, 0, 0.13);
+  color: #ffd27e;
+  border: 1px solid rgba(249, 171, 0, 0.25);
+}
+
+.pn-text {
+  word-break: keep-all;
+}

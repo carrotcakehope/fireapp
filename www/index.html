@@ -560,6 +560,21 @@
     <div id="facilities-content" class="rg-outer"></div>
   </section>
 
+  <!-- 패치노트 모달 -->
+  <div id="patch-notes-modal" class="pn-overlay hidden">
+    <div class="pn-box">
+      <div class="pn-header">
+        <div class="pn-title-row">
+          <span class="pn-label">업데이트 소식</span>
+          <span id="pn-version" class="pn-version"></span>
+        </div>
+        <div id="pn-date" class="pn-date"></div>
+      </div>
+      <ul id="pn-list" class="pn-list"></ul>
+      <button id="pn-close-btn" class="btn btn-primary" type="button" style="width:100%;margin-top:20px;">확인</button>
+    </div>
+  </div>
+
   <script src="./pdf.min.js"></script>
   <script src="./app.js"></script>
   <script src="./facilities-data.js"></script>
