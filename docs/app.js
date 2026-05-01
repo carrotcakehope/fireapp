@@ -11349,7 +11349,7 @@ document.getElementById('home-meta').textContent = PATCH_NOTES.version + ' / 최
 
 // ── 패치노트 모달 ────────────────────────────────────────────────────────
 (function () {
-  var typeLabel = { new: '새기능', fix: '버그수정', improve: '개선', notice: '공지사항' };
+  var typeLabel = { new: '추가기능', fix: '버그수정', improve: '개선사항', notice: '공지사항' };
   var typeClass = { new: 'pn-tag-new', fix: 'pn-tag-fix', improve: 'pn-tag-improve', notice: 'pn-tag-notice' };
 
   var itemsHtml = PATCH_NOTES.items.map(function (item) {
