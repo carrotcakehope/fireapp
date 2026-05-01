@@ -3375,10 +3375,27 @@ html[data-theme="light"] .fac-photo-source-badge {
   gap: 4px;
 }
 
+.fac-intro-comp-name-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
 .fac-intro-comp-name {
   font-size: 0.82rem;
   font-weight: 700;
   color: var(--text);
+}
+
+.fac-intro-comp-analogy {
+  font-size: 0.7rem;
+  font-weight: 600;
+  background: var(--blue-dim);
+  color: var(--blue);
+  border-radius: 4px;
+  padding: 1px 6px;
+  white-space: nowrap;
 }
 
 .fac-intro-comp-desc {
@@ -3521,6 +3538,18 @@ html[data-theme="light"] .fac-photo-source-badge {
   letter-spacing: 0.5px;
 }
 
+.pn-notice {
+  margin-bottom: 14px;
+  padding: 9px 12px;
+  border-radius: 8px;
+  background: var(--amber-dim);
+  border: 1px solid rgba(249, 171, 0, 0.2);
+  color: #dfad39;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
 .pn-list {
   list-style: none;
   margin: 0;
@@ -3566,6 +3595,12 @@ html[data-theme="light"] .fac-photo-source-badge {
   background: rgba(249, 171, 0, 0.13);
   color: #ffd27e;
   border: 1px solid rgba(249, 171, 0, 0.25);
+}
+
+.pn-tag-notice {
+  background: var(--red-dim2);
+  color: var(--red-soft);
+  border: 1px solid rgba(217, 48, 37, 0.3);
 }
 
 .pn-text {

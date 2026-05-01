@@ -397,10 +397,19 @@
         const info = document.createElement('div');
         info.className = 'fac-intro-comp-info';
 
+        const nameRow = document.createElement('div');
+        nameRow.className = 'fac-intro-comp-name-row';
         const name = document.createElement('div');
         name.className = 'fac-intro-comp-name';
         name.textContent = comp.name;
-        info.appendChild(name);
+        nameRow.appendChild(name);
+        if (comp.analogy) {
+          const badge = document.createElement('span');
+          badge.className = 'fac-intro-comp-analogy';
+          badge.textContent = comp.analogy;
+          nameRow.appendChild(badge);
+        }
+        info.appendChild(nameRow);
 
         const descEl = document.createElement('div');
         descEl.className = 'fac-intro-comp-desc';

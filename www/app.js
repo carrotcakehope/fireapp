@@ -1,9 +1,15 @@
+// ── 개발자 모드 (GA 추적 비활성화) ───────────────────────────────────────
+// 본인 기기에서 콘솔에 한 번만 실행: localStorage.setItem('devMode', 'true')
+if (localStorage.getItem('devMode') === 'true') {
+  window['ga-disable-G-LKQZX5YS2H'] = true;
+}
+
 // ── 패치노트 설정 (여기만 수정하면 됩니다) ──────────────────────────────
 const PATCH_NOTES = {
-  version: "v1.2.1",
-  date: "2026-04-26",
+  version: "v1.2.2",
+  date: "2026-05-01",
   items: [
-    { type: "new",     text: "소방시설 설명 메뉴 추가 (테스트중)" },
+    { type: "notice",  text: "법적기준이 아닙니다. 참고만해주세요!" },
     { type: "new",     text: "소방안전관리보조자 선임인원 계산기 추가(날짜 계산기에 위치)" },
     { type: "improve", text: "Google Analytics 및 GTM 트래킹 적용" },
     { type: "fix",     text: "전반적인 UI 개선 및 버그 수정" },
@@ -11301,8 +11307,8 @@ document.getElementById('home-meta').textContent = PATCH_NOTES.version + ' / 최
 
 // ── 패치노트 모달 ────────────────────────────────────────────────────────
 (function () {
-  var typeLabel = { new: '새기능', fix: '버그수정', improve: '개선' };
-  var typeClass = { new: 'pn-tag-new', fix: 'pn-tag-fix', improve: 'pn-tag-improve' };
+  var typeLabel = { new: '새기능', fix: '버그수정', improve: '개선', notice: '공지사항' };
+  var typeClass = { new: 'pn-tag-new', fix: 'pn-tag-fix', improve: 'pn-tag-improve', notice: 'pn-tag-notice' };
 
   var itemsHtml = PATCH_NOTES.items.map(function (item) {
     var t = item.type;
@@ -11317,5 +11323,10 @@ document.getElementById('home-meta').textContent = PATCH_NOTES.version + ' / 최
 
   document.getElementById('pn-close-btn').addEventListener('click', function () {
     modal.classList.add('hidden');
+  });
+
+  document.getElementById('pn-hide-today-btn').addEventListener('click', function () {
+    modal.classList.add('hidden');
+    localStorage.setItem('lastPatchSeen', today);
   });
 })();
