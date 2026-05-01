@@ -264,7 +264,9 @@
 
         const panel = document.createElement('div');
         panel.className = 'fac-water-comp-panel hidden';
-        panel.appendChild(buildIntroCard(introData));
+        const introCard = buildIntroCard(introData);
+        introCard.querySelector('.fac-intro-header')?.remove();
+        panel.appendChild(introCard);
 
         btn.addEventListener('click', () => {
           const isHidden = panel.classList.toggle('hidden');
