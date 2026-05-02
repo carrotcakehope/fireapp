@@ -11357,11 +11357,15 @@ document.getElementById('home-meta').textContent = PATCH_NOTES.version + ' / 최
     return '<li class="pn-item"><span class="pn-tag ' + (typeClass[t] || '') + '">' + (typeLabel[t] || t) + '</span><span class="pn-text">' + item.text + '</span></li>';
   }).join('');
 
+  var today = todayString();
   var modal = document.getElementById('patch-notes-modal');
   document.getElementById('pn-version').textContent = PATCH_NOTES.version;
   document.getElementById('pn-date').textContent = PATCH_NOTES.date;
   document.getElementById('pn-list').innerHTML = itemsHtml;
-  modal.classList.remove('hidden');
+
+  if (localStorage.getItem('lastPatchSeen') !== today) {
+    modal.classList.remove('hidden');
+  }
 
   document.getElementById('pn-close-btn').addEventListener('click', function () {
     modal.classList.add('hidden');
