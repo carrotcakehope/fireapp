@@ -11347,6 +11347,30 @@ document.getElementById('contact-confirm-ok').addEventListener('click', function
 // home-meta를 PATCH_NOTES와 동기화
 document.getElementById('home-meta').textContent = PATCH_NOTES.version + ' / 최종 수정 ' + PATCH_NOTES.date;
 
+// ── 개발자 모드 숨겨진 토글 (버전 5번 탭) ────────────────────────────────
+(function () {
+  var tapCount = 0;
+  var tapTimer = null;
+  document.getElementById('home-meta').addEventListener('click', function () {
+    tapCount++;
+    clearTimeout(tapTimer);
+    tapTimer = setTimeout(function () { tapCount = 0; }, 1500);
+    if (tapCount >= 5) {
+      tapCount = 0;
+      var isOn = localStorage.getItem('devMode') === 'true';
+      if (isOn) {
+        localStorage.removeItem('devMode');
+        window['ga-disable-G-LKQZX5YS2H'] = false;
+        showToast('개발자 모드 비활성화됨 — GA 추적 켜짐');
+      } else {
+        localStorage.setItem('devMode', 'true');
+        window['ga-disable-G-LKQZX5YS2H'] = true;
+        showToast('개발자 모드 활성화됨 — GA 추적 꺼짐');
+      }
+    }
+  });
+})();
+
 // ── 패치노트 모달 ────────────────────────────────────────────────────────
 (function () {
   var typeLabel = { new: '추가기능', fix: '버그수정', improve: '개선사항', notice: '공지사항' };
