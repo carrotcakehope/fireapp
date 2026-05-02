@@ -10027,12 +10027,11 @@ renderHomeReminders();
 
 // ── Theme Toggle ──────────────────────────────────────────────
 (function initTheme() {
-  const THEMES = ['dark', 'light', 'official', 'blossom'];
+  const THEMES = ['blossom', 'dark', 'official'];
   const THEME_META = {
-    dark:     { icon: '☀️',  title: '밝은 테마로 전환' },
-    light:    { icon: '🏛️', title: '공공기관 테마로 전환' },
-    official: { icon: '🌸',  title: '벚꽃 테마로 전환' },
     blossom:  { icon: '🌙',  title: '어두운 테마로 전환' },
+    dark:     { icon: '☀️',  title: '낮 테마로 전환' },
+    official: { icon: '🌸',  title: '벚꽃 테마로 전환' },
   };
 
   function applyTheme(t) {
@@ -10052,7 +10051,9 @@ renderHomeReminders();
     tb.appendChild(btn);
   });
 
-  applyTheme(localStorage.getItem('theme') || 'dark');
+  let saved = localStorage.getItem('theme') || 'blossom';
+  if (saved === 'light') saved = 'official';
+  applyTheme(saved);
 
   document.addEventListener('click', e => {
     if (e.target.closest('.theme-toggle-btn')) {
