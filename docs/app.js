@@ -10027,12 +10027,21 @@ renderHomeReminders();
 
 // ── Theme Toggle ──────────────────────────────────────────────
 (function initTheme() {
+  const THEMES = ['dark', 'light', 'official', 'blossom'];
+  const THEME_META = {
+    dark:     { icon: '☀️',  title: '밝은 테마로 전환' },
+    light:    { icon: '🏛️', title: '공공기관 테마로 전환' },
+    official: { icon: '🌸',  title: '벚꽃 테마로 전환' },
+    blossom:  { icon: '🌙',  title: '어두운 테마로 전환' },
+  };
+
   function applyTheme(t) {
     document.documentElement.setAttribute('data-theme', t);
     localStorage.setItem('theme', t);
+    const meta = THEME_META[t];
     document.querySelectorAll('.theme-toggle-btn').forEach(btn => {
-      btn.textContent = t === 'dark' ? '☀️' : '🌙';
-      btn.title = t === 'dark' ? '밝은 테마로 전환' : '어두운 테마로 전환';
+      btn.textContent = meta.icon;
+      btn.title = meta.title;
     });
   }
 
@@ -10047,7 +10056,9 @@ renderHomeReminders();
 
   document.addEventListener('click', e => {
     if (e.target.closest('.theme-toggle-btn')) {
-      applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+      const cur = document.documentElement.getAttribute('data-theme');
+      const next = THEMES[(THEMES.indexOf(cur) + 1) % THEMES.length];
+      applyTheme(next);
     }
   });
 })();
