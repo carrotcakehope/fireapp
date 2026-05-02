@@ -1024,6 +1024,12 @@ function showScreen(name) {
   Object.entries(screens).forEach(([key, element]) => {
     element.classList.toggle("active", key === name);
   });
+  const target = screens[name];
+  if (target) {
+    const scrollable = target.querySelector('.scroll-content') || target;
+    scrollable.scrollTop = 0;
+  }
+  window.scrollTo(0, 0);
   if (typeof gtag === "function") {
     gtag("event", "screen_view", {
       screen_name: screenLabels[name] || name,
