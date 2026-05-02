@@ -501,8 +501,9 @@
       body.appendChild(grid);
 
     } else if (intro.type === 'comparison' && intro.headers && intro.rows) {
+      // 데스크탑: 테이블
       const tableWrap = document.createElement('div');
-      tableWrap.className = 'fac-intro-table-wrap';
+      tableWrap.className = 'fac-intro-table-wrap fac-comp-table-view';
       const table = document.createElement('table');
       table.className = 'fac-intro-table';
 
@@ -519,7 +520,7 @@
       const tbody = document.createElement('tbody');
       intro.rows.forEach(row => {
         const tr = document.createElement('tr');
-        row.forEach((cell, i) => {
+        row.forEach((cell) => {
           const td = document.createElement('td');
           td.textContent = cell;
           tr.appendChild(td);
@@ -529,6 +530,33 @@
       table.appendChild(tbody);
       tableWrap.appendChild(table);
       body.appendChild(tableWrap);
+
+      // 모바일: 컬럼별 카드
+      const cardView = document.createElement('div');
+      cardView.className = 'fac-comp-card-view';
+      for (let col = 1; col < intro.headers.length; col++) {
+        const colCard = document.createElement('div');
+        colCard.className = 'fac-comp-col-card';
+        const colTitle = document.createElement('div');
+        colTitle.className = 'fac-comp-col-title';
+        colTitle.textContent = intro.headers[col];
+        colCard.appendChild(colTitle);
+        intro.rows.forEach(row => {
+          const rowEl = document.createElement('div');
+          rowEl.className = 'fac-comp-col-row';
+          const label = document.createElement('span');
+          label.className = 'fac-comp-col-label';
+          label.textContent = row[0];
+          const val = document.createElement('span');
+          val.className = 'fac-comp-col-val';
+          val.textContent = row[col];
+          rowEl.appendChild(label);
+          rowEl.appendChild(val);
+          colCard.appendChild(rowEl);
+        });
+        cardView.appendChild(colCard);
+      }
+      body.appendChild(cardView);
     }
 
     card.appendChild(body);

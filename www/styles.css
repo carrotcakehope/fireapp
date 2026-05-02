@@ -3766,6 +3766,65 @@ html[data-theme="light"] .fac-photo-source-badge {
   white-space: nowrap;
 }
 
+/* 비교표 모바일 카드 뷰 */
+.fac-comp-card-view {
+  display: none;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.fac-comp-col-card {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--surface2);
+}
+
+.fac-comp-col-title {
+  padding: 10px 14px;
+  background: var(--blue-dim);
+  border-bottom: 2px solid var(--blue);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--blue);
+}
+
+.fac-comp-col-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 9px 14px;
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.fac-comp-col-row:last-child {
+  border-bottom: none;
+}
+
+.fac-comp-col-label {
+  color: var(--text-muted);
+  font-weight: 600;
+  flex-shrink: 0;
+  min-width: 80px;
+}
+
+.fac-comp-col-val {
+  color: var(--text);
+  text-align: right;
+}
+
+@media (max-width: 540px) {
+  .fac-comp-table-view {
+    display: none;
+  }
+  .fac-comp-card-view {
+    display: flex;
+  }
+}
+
 /* ── 패치노트 모달 ── */
 .pn-overlay {
   position: fixed;
