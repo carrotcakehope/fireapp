@@ -10,7 +10,7 @@ const PATCH_NOTES = {
   date: "2026-05-01",
   items: [
     { type: "notice",  text: "법적기준이 아닙니다. 참고만해주세요!" },
-    { type: "new",     text: "소방안전관리보조자 선임인원 계산기 추가(날짜 계산기에 위치)" },
+    { type: "new",     text: "①소방안전관리보조자 선임인원 계산기 추가(날짜 계산기에 위치)<br>②벚꽃테마 추가. 눈 아프면🌙버튼 누르세요." },
     { type: "improve", text: "Google Analytics 및 GTM 트래킹 적용" },
     { type: "fix",     text: "전반적인 UI 개선 및 버그 수정" },
   ],
