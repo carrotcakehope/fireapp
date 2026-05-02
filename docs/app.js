@@ -3991,6 +3991,7 @@ function multiuseRestart() {
 // ─────────────────────────────────────────────────────────────────────────────
 
 document.getElementById("open-explorer").addEventListener("click", () => {
+  gtag("event", "menu_click", { menu_name: "소방시설탐색기" });
   showScreen("explorerSelect");
 });
 document.getElementById("back-from-explorer-select").addEventListener("click", () => showScreen("home"));
@@ -4005,14 +4006,17 @@ document.getElementById("explorer-select-detailed").addEventListener("click", ()
   yearWizardRestart();
 });
 document.getElementById("open-date-calculator").addEventListener("click", () => {
+  gtag("event", "menu_click", { menu_name: "날짜계산기" });
   showScreen("date");
   renderDateCalculator();
 });
 document.getElementById("open-inspection-decoder").addEventListener("click", () => {
+  gtag("event", "menu_click", { menu_name: "작동종합대상판독기" });
   inspectionRestart();
   showScreen("inspection");
 });
 document.getElementById("open-multiuse-decoder").addEventListener("click", () => {
+  gtag("event", "menu_click", { menu_name: "다중이용업소판독기" });
   multiuseRestart();
   showScreen("multiuse");
 });
@@ -4247,6 +4251,7 @@ function renderOccupancyCalculator() {
 screens.occupancy = document.getElementById("screen-occupancy");
 screens.facilities = document.getElementById("screen-facilities");
 document.getElementById("open-occupancy-calculator").addEventListener("click", () => {
+  gtag("event", "menu_click", { menu_name: "수용인원계산기" });
   occupancyState.step = "category";
   occupancyState.type = "lodging_bed";
   occupancyState.values = {};
@@ -11289,6 +11294,7 @@ function renderFacilityBlock(c, item, selectedIds) {
 }
 
 document.getElementById('open-report-guide').addEventListener('click', function () {
+  gtag("event", "menu_click", { menu_name: "자체점검보고서읽는법" });
   rgState.tab = 'page1';
   showScreen('reportGuide');
   renderReportGuide();

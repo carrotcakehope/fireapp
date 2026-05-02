@@ -11,6 +11,7 @@
   }
 
   openBtn.addEventListener('click', () => {
+    gtag("event", "menu_click", { menu_name: "소방시설설명" });
     showScreen('screen-facilities');
     init();
   });
