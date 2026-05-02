@@ -6,8 +6,8 @@ if (localStorage.getItem('devMode') === 'true') {
 
 // ── 패치노트 설정 (여기만 수정하면 됩니다) ──────────────────────────────
 const PATCH_NOTES = {
-  version: "v1.2.2",
-  date: "2026-05-01",
+  version: "v1.2.3",
+  date: "2026-05-03",
   items: [
     { type: "notice",  text: "법적기준이 아닙니다. 참고만해주세요!" },
     { type: "new",     text: "①소방안전관리보조자 선임인원 계산기 추가(날짜 계산기에 위치)<br>②벚꽃테마 추가. 눈 아프면🌙버튼 누르세요." },
