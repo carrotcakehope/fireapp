@@ -10869,7 +10869,7 @@ const RG_PAGE1_SECTIONS = [
     label: '제출일과 서명',
     img: './image/inspection/page 1/page1-날짜서명.png',
     desc: [
-      '119안전센터에서 받는 보고서에는 관계인이 서명 또는 날인합니다. 서명(또는 인)부분에는 <b>관계인의 서명(또는 인)</b>이 있어야 합니다.</b>',
+      '소방서로 제출하는 자체점검의 서명(또는 인)부분에는 <b>관계인의 서명(또는 인)</b>이 있어야 합니다.(관계인이 아닌 안전관리자 불가)</b>',
       '관계인은 <b>점검 끝난 날부터 15일 이내</b>에 이행계획서(점검결과 부적합 사항이 있는 경우)를 첨부하여 제출해야 합니다.',
       '위임장을 첨부하는 경우에는 소방시설관리업자 등이 대신 보고할 수 있습니다.',
     ],
@@ -10915,6 +10915,22 @@ function createRgAccordion(section, num) {
     body.appendChild(ul);
   }
 
+  if (section.noteItems && section.noteItems.length) {
+    var noteBox = document.createElement('div');
+    noteBox.className = 'rg-role-note';
+    var noteTitle = document.createElement('div');
+    noteTitle.className = 'rg-role-note-title';
+    noteTitle.innerHTML = '<span class="rg-note-badge">참고</span> 관계인 구분';
+    noteBox.appendChild(noteTitle);
+    section.noteItems.forEach(function (item) {
+      var row = document.createElement('div');
+      row.className = 'rg-role-item';
+      row.innerHTML = '<span class="rg-role-tag">' + item.tag + '</span>' + item.text;
+      noteBox.appendChild(row);
+    });
+    body.appendChild(noteBox);
+  }
+
   header.addEventListener('click', function () {
     body.hidden = !body.hidden;
     header.classList.toggle('open', !body.hidden);
@@ -10933,8 +10949,13 @@ const RG_PAGE2_SECTIONS = [
     img: './image/inspection/page 2/page2-관계인정보.png',
     desc: [
       '<b>대표자</b>는 특정소방대상물의 관리 권한을 가진 관계인의 인적사항을 기재합니다.',
-      '소유자·관리자·점유자 중 해당하는 □에 ✔ 표시하고 성명과 전화번호를 기재합니다.',
+      '소유자·관리자·점유자 중 해당하는 란에 ✔ 표시하고 성명과 전화번호를 기재합니다.',
       '소유자와 실제 관리자가 다를 경우, 소방 관리의 실질적 권한을 가진 사람을 기재합니다.',
+    ],
+    noteItems: [
+      { tag: '소유자 (건물주)', text: '법적으로 그 건물의 소유권(등기명의)을 가진 사람입니다. 건축물대장·등기부등본에 이름이 올라 있는 건물의 진짜 주인입니다.' },
+      { tag: '관리자 (관리소장)', text: '소유자를 대신해 건물·시설을 실질적으로 유지·관리할 권한과 책임을 부여받은 사람입니다. 관리소장이나 위탁 관리업체 등이 해당합니다.' },
+      { tag: '점유자 (세입자)', text: '소유권이나 전체 관리 권한은 없지만, 현재 그 공간을 실제로 점유·사용(영업·거주 등)하는 사람입니다. 보증금과 월세를 내고 입점한 임차인·세입자가 대표적입니다.' },
     ],
   },
   {

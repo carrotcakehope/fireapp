@@ -113,7 +113,7 @@
     header.innerHTML = `
       <div>
         <div class="fac-item-category">${item.category}</div>
-        <div class="rg-acc-label">${item.name} <span class="fac-level-badge fac-level-${item.level}">${levelLabel(item.level)}</span></div>
+        <div class="rg-acc-label">${item.name}</div>
       </div>
       <span class="rg-acc-chevron">▼</span>`;
 
