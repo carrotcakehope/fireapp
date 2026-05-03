@@ -378,7 +378,12 @@
       }
     };
 
-    if (item.mainSource) {
+    if (item.mainLabel) {
+      const badge = document.createElement('span');
+      badge.className = 'fac-photo-source-badge';
+      badge.textContent = item.mainLabel;
+      imgWrap.appendChild(badge);
+    } else if (item.mainSource) {
       const badge = document.createElement('span');
       badge.className = 'fac-photo-source-badge';
       badge.textContent = '출처: ' + item.mainSource;
