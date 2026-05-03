@@ -10876,15 +10876,16 @@ const RG_PAGE1_SECTIONS = [
   },
 ];
 
-function createRgAccordion(section) {
+function createRgAccordion(section, num) {
   var wrap = document.createElement('div');
   wrap.className = 'rg-accordion';
 
   var header = document.createElement('button');
   header.type = 'button';
   header.className = 'rg-accordion-header';
+  var numBadge = (num != null) ? '<span class="rg-acc-num">' + num + '</span>' : '';
   header.innerHTML =
-    '<span class="rg-acc-label">' + section.label + '</span>' +
+    numBadge + '<span class="rg-acc-label">' + section.label + '</span>' +
     '<span class="rg-acc-chevron">▼</span>';
 
   var body = document.createElement('div');
@@ -11001,7 +11002,7 @@ function renderRgPage1(c) {
   accLabel.className = 'rg-section-label';
   accLabel.textContent = '항목별 작성 방법';
   c.appendChild(accLabel);
-  RG_PAGE1_SECTIONS.forEach(function (s) { c.appendChild(createRgAccordion(s)); });
+  RG_PAGE1_SECTIONS.forEach(function (s, i) { c.appendChild(createRgAccordion(s, i + 1)); });
 }
 
 function renderRgPage2(c) {
@@ -11013,7 +11014,7 @@ function renderRgPage2(c) {
   accLabel.className = 'rg-section-label';
   accLabel.textContent = '항목별 작성 방법';
   c.appendChild(accLabel);
-  RG_PAGE2_SECTIONS.forEach(function (s) { c.appendChild(createRgAccordion(s)); });
+  RG_PAGE2_SECTIONS.forEach(function (s, i) { c.appendChild(createRgAccordion(s, i + 1)); });
 }
 
 function renderRgChecklist(c) {

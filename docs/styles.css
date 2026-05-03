@@ -2943,10 +2943,26 @@ html[data-theme="light"] .rg-tab-bar {
   border-bottom: 1px solid var(--border);
 }
 
+.rg-acc-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--red);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  flex-shrink: 0;
+  margin-right: 8px;
+}
+
 .rg-acc-label {
   font-size: 13px;
   font-weight: 600;
   letter-spacing: -0.2px;
+  flex: 1;
 }
 
 .rg-acc-chevron {
