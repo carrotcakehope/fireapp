@@ -3440,8 +3440,8 @@ html[data-theme="light"] .fac-photo-source-badge {
 /* ── 사진 + 설명 2열 레이아웃 ── */
 .fac-photo-desc-row {
   display: grid;
-  grid-template-columns: minmax(140px, 260px) 1fr;
-  gap: 12px;
+  grid-template-columns: minmax(140px, 340px) 1fr;
+  gap: 16px;
   margin-bottom: 14px;
   align-items: start;
 }
