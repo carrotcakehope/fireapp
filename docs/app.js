@@ -6,7 +6,7 @@ if (localStorage.getItem('devMode') === 'true') {
 
 // ── 패치노트 설정 (여기만 수정하면 됩니다) ──────────────────────────────
 const PATCH_NOTES = {
-  version: "v1.2.4",
+  version: "v1.2.5",
   date: "2026-05-04",
   items: [
     { type: "notice",  text: "법적기준이 아닙니다. 참고만해주세요!" },
