@@ -2399,12 +2399,10 @@ function setSectionVisibility(sectionId, visible) {
 }
 
 function clearMultiuseSections() {
-  ["multiuse-required-list", "multiuse-extra-list", "multiuse-etc-list", "multiuse-reason-list", "multiuse-transitional-notes"].forEach((id) => {
+  ["multiuse-reason-list", "multiuse-transitional-notes"].forEach((id) => {
     const node = document.getElementById(id);
     if (node) node.innerHTML = "";
   });
-  setSectionVisibility("multiuse-extra-section", false);
-  setSectionVisibility("multiuse-etc-section", false);
   setSectionVisibility("open-multiuse-safety", false);
 }
 
@@ -2564,12 +2562,7 @@ function renderMultiuseSafetyCard(input) {
   clearMultiuseSections();
   const multiuse = evaluateMultiuseFacilities(input);
   document.getElementById("multiuse-safety-summary").innerHTML = `<div class="ib-title">다중이용업소 안전시설 기준</div>입력한 조건을 기준으로 다중이용업소에 설치해야 하는 안전시설만 별도로 정리했습니다.`;
-  renderSimpleRequiredList(multiuse.requiredItems, "multiuse-required-list");
-  renderSimpleRequiredList(multiuse.extraSafetyItems, "multiuse-extra-list");
-  renderSimpleRequiredList(multiuse.etcItems, "multiuse-etc-list");
   renderResultGroup("multiuse-reason-list", multiuse.reasonItems);
-  setSectionVisibility("multiuse-extra-section", multiuse.extraSafetyItems.length > 0);
-  setSectionVisibility("multiuse-etc-section", multiuse.etcItems.length > 0);
   renderTransitionalNotes(multiuse.transitionalNotes);
 }
 
@@ -2577,12 +2570,7 @@ function renderLodgingMultiuseSafetyCard(input) {
   clearMultiuseSections();
   const multiuse = evaluateLodgingMultiuseFacilities(input);
   document.getElementById("multiuse-safety-summary").innerHTML = `<div class="ib-title">다중이용업소 안전시설 기준</div>입력한 조건을 기준으로 다중이용업소에 설치해야 하는 안전시설만 별도로 정리했습니다.`;
-  renderSimpleRequiredList(multiuse.requiredItems, "multiuse-required-list");
-  renderSimpleRequiredList(multiuse.extraSafetyItems, "multiuse-extra-list");
-  renderSimpleRequiredList(multiuse.etcItems, "multiuse-etc-list");
   renderResultGroup("multiuse-reason-list", multiuse.reasonItems);
-  setSectionVisibility("multiuse-extra-section", multiuse.extraSafetyItems.length > 0);
-  setSectionVisibility("multiuse-etc-section", multiuse.etcItems.length > 0);
   renderTransitionalNotes(multiuse.transitionalNotes);
 }
 
@@ -2660,7 +2648,7 @@ function showToast(message) {
 
 function scrollToTop() {
   const scrollEl = document.querySelector("#screen-explorer .scroll-content");
-  if (scrollEl) scrollEl.scrollTo({ top: 0, behavior: "smooth" });
+  if (scrollEl) scrollEl.scrollTop = 0;
 }
 
 function moveStep(direction) {
@@ -6016,7 +6004,7 @@ function yearCurrentStepIsValid() {
 
 function yearScrollToTop() {
   const el = document.querySelector("#screen-explorer-year .scroll-content");
-  if (el) el.scrollTo({ top: 0, behavior: "smooth" });
+  if (el) el.scrollTop = 0;
 }
 
 function yearMoveStep(direction) {
@@ -9759,12 +9747,7 @@ document.getElementById("year-open-multiuse-safety").addEventListener("click", (
   } else {
     multiuse = evaluateMultiuseFacilities(inp);
   }
-  renderSimpleRequiredList(multiuse.requiredItems, "year-multiuse-required-list");
-  renderSimpleRequiredList(multiuse.extraSafetyItems || [], "year-multiuse-extra-list");
-  renderSimpleRequiredList(multiuse.etcItems || [], "year-multiuse-etc-list");
   renderResultGroup("year-multiuse-reason-list", multiuse.reasonItems);
-  setSectionVisibility("year-multiuse-extra-section", (multiuse.extraSafetyItems || []).length > 0);
-  setSectionVisibility("year-multiuse-etc-section", (multiuse.etcItems || []).length > 0);
   const transitionalContainer = document.getElementById("year-multiuse-transitional-notes");
   if (transitionalContainer && multiuse.transitionalNotes && multiuse.transitionalNotes.length > 0) {
     const items = multiuse.transitionalNotes.map((n) => `<div class="transitional-item"><strong>${n.title}</strong><br>${n.text}</div>`).join("");
