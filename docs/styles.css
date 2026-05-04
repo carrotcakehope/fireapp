@@ -944,6 +944,38 @@ input:focus-visible {
   line-height: 1.75;
 }
 
+/* ── Result Nav ── */
+.result-nav {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+.result-nav .btn {
+  width: 100%;
+  margin-top: 0;
+}
+#open-multiuse-safety,
+#year-open-multiuse-safety {
+  order: -1;
+  color: var(--red);
+  border-color: var(--red);
+}
+@media (min-width: 900px) {
+  .result-nav {
+    flex-direction: row;
+  }
+  .result-nav .btn {
+    flex: 1;
+    width: auto;
+  }
+  #open-multiuse-safety,
+  #year-open-multiuse-safety {
+    order: 0;
+    flex: 1;
+  }
+}
+
 /* ── Restart Button ── */
 .btn-restart {
   width: 100%;
