@@ -954,8 +954,6 @@ input:focus-visible {
 #open-multiuse-safety,
 #year-open-multiuse-safety {
   order: -1;
-  color: var(--red);
-  border-color: var(--red);
 }
 @media (min-width: 900px) {
   .result-nav {
@@ -4335,10 +4333,12 @@ html[data-theme="blossom"] .home-title span {
 /* 버튼 primary */
 html[data-theme="blossom"] .btn-primary {
   background: #c84b6e;
+  color: #fff;
   box-shadow: 0 2px 8px rgba(200, 75, 110, 0.35);
 }
 html[data-theme="blossom"] .btn-primary:hover {
   background: #b03d5e;
+  color: #fff;
   box-shadow: 0 4px 14px rgba(200, 75, 110, 0.45);
 }
 
