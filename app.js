@@ -10920,6 +10920,24 @@ function createRgAccordion(section, num) {
     body.appendChild(noteBox);
   }
 
+  if (section.extraNotes && section.extraNotes.length) {
+    section.extraNotes.forEach(function (note) {
+      var noteBox = document.createElement('div');
+      noteBox.className = 'rg-role-note';
+      var noteTitleEl = document.createElement('div');
+      noteTitleEl.className = 'rg-role-note-title';
+      noteTitleEl.innerHTML = '<span class="rg-note-badge">참고</span> ' + (note.title || '구분');
+      noteBox.appendChild(noteTitleEl);
+      note.items.forEach(function (item) {
+        var row = document.createElement('div');
+        row.className = 'rg-role-item';
+        row.innerHTML = '<span class="rg-role-tag">' + item.tag + '</span>' + item.text;
+        noteBox.appendChild(row);
+      });
+      body.appendChild(noteBox);
+    });
+  }
+
   header.addEventListener('click', function () {
     body.hidden = !body.hidden;
     header.classList.toggle('open', !body.hidden);
@@ -10973,7 +10991,7 @@ const RG_PAGE2_SECTIONS = [
     label: '건축물 정보 ①',
     img: './image/inspection/page 2/page2-건축물정보01.png',
     desc: [
-      '<b>건축허가일 등</b> 해당 특정소방대상물의 건축물 정보를 기입합니다.(세움터 사이트 등에서 건축물대장을 통해 확인)',
+      '<b>건축허가일 등</b>: 해당 특정소방대상물의 건축물 정보를 기입합니다.(세움터 사이트 등에서 건축물대장을 통해 확인)',
       '<b>건축물구조</b>: 해당하는 구조에 ✔ 표시합니다.',
     ],
     noteTitle: '건축물구조 구분',
@@ -10991,7 +11009,7 @@ const RG_PAGE2_SECTIONS = [
     img: './image/inspection/page 2/page2-건축물정보02.png',
     desc: [
       '<b>지붕구조 등</b>:해당 특정소방대상물의 건축물 정보를 기입합니다.(세움터 사이트 등에서 건축물대장을 통해 확인)',
-      '<b>계단</b>: 직통계단과 특별피난계단의 개소 수를 각각 기재합니다.',
+      '<b>계단</b>: 직통(또는 피난)계단과 특별피난계단의 개소 수를 각각 기재합니다.',
       '<b>승강기</b>: 승용·비상용·피난용 승강기의 대수를 각각 기재합니다.',
       '<b>주차장</b>: 해당하는 형태에 ✔ 표시합니다.',
     ],
@@ -11001,6 +11019,23 @@ const RG_PAGE2_SECTIONS = [
       { tag: '기와', text: '낱개를 겹쳐 잇는 방식으로 배수 성능과 통기성이 뛰어나고 수명이 깁니다. 전통 한식 기와 외에도 스페니쉬 기와, 금속 기와 등 종류가 다양합니다.' },
       { tag: '슬레이트', text: '얇은 판 형태의 지붕재로 가볍고 시공비가 저렴합니다. 과거의 석면 슬레이트는 건강 문제로 현재는 철거 대상이며, 요즘은 무석면 슬레이트나 합성수지 제품이 사용됩니다.' },
       { tag: '기타', text: '샌드위치 패널, 아스팔트 싱글, 징크(아연도금강판), 막구조 등이 해당합니다.' },
+    ],
+    extraNotes: [
+      {
+        title: '계단 종류 구분',
+        items: [
+          { tag: '직통계단', text: '어느 층에서든 피난층(1층)까지 중단 없이 연결되는 계단입니다. 4층 이하 저층 건물에 주로 적용됩니다.' },
+          { tag: '피난계단', text: '직통계단에 내화구조 벽과 방화문을 설치해 불길과 연기를 차단한 계단입니다. <b>5층 이상 또는 지하 2층 이하</b> 건물에 설치 의무가 있습니다.' },
+          { tag: '특별피난계단', text: '피난계단 구조에 더해, 계단실 진입 전 <b>부속실(전실)</b>을 두어 연기 유입을 2중으로 차단합니다. <b>11층 이상(공동주택은 16층 이상) 또는 지하 3층 이하</b> 건물에 설치 의무가 있습니다.' },
+        ],
+      },
+      {
+        title: '승강기 종류 구분',
+        items: [
+          { tag: '비상용승강기', text: '화재 시 소방대원이 장비를 들고 고층으로 진입하기 위한 승강기입니다. <b>높이 31m 초과</b> 건물(대략 10~11층 이상)에 설치 의무가 있습니다.' },
+          { tag: '피난용승강기', text: '계단 대피가 어려운 거주자(노약자·장애인 등)가 화재 시 안전하게 피난하는 승강기입니다. <b>30층 이상 또는 높이 120m 이상</b> 고층건축물에 승용승강기 중 1대 이상을 설치해야 합니다.' },
+        ],
+      },
     ],
   },
 ];
