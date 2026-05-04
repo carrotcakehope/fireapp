@@ -1008,9 +1008,9 @@ function getActiveSteps() {
 
 const screenLabels = {
   home: "홈",
-  explorerSelect: "소방시설탐색기 - 모드선택",
-  explorer: "소방시설탐색기 - 간단한버전",
-  explorerYear: "소방시설탐색기 - 연도별",
+  explorerSelect: "소방시설탐색기",
+  explorer: "소방시설탐색기",
+  explorerYear: "소방시설탐색기",
   date: "날짜 계산기",
   inspection: "작동·종합 대상 판독기",
   multiuse: "다중이용업소 판독기",
