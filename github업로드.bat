@@ -15,6 +15,9 @@ if not exist .gitignore (
     echo .claude/ >> .gitignore
 )
 
+git config user.name "carrotcakehope" > nul 2>&1
+git config user.email "carrotcakehpe@gmail.com" > nul 2>&1
+
 git remote | findstr /X "supply" > nul 2>&1
 if %errorlevel% neq 0 (
     git remote add supply https://github.com/carrotcakehope/supply-fireapp.git
@@ -26,6 +29,7 @@ echo.
 
 echo [2/3] Staging files...
 git add -A
+git reset HEAD supply-fireapp/ > nul 2>&1
 
 echo [3/3] Uploading to GitHub...
 for /f "tokens=*" %%i in ('powershell -NoProfile -Command "Get-Date -Format 'yyyy-MM-dd HH:mm:ss'"') do set TIMESTAMP=%%i
