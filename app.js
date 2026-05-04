@@ -6,11 +6,11 @@ if (localStorage.getItem('devMode') === 'true') {
 
 // ── 패치노트 설정 (여기만 수정하면 됩니다) ──────────────────────────────
 const PATCH_NOTES = {
-  version: "v1.2.2",
-  date: "2026-05-01",
+  version: "v1.2.3",
+  date: "2026-05-03",
   items: [
     { type: "notice",  text: "법적기준이 아닙니다. 참고만해주세요!" },
-    { type: "new",     text: "소방안전관리보조자 선임인원 계산기 추가(날짜 계산기에 위치)" },
+    { type: "new",     text: "①소방안전관리보조자 선임인원 계산기 추가(날짜 계산기에 위치)<br>②벚꽃테마 추가. 눈 아프면🌙버튼 누르세요." },
     { type: "improve", text: "Google Analytics 및 GTM 트래킹 적용" },
     { type: "fix",     text: "전반적인 UI 개선 및 버그 수정" },
   ],
@@ -1014,16 +1014,22 @@ const screenLabels = {
   date: "날짜 계산기",
   inspection: "작동·종합 대상 판독기",
   multiuse: "다중이용업소 판독기",
-  guide: "소방시설 설명",
+  guide: "이용 안내",
   reportGuide: "자체점검 보고서 읽는법",
   occupancy: "수용인원 계산기",
-  facilities: "소방시설 설명 (상세)",
+  facilities: "소방시설 설명",
 };
 
 function showScreen(name) {
   Object.entries(screens).forEach(([key, element]) => {
     element.classList.toggle("active", key === name);
   });
+  const target = screens[name];
+  if (target) {
+    const scrollable = target.querySelector('.scroll-content') || target;
+    scrollable.scrollTop = 0;
+  }
+  window.scrollTo(0, 0);
   if (typeof gtag === "function") {
     gtag("event", "screen_view", {
       screen_name: screenLabels[name] || name,
@@ -3991,6 +3997,7 @@ function multiuseRestart() {
 // ─────────────────────────────────────────────────────────────────────────────
 
 document.getElementById("open-explorer").addEventListener("click", () => {
+  gtag("event", "menu_click", { menu_name: "소방시설탐색기" });
   showScreen("explorerSelect");
 });
 document.getElementById("back-from-explorer-select").addEventListener("click", () => showScreen("home"));
@@ -4005,14 +4012,17 @@ document.getElementById("explorer-select-detailed").addEventListener("click", ()
   yearWizardRestart();
 });
 document.getElementById("open-date-calculator").addEventListener("click", () => {
+  gtag("event", "menu_click", { menu_name: "날짜계산기" });
   showScreen("date");
   renderDateCalculator();
 });
 document.getElementById("open-inspection-decoder").addEventListener("click", () => {
+  gtag("event", "menu_click", { menu_name: "작동종합대상판독기" });
   inspectionRestart();
   showScreen("inspection");
 });
 document.getElementById("open-multiuse-decoder").addEventListener("click", () => {
+  gtag("event", "menu_click", { menu_name: "다중이용업소판독기" });
   multiuseRestart();
   showScreen("multiuse");
 });
@@ -4247,6 +4257,7 @@ function renderOccupancyCalculator() {
 screens.occupancy = document.getElementById("screen-occupancy");
 screens.facilities = document.getElementById("screen-facilities");
 document.getElementById("open-occupancy-calculator").addEventListener("click", () => {
+  gtag("event", "menu_click", { menu_name: "수용인원계산기" });
   occupancyState.step = "category";
   occupancyState.type = "lodging_bed";
   occupancyState.values = {};
@@ -10022,12 +10033,20 @@ renderHomeReminders();
 
 // ── Theme Toggle ──────────────────────────────────────────────
 (function initTheme() {
+  const THEMES = ['blossom', 'dark', 'official'];
+  const THEME_META = {
+    blossom:  { icon: '🌙',  title: '어두운 테마로 전환' },
+    dark:     { icon: '☀️',  title: '낮 테마로 전환' },
+    official: { icon: '🌸',  title: '벚꽃 테마로 전환' },
+  };
+
   function applyTheme(t) {
     document.documentElement.setAttribute('data-theme', t);
     localStorage.setItem('theme', t);
+    const meta = THEME_META[t];
     document.querySelectorAll('.theme-toggle-btn').forEach(btn => {
-      btn.textContent = t === 'dark' ? '☀️' : '🌙';
-      btn.title = t === 'dark' ? '밝은 테마로 전환' : '어두운 테마로 전환';
+      btn.textContent = meta.icon;
+      btn.title = meta.title;
     });
   }
 
@@ -10038,11 +10057,15 @@ renderHomeReminders();
     tb.appendChild(btn);
   });
 
-  applyTheme(localStorage.getItem('theme') || 'dark');
+  let saved = localStorage.getItem('theme') || 'blossom';
+  if (saved === 'light') saved = 'official';
+  applyTheme(saved);
 
   document.addEventListener('click', e => {
     if (e.target.closest('.theme-toggle-btn')) {
-      applyTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+      const cur = document.documentElement.getAttribute('data-theme');
+      const next = THEMES[(THEMES.indexOf(cur) + 1) % THEMES.length];
+      applyTheme(next);
     }
   });
 })();
@@ -10846,22 +10869,23 @@ const RG_PAGE1_SECTIONS = [
     label: '제출일과 서명',
     img: './image/inspection/page 1/page1-날짜서명.png',
     desc: [
-      '119안전센터에서 받는 보고서에는 관계인이 서명 또는 날인합니다. 서명(또는 인)부분에는 <b>관계인의 서명(또는 인)</b>이 있어야 합니다.</b>',
+      '소방서로 제출하는 자체점검의 서명(또는 인)부분에는 <b>관계인의 서명(또는 인)</b>이 있어야 합니다.(관계인이 아닌 안전관리자 불가)</b>',
       '관계인은 <b>점검 끝난 날부터 15일 이내</b>에 이행계획서(점검결과 부적합 사항이 있는 경우)를 첨부하여 제출해야 합니다.',
       '위임장을 첨부하는 경우에는 소방시설관리업자 등이 대신 보고할 수 있습니다.',
     ],
   },
 ];
 
-function createRgAccordion(section) {
+function createRgAccordion(section, num) {
   var wrap = document.createElement('div');
   wrap.className = 'rg-accordion';
 
   var header = document.createElement('button');
   header.type = 'button';
   header.className = 'rg-accordion-header';
+  var numBadge = (num != null) ? '<span class="rg-acc-num">' + num + '</span>' : '';
   header.innerHTML =
-    '<span class="rg-acc-label">' + section.label + '</span>' +
+    numBadge + '<span class="rg-acc-label">' + section.label + '</span>' +
     '<span class="rg-acc-chevron">▼</span>';
 
   var body = document.createElement('div');
@@ -10891,6 +10915,22 @@ function createRgAccordion(section) {
     body.appendChild(ul);
   }
 
+  if (section.noteItems && section.noteItems.length) {
+    var noteBox = document.createElement('div');
+    noteBox.className = 'rg-role-note';
+    var noteTitle = document.createElement('div');
+    noteTitle.className = 'rg-role-note-title';
+    noteTitle.innerHTML = '<span class="rg-note-badge">참고</span> ' + (section.noteTitle || '구분');
+    noteBox.appendChild(noteTitle);
+    section.noteItems.forEach(function (item) {
+      var row = document.createElement('div');
+      row.className = 'rg-role-item';
+      row.innerHTML = '<span class="rg-role-tag">' + item.tag + '</span>' + item.text;
+      noteBox.appendChild(row);
+    });
+    body.appendChild(noteBox);
+  }
+
   header.addEventListener('click', function () {
     body.hidden = !body.hidden;
     header.classList.toggle('open', !body.hidden);
@@ -10908,9 +10948,15 @@ const RG_PAGE2_SECTIONS = [
     label: '관계인 정보 (대표자)',
     img: './image/inspection/page 2/page2-관계인정보.png',
     desc: [
-      '<b>대표자</b>는 특정소방대상물의 관리 권한을 가진 관계인의 인적사항을 기재합니다.',
-      '소유자·관리자·점유자 중 해당하는 □에 ✔ 표시하고 성명과 전화번호를 기재합니다.',
-      '소유자와 실제 관리자가 다를 경우, 소방 관리의 실질적 권한을 가진 사람을 기재합니다.',
+      '<b>대표자</b>는 소유자·관리자·점유자 중 해당하는 란에 ✔ 표시하고 성명과 전화번호를 기재합니다.',
+      '<b>소방안전관리등급</b>: 「화재의 예방 및 안전관리에 관한 법률 시행령」 별표 4에 따른 등급(특급·1급·2급·3급)을 기재하고, 현재 선임된 소방안전관리자 정보를 기입합니다.',
+      '<b>소방안전관리자</b>에는 현재 선임된 소방안전관리자 정보를 기입합니다. 최근 교육이수일은 최근에 받은 보수교육(2년마다 실시)을 받은 날을 기입합니다.',
+    ],
+    noteTitle: '관계인 구분',
+    noteItems: [
+      { tag: '소유자 (건물주)', text: '법적으로 그 건물의 소유권(등기명의)을 가진 사람입니다. 건축물대장·등기부등본에 이름이 올라 있는 건물의 진짜 주인입니다.' },
+      { tag: '관리자 (관리소장)', text: '소유자를 대신해 건물·시설을 실질적으로 유지·관리할 권한과 책임을 부여받은 사람입니다. 관리소장이나 위탁 관리업체 등이 해당합니다.' },
+      { tag: '점유자 (세입자)', text: '소유권이나 전체 관리 권한은 없지만, 현재 그 공간을 실제로 점유·사용(영업·거주 등)하는 사람입니다. 보증금과 월세를 내고 입점한 임차인·세입자가 대표적입니다.' },
     ],
   },
   {
@@ -10918,8 +10964,8 @@ const RG_PAGE2_SECTIONS = [
     label: '소방안전 정보',
     img: './image/inspection/page 2/page2-대상물정보.png',
     desc: [
-      '<b>소방안전관리등급</b>: 「화재의 예방 및 안전관리에 관한 법률 시행령」 별표 4에 따른 등급(특급·1급·2급·3급)을 기재하고, 현재 선임된 소방안전관리자 정보를 기입합니다.',
       '<b>소방계획서 / 자체점검(전년도) / 교육훈련(전년도)</b>: 「화재의 예방 및 안전관리에 관한 법률」 제24조에 따른 소방안전관리업무 실시사항을 기입합니다.',
+      '<b>소방계획서(매년 작성)</b>는 연초에는 작성되어야 하고, <b>소방안전교육 및 소방훈련(매년 실시)</b>은 연말까지는 실시하여야 합니다.',
       '<b>화재보험</b>: 해당 특정소방대상물에 화재보험이 가입되어 있는 경우 가입에 ✔ 표시하고, 가입기간과 가입금액(대인/대물)을 기재합니다.',
     ],
   },
@@ -10929,8 +10975,8 @@ const RG_PAGE2_SECTIONS = [
     img: './image/inspection/page 2/page2-다중이용업소.png',
     desc: [
       '해당 특정소방대상물에 현재 입점 중인 다중이용업소 업종의 □에 ✔ 표시하고, 그 업소 숫자를 기입합니다.',
-      '휴게음식점, 제과점, 일반음식점, 단란주점, 유흥주점, 비디오물감상실, 학원, 목욕장 등이 해당됩니다.',
-      '해당 없는 경우 <b>해당없음</b>에 ✔ 표시합니다.',
+      '휴게음식점, 일반음식점, 단란주점, 유흥주점 등이 해당됩니다.(해당 업소가 다중이용업소인지는 <b>다중이용업소판독기</b> 사용)',
+      '해당 없는 경우 해당없음에 ✔ 표시합니다.',
     ],
   },
   {
@@ -10938,11 +10984,16 @@ const RG_PAGE2_SECTIONS = [
     label: '건축물 정보 ①',
     img: './image/inspection/page 2/page2-건축물정보01.png',
     desc: [
-      '건축허가일 등 해당 특정소방대상물의 건축물 정보를 기입합니다.',
-      '<b>건축허가일 / 사용승인일</b>: 건축물 대장에서 확인하여 기재합니다.',
-      '<b>연면적 / 건축면적</b>: 건축물 대장 기준 ㎡ 단위로 기재합니다.',
-      '<b>층수</b>: 지상층수와 지하층수를 각각 기재합니다.',
-      '<b>건축물구조 / 지붕구조</b>: 해당하는 구조에 ✔ 표시합니다.',
+      '<b>건축허가일 등</b> 해당 특정소방대상물의 건축물 정보를 기입합니다.(세움터 사이트 등에서 건축물대장을 통해 확인)',
+      '<b>건축물구조</b>: 해당하는 구조에 ✔ 표시합니다.',
+    ],
+    noteTitle: '건축물구조 구분',
+    noteItems: [
+      { tag: '콘크리트구조 (RC)', text: '압축력에 강한 콘크리트와 인장력에 강한 철근을 결합한 방식입니다. 내화성·내구성·방음성이 뛰어나지만, 건물이 무겁고 공사 기간이 깁니다.' },
+      { tag: '철골구조 (S)', text: 'H형강 등 강철 부재를 볼트·용접으로 조립합니다. 강도가 높아 고층 빌딩·대형 공장에 적합하고 공사가 빠릅니다. 다만 열에 취약해 화재 시 강도가 급격히 떨어지므로 반드시 내화 피복이 필요합니다.' },
+      { tag: '조적조 (Masonry)', text: '벽돌·돌·블록을 모르타르로 쌓아 올리는 방식입니다. 시공이 단순하지만 횡력(옆에서 미는 힘)에 약해 지진에 취약합니다.' },
+      { tag: '목구조', text: '나무를 주재료로 사용하는 친환경 방식입니다. 가볍고 단열이 좋으며 탄성이 있어 지진에 의외로 강합니다. 다만 습기·화재에 민감합니다.' },
+      { tag: '기타', text: '철골철근콘크리트구조(SRC), 막구조, PC구조(프리캐스트 콘크리트) 등이 해당합니다.' },
     ],
   },
   {
@@ -10954,6 +11005,13 @@ const RG_PAGE2_SECTIONS = [
       '<b>승강기</b>: 승용·비상용·피난용 승강기의 대수를 각각 기재합니다.',
       '<b>주차장</b>: 해당하는 형태에 ✔ 표시합니다.',
       '건축물 대장과 실제 현황이 다를 경우 실제 현황을 기재합니다.',
+    ],
+    noteTitle: '지붕구조 구분',
+    noteItems: [
+      { tag: '슬래브', text: '철근콘크리트로 만든 평평한 판 형태의 지붕입니다. 옥상을 공간으로 활용할 수 있고 내화성이 좋지만, 물이 고이지 않도록 방수 처리와 배수 기울기(구배) 확보가 중요합니다.' },
+      { tag: '기와', text: '낱개를 겹쳐 잇는 방식으로 배수 성능과 통기성이 뛰어나고 수명이 깁니다. 전통 한식 기와 외에도 스페니쉬 기와, 금속 기와 등 종류가 다양합니다.' },
+      { tag: '슬레이트', text: '얇은 판 형태의 지붕재로 가볍고 시공비가 저렴합니다. 과거의 석면 슬레이트는 건강 문제로 현재는 철거 대상이며, 요즘은 무석면 슬레이트나 합성수지 제품이 사용됩니다.' },
+      { tag: '기타', text: '샌드위치 패널, 아스팔트 싱글, 징크(아연도금강판), 막구조 등이 해당합니다.' },
     ],
   },
 ];
@@ -10978,7 +11036,7 @@ function renderRgPage1(c) {
   accLabel.className = 'rg-section-label';
   accLabel.textContent = '항목별 작성 방법';
   c.appendChild(accLabel);
-  RG_PAGE1_SECTIONS.forEach(function (s) { c.appendChild(createRgAccordion(s)); });
+  RG_PAGE1_SECTIONS.forEach(function (s, i) { c.appendChild(createRgAccordion(s, i + 1)); });
 }
 
 function renderRgPage2(c) {
@@ -10990,7 +11048,7 @@ function renderRgPage2(c) {
   accLabel.className = 'rg-section-label';
   accLabel.textContent = '항목별 작성 방법';
   c.appendChild(accLabel);
-  RG_PAGE2_SECTIONS.forEach(function (s) { c.appendChild(createRgAccordion(s)); });
+  RG_PAGE2_SECTIONS.forEach(function (s, i) { c.appendChild(createRgAccordion(s, i + 1)); });
 }
 
 function renderRgChecklist(c) {
@@ -11289,6 +11347,7 @@ function renderFacilityBlock(c, item, selectedIds) {
 }
 
 document.getElementById('open-report-guide').addEventListener('click', function () {
+  gtag("event", "menu_click", { menu_name: "자체점검보고서읽는법" });
   rgState.tab = 'page1';
   showScreen('reportGuide');
   renderReportGuide();
