@@ -29,6 +29,9 @@ if exist pdf.worker.min.js copy /Y pdf.worker.min.js  docs\pdf.worker.min.js  > 
 if exist report-guide.pdf  copy /Y report-guide.pdf   docs\report-guide.pdf   > nul  &  copy /Y report-guide.pdf   www\report-guide.pdf   > nul
 if exist image xcopy /Y /E /I image docs\image > nul
 if exist image xcopy /Y /E /I image www\image  > nul
+if not exist .nojekyll     type nul > .nojekyll
+if not exist docs\.nojekyll type nul > docs\.nojekyll
+if not exist www\.nojekyll  type nul > www\.nojekyll
 echo       Done
 
 :: Bump service worker cache version
@@ -40,14 +43,34 @@ echo       Done
 
 :: Git commit and push
 echo [3/3] Pushing to GitHub...
+
+:: Git 사용자 정보 자동 설정
+git config user.name "carrotcakehope" > nul 2>&1
+git config user.email "carrotcakehpe@gmail.com" > nul 2>&1
+
+:: fireapp remote 없으면 자동 추가
+git remote get-url fireapp > nul 2>&1
+if %errorlevel% neq 0 (
+    git remote add fireapp https://github.com/carrotcakehope/fireapp.git
+    echo  fireapp remote added
+)
+
+git fetch origin
+git reset --soft origin/main
 git add docs/
 git add www/
 git add sw.js
 git add capacitor.config.json
-git commit -m "update: web deploy"
-git push
+git commit -m "update: web deploy" --allow-empty
+git push origin main
 if %errorlevel% neq 0 (
-    echo [ERROR] Git push failed - check git login
+    echo [ERROR] supply-fireapp push failed
+    pause
+    exit /b 1
+)
+git push fireapp main
+if %errorlevel% neq 0 (
+    echo [ERROR] fireapp push failed
     pause
     exit /b 1
 )
