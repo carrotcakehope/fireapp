@@ -964,7 +964,10 @@ function getActiveSteps() {
       return state.answers.hasMultiuseBusiness === "yes"
         && (state.answers.multiuseIsPostpartum === "yes" || state.answers.multiuseIsGosiwon === "yes");
     }
-    if (["multiuseSimpleSprinklerCheck", "multiuseOnSecondToTenthFloor", "multiuseUsesAV", "multiuseHasGasFacility", "multiuseHasRooms", "multiuseHasEvacuationRoute"].includes(step.key)) {
+    if (step.key === "multiuseOnSecondToTenthFloor") {
+      return state.answers.hasMultiuseBusiness === "yes" && state.answers.multiuseInBasement !== "yes";
+    }
+    if (["multiuseSimpleSprinklerCheck", "multiuseUsesAV", "multiuseHasGasFacility", "multiuseHasRooms", "multiuseHasEvacuationRoute"].includes(step.key)) {
       return state.answers.hasMultiuseBusiness === "yes";
     }
     // 숙박시설 전용 조건
@@ -981,7 +984,10 @@ function getActiveSteps() {
       return state.answers.lodgingHasMultiuseBusiness === "yes"
         && (state.answers.lodgingMultiuseIsPostpartum === "yes" || state.answers.lodgingMultiuseIsGosiwon === "yes");
     }
-    if (["lodgingMultiuseSimpleSprinklerCheck", "lodgingMultiuseOnSecondToTenthFloor", "lodgingMultiuseUsesAV", "lodgingMultiuseHasGasFacility", "lodgingMultiuseHasRooms", "lodgingMultiuseHasEvacuationRoute"].includes(step.key)) {
+    if (step.key === "lodgingMultiuseOnSecondToTenthFloor") {
+      return state.answers.lodgingHasMultiuseBusiness === "yes" && state.answers.lodgingMultiuseInBasement !== "yes";
+    }
+    if (["lodgingMultiuseSimpleSprinklerCheck", "lodgingMultiuseUsesAV", "lodgingMultiuseHasGasFacility", "lodgingMultiuseHasRooms", "lodgingMultiuseHasEvacuationRoute"].includes(step.key)) {
       return state.answers.lodgingHasMultiuseBusiness === "yes";
     }
     // 노유자시설 전용 조건
@@ -1356,7 +1362,7 @@ function normalizeAnswers() {
     multiuseIsPostpartum: toBool(state.answers.multiuseIsPostpartum),
     multiuseIsGosiwon: toBool(state.answers.multiuseIsGosiwon),
     multiuseIsGunRange: toBool(state.answers.multiuseIsGunRange),
-    multiuseOnSecondToTenthFloor: toBool(state.answers.multiuseOnSecondToTenthFloor),
+    multiuseOnSecondToTenthFloor: toBool(state.answers.multiuseOnSecondToTenthFloor) && state.answers.multiuseInBasement !== "yes",
     multiuseOnGroundOrRefugeFloor: toBool(state.answers.multiuseOnGroundOrRefugeFloor),
     multiuseUsesAV: toBool(state.answers.multiuseUsesAV),
     multiuseHasGasFacility: toBool(state.answers.multiuseHasGasFacility),
@@ -1383,7 +1389,7 @@ function normalizeAnswers() {
     lodgingMultiuseIsPostpartum: toBool(state.answers.lodgingMultiuseIsPostpartum),
     lodgingMultiuseIsGosiwon: toBool(state.answers.lodgingMultiuseIsGosiwon),
     lodgingMultiuseIsGunRange: toBool(state.answers.lodgingMultiuseIsGunRange),
-    lodgingMultiuseOnSecondToTenthFloor: toBool(state.answers.lodgingMultiuseOnSecondToTenthFloor),
+    lodgingMultiuseOnSecondToTenthFloor: toBool(state.answers.lodgingMultiuseOnSecondToTenthFloor) && state.answers.lodgingMultiuseInBasement !== "yes",
     lodgingMultiuseOnGroundOrRefugeFloor: toBool(state.answers.lodgingMultiuseOnGroundOrRefugeFloor),
     lodgingMultiuseUsesAV: toBool(state.answers.lodgingMultiuseUsesAV),
     lodgingMultiuseHasGasFacility: toBool(state.answers.lodgingMultiuseHasGasFacility),

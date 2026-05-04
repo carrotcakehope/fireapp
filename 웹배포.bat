@@ -61,6 +61,9 @@ git add docs/
 git add www/
 git add sw.js
 git add capacitor.config.json
+git add index.html styles.css app.js manifest.json
+if exist facilities.js     git add facilities.js
+if exist facilities-data.js git add facilities-data.js
 git commit -m "update: web deploy" --allow-empty
 git push origin main
 if %errorlevel% neq 0 (
