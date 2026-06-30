@@ -707,7 +707,7 @@
           </div>
         </div>
         <div class="guide-info-body">
-          <p>버튼을 누를 때마다 <strong>계절 → 낮 → 밤</strong> 순으로 순환됩니다. 계절 테마는 현재 계절에 맞게 자동으로 적용됩니다. 여름(6~8월)에는 09~18시에 여름 해변, 나머지 시간에는 여름밤으로 자동 전환됩니다.</p>
+          <p>버튼을 누를 때마다 <strong>계절 → 낮 → 밤</strong> 순으로 순환됩니다. 계절 테마는 현재 계절에 맞게 자동으로 적용되며, 여름(6~8월)에는 여름밤 테마가 적용됩니다.</p>
           <div class="guide-theme-chips">
             <div class="guide-theme-chip">
               <div class="guide-theme-chip-swatch theme-swatch-blossom">🌸</div>
@@ -717,10 +717,10 @@
               </div>
             </div>
             <div class="guide-theme-chip">
-              <div class="guide-theme-chip-swatch theme-swatch-summer">🌊</div>
+              <div class="guide-theme-chip-swatch theme-swatch-summer-night">🌌</div>
               <div class="guide-theme-chip-meta">
-                <span class="guide-theme-chip-name">여름 해변 (6~8월 · 09~18시)</span>
-                <span class="guide-theme-chip-desc">밝은 하늘·바다빛 + 기러기 떼 애니메이션</span>
+                <span class="guide-theme-chip-name">여름 (6~8월)</span>
+                <span class="guide-theme-chip-desc">짙은 인디고 + 시안 + 반딧불 애니메이션</span>
               </div>
             </div>
             <div class="guide-theme-chip">
@@ -749,13 +749,6 @@
               <div class="guide-theme-chip-meta">
                 <span class="guide-theme-chip-name">밤 모드</span>
                 <span class="guide-theme-chip-desc">어두운 배경 + 빨간 포인트 (봄·가을·겨울 밤)</span>
-              </div>
-            </div>
-            <div class="guide-theme-chip">
-              <div class="guide-theme-chip-swatch theme-swatch-summer-night">🌌</div>
-              <div class="guide-theme-chip-meta">
-                <span class="guide-theme-chip-name">여름밤 (6~8월 · 18시~09시)</span>
-                <span class="guide-theme-chip-desc">짙은 인디고 + 시안 + 반딧불 애니메이션</span>
               </div>
             </div>
           </div>
@@ -1033,11 +1026,12 @@
   <div id="contact-confirm-modal" class="reminder-modal-overlay hidden">
     <div class="reminder-modal-box">
       <h3 class="reminder-modal-title">✉️ 문의하기</h3>
-      <p class="reminder-modal-desc">'메일 보내러 가기' 버튼을 누르면 개발자에게 <br>Gmail을 통해 메일을 보냅니다.<br>버튼이 열리지 않으면 주소를 복사해 직접 보내셔도 됩니다.</p>
+      <p class="reminder-modal-desc">'메일 보내러 가기' 버튼을 누르면 개발자에게 <br>G-mail을 통해 메일을 보냅니다. G-mail이 제대로<br> 열리지 않으면 아래의 주소를 복사해서 직접 보낼 수 있습니다.</p>
       <div class="contact-confirm-email">
         <span id="contact-email-text">carrotcakehope@gmail.com</span>
         <button id="contact-copy-btn" class="contact-copy-btn" type="button" title="복사">📋</button>
       </div>
+      <p class="contact-intranet-note">소방서 PC는 보안상 Gmail이 열리지 않을 수 있습니다. 그럴 땐 <strong>내부메일로 소방장 김규범</strong>에게 보내주시면 감사드리겠습니다.</p>
       <div class="w-nav" style="margin-top:16px;">
         <button id="contact-confirm-cancel" class="btn btn-ghost" type="button">취소</button>
         <button id="contact-confirm-ok" class="btn btn-primary" type="button">메일 보내러 가기</button>
@@ -1207,7 +1201,6 @@
     const ctx = canvas.getContext('2d');
     let particles = [];
     let animMode = null;
-    let waveOffset = 0;
 
     function resize() {
       canvas.width = window.innerWidth;
@@ -1216,7 +1209,7 @@
     window.addEventListener('resize', () => { resize(); resetParticles(animMode); });
     resize();
 
-    const ANIMATED = new Set(['blossom', 'summer', 'summer-night', 'autumn', 'winter']);
+    const ANIMATED = new Set(['blossom', 'summer-night', 'autumn', 'winter']);
 
     function checkTheme() {
       const theme = document.documentElement.getAttribute('data-theme');
@@ -1248,41 +1241,6 @@
         ctx.save(); ctx.globalAlpha = this.alpha; ctx.fillStyle = this.color;
         ctx.translate(this.x, this.y); ctx.rotate(this.angle);
         ctx.beginPath(); ctx.ellipse(0,0,this.w/2,this.h/2,0,0,Math.PI*2); ctx.fill(); ctx.restore();
-      }
-    }
-
-    /* ── 여름 해변: 기러기 ── */
-    class Goose {
-      constructor(init) { this.reset(init); }
-      reset(init) {
-        this.dir = Math.random() > 0.5 ? 1 : -1;
-        this.x = init ? Math.random()*canvas.width : (this.dir===1 ? -80 : canvas.width+80);
-        this.y = Math.random() * canvas.height * 0.62 + 30;
-        this.vx = this.dir * (Math.random()*0.3+0.18);
-        this.vy = (Math.random()-0.5)*0.15;
-        this.size = Math.random()*10+9;
-        this.alpha = Math.random()*0.3+0.28;
-        this.wing = Math.random()*Math.PI*2;
-        this.wingSpd = Math.random()*0.045+0.03;
-      }
-      update() {
-        this.x += this.vx; this.y += this.vy + Math.sin(this.wing*0.28)*0.12;
-        this.wing += this.wingSpd;
-        if (this.x < -120 || this.x > canvas.width+120) this.reset(false);
-        if (this.y > canvas.height * 0.72) this.y = canvas.height * 0.72;
-      }
-      draw() {
-        ctx.save(); ctx.globalAlpha = this.alpha;
-        ctx.strokeStyle = '#4a8898'; ctx.lineWidth = 1.6; ctx.lineCap = 'round';
-        ctx.translate(this.x, this.y);
-        if (this.dir === -1) ctx.scale(-1,1);
-        const dip = Math.sin(this.wing) * this.size * 0.42;
-        const s = this.size;
-        ctx.beginPath(); ctx.moveTo(-s*0.28,0); ctx.lineTo(s*0.28,0); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(-s*0.1,0); ctx.quadraticCurveTo(-s*0.52,dip,-s*1.05,dip*0.55); ctx.stroke();
-        ctx.beginPath(); ctx.moveTo(s*0.1,0); ctx.quadraticCurveTo(s*0.52,dip,s*1.05,dip*0.55); ctx.stroke();
-        ctx.beginPath(); ctx.arc(s*0.42,-s*0.12,s*0.14,0,Math.PI*2);
-        ctx.fillStyle='#4a8898'; ctx.fill(); ctx.restore();
       }
     }
 
@@ -1362,8 +1320,8 @@
       }
     }
 
-    const COUNTS = { blossom:42, summer:14, 'summer-night':38, autumn:36, winter:65 };
-    const CLASSES = { blossom:Petal, summer:Goose, 'summer-night':Firefly, autumn:Leaf, winter:Snowflake };
+    const COUNTS = { blossom:42, 'summer-night':38, autumn:36, winter:65 };
+    const CLASSES = { blossom:Petal, 'summer-night':Firefly, autumn:Leaf, winter:Snowflake };
 
     function resetParticles(mode) {
       particles = [];
@@ -1372,44 +1330,9 @@
       for (let i=0; i<(COUNTS[mode]||30); i++) particles.push(new Cls(true));
     }
 
-    function drawWaves() {
-      const h = canvas.height;
-      const w = canvas.width;
-      const waves = [
-        { yRatio: 0.74, amp: 12, freq: 0.50, phaseOff: 0.0,  fillA: 0.22, strokeA: 0.30 },
-        { yRatio: 0.82, amp:  9, freq: 0.68, phaseOff: 1.9,  fillA: 0.28, strokeA: 0.38 },
-        { yRatio: 0.89, amp:  5, freq: 0.90, phaseOff: 3.6,  fillA: 0.34, strokeA: 0.46 },
-      ];
-      waves.forEach(wave => {
-        const baseY = h * wave.yRatio;
-        ctx.save();
-        ctx.beginPath();
-        ctx.moveTo(0, h);
-        for (let x = 0; x <= w; x += 4) {
-          const y = baseY + Math.sin(x * wave.freq * Math.PI * 2 / w + waveOffset + wave.phaseOff) * wave.amp;
-          ctx.lineTo(x, y);
-        }
-        ctx.lineTo(w, h);
-        ctx.closePath();
-        ctx.fillStyle = `rgba(30,130,195,${wave.fillA})`;
-        ctx.fill();
-        ctx.beginPath();
-        for (let x = 0; x <= w; x += 4) {
-          const y = baseY + Math.sin(x * wave.freq * Math.PI * 2 / w + waveOffset + wave.phaseOff) * wave.amp;
-          x === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
-        }
-        ctx.strokeStyle = `rgba(20,110,175,${wave.strokeA})`;
-        ctx.lineWidth = 1.8;
-        ctx.stroke();
-        ctx.restore();
-      });
-      waveOffset += 0.002;
-    }
-
     function animate() {
       if (canvas.style.display==='block' && animMode) {
         ctx.clearRect(0,0,canvas.width,canvas.height);
-        if (animMode === 'summer') drawWaves();
         particles.forEach(p => { p.update(); p.draw(); });
       }
       requestAnimationFrame(animate);

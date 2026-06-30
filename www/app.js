@@ -4109,7 +4109,7 @@ function renderDateCalculator() {
     legendMarkup = `
       <div class="cl-item"><span class="cl-dot" style="background: transparent; border: 2px solid var(--red);"></span>선택일</div>
       <div class="cl-item"><span class="cl-dot" style="background: color-mix(in srgb, var(--red) 18%, transparent);"></span>산정 날짜</div>
-      <div class="cl-item"><span class="cl-dot" style="background: color-mix(in srgb, var(--red) 45%, transparent); border: 1.5px solid color-mix(in srgb, var(--red) 85%, transparent);"></span>마감일</div>
+      <div class="cl-item"><span class="cl-dot-label" style="background: color-mix(in srgb, var(--red) 45%, transparent); color: var(--red-soft); border: 1px solid color-mix(in srgb, var(--red) 85%, transparent);">제</span>제출기한</div>
       <div class="cl-item"><span class="cl-dot cl-dot-holiday"></span>입력 공휴일</div>
     `;
   }
@@ -4148,9 +4148,9 @@ function renderDateCalculator() {
     legendMarkup = `
       <div class="cl-item"><span class="cl-dot" style="background: transparent; border: 2px solid var(--red);"></span>선택일</div>
       <div class="cl-item"><span class="cl-dot cl-dot-appoint-range"></span>선임기한 범위</div>
-      <div class="cl-item"><span class="cl-dot" style="background: color-mix(in srgb, var(--red) 45%, transparent); border: 1.5px solid color-mix(in srgb, var(--red) 85%, transparent);"></span>선임기한</div>
+      <div class="cl-item"><span class="cl-dot-label" style="background: color-mix(in srgb, var(--red) 45%, transparent); color: var(--red-soft); border: 1px solid color-mix(in srgb, var(--red) 85%, transparent);">선</span>선임기한</div>
       <div class="cl-item"><span class="cl-dot cl-dot-report-range"></span>선임신고 범위</div>
-      <div class="cl-item"><span class="cl-dot" style="background: rgba(66, 133, 244, 0.42); border: 1.5px solid rgba(66, 133, 244, 0.85);"></span>선임신고기한</div>
+      <div class="cl-item"><span class="cl-dot-label cl-label-report">신</span>선임신고기한</div>
       <div class="cl-item"><span class="cl-dot cl-dot-holiday"></span>입력 공휴일</div>
     `;
   }
@@ -4164,6 +4164,16 @@ function renderDateCalculator() {
     reportDeadline = reportDates[reportDates.length - 1];
     completionDates.forEach((date) => appointRangeKeys.add(dateKey(date)));
     reportDates.forEach((date) => reportRangeKeys.add(dateKey(date)));
+    // 자체점검과 동일하게: 신고 범위 안의 공휴일도 칸을 채워 구멍 없이 이어지게
+    // (addInspectReportDays는 공휴일을 건너뛰어 reportDates에서 빠지므로 따로 메움)
+    if (reportDeadline) {
+      let rcur = addDays(completionDeadline, 1);
+      while (rcur <= reportDeadline) {
+        const rk = dateKey(rcur);
+        if (holidayKeys.has(rk)) reportRangeKeys.add(rk);
+        rcur = addDays(rcur, 1);
+      }
+    }
     tableBody = [
       ["10일<br><span style='color:var(--text-dim);font-size:11px'>수리·정비</span>", "감지기 탈락·불량, 위치표시등 또는 유도등 조도 불량, 수신기 예비전원 불량, 호스·노즐 교체, 소화기 수량 부족 등"],
       ["20일<br><span style='color:var(--text-dim);font-size:11px'>전부·일부 교체</span>", "수신기 교체, 소화펌프 교체 등"],
@@ -4187,9 +4197,9 @@ function renderDateCalculator() {
     legendMarkup = `
       <div class="cl-item"><span class="cl-dot" style="background: transparent; border: 2px solid var(--red);"></span>선택일</div>
       <div class="cl-item"><span class="cl-dot cl-dot-appoint-range"></span>이행완료 범위</div>
-      <div class="cl-item"><span class="cl-dot" style="background: color-mix(in srgb, var(--red) 45%, transparent); border: 1.5px solid color-mix(in srgb, var(--red) 85%, transparent);"></span>이행완료기한</div>
+      <div class="cl-item"><span class="cl-dot-label" style="background: color-mix(in srgb, var(--red) 45%, transparent); color: var(--red-soft); border: 1px solid color-mix(in srgb, var(--red) 85%, transparent);">조</span>이행완료기한</div>
       <div class="cl-item"><span class="cl-dot cl-dot-report-range"></span>완료신고 범위</div>
-      <div class="cl-item"><span class="cl-dot" style="background: rgba(66, 133, 244, 0.42); border: 1.5px solid rgba(66, 133, 244, 0.85);"></span>완료신고기한</div>
+      <div class="cl-item"><span class="cl-dot-label cl-label-report">신</span>완료신고기한</div>
       <div class="cl-item"><span class="cl-dot cl-dot-holiday"></span>입력 공휴일</div>
     `;
   }
@@ -4285,7 +4295,17 @@ function renderDateCalculator() {
     if (reportDeadline && sameDate(date, reportDeadline)) classes.push("report-deadline");
     if (mode.supportsHolidaySelection && holidayKeys.has(key)) classes.push("holiday");
 
-    cells.push(`<button class="${classes.join(" ")}" type="button" data-date="${key}">${date.getDate()}</button>`);
+    // 마감 날짜는 숫자 대신 종류 글자 표시: 선임기한=선, 조치(이행완료)기한=조, 신고기한=신
+    let cellText = String(date.getDate());
+    if (deadline && sameDate(date, deadline)) {
+      cellText = "제"; classes.push("deadline-label");
+    } else if (appointDeadline && sameDate(date, appointDeadline)) {
+      cellText = mode.kind === "noncompliance_dual" ? "조" : "선"; classes.push("deadline-label");
+    } else if (reportDeadline && sameDate(date, reportDeadline)) {
+      cellText = "신"; classes.push("deadline-label");
+    }
+
+    cells.push(`<button class="${classes.join(" ")}" type="button" data-date="${key}">${cellText}</button>`);
   }
 
   // D-day 계산 헬퍼
@@ -16785,16 +16805,16 @@ renderHomeReminders();
 
 // ── Theme Toggle ──────────────────────────────────────────────
 (function initTheme() {
-  const SEASON_DAY   = { spring: 'blossom', summer: 'summer', autumn: 'autumn', winter: 'winter' };
+  const SEASON_DAY   = { spring: 'blossom', summer: 'summer-night', autumn: 'autumn', winter: 'winter' };
   const THEME_ICONS  = {
-    blossom: '🌸', summer: '🌊', autumn: '🍂', winter: '❄️',
+    blossom: '🌸', autumn: '🍂', winter: '❄️',
     'summer-night': '🌌', official: '☀️', dark: '🌙',
   };
   const THEME_LABELS = {
-    blossom: '벚꽃 테마로', summer: '여름 해변으로', autumn: '가을 테마로', winter: '겨울 테마로',
+    blossom: '벚꽃 테마로', autumn: '가을 테마로', winter: '겨울 테마로',
     'summer-night': '여름밤으로', official: '낮 모드로', dark: '밤 모드로',
   };
-  const DEV_ALL = ['blossom', 'summer', 'autumn', 'winter', 'official', 'dark', 'summer-night'];
+  const DEV_ALL = ['blossom', 'summer-night', 'autumn', 'winter', 'official', 'dark'];
 
   function getSeason() {
     const m = new Date().getMonth() + 1;
@@ -16804,15 +16824,9 @@ renderHomeReminders();
     return 'winter';
   }
 
-  function getSummerTheme() {
-    const h = new Date().getHours();
-    return (h >= 9 && h < 18) ? 'summer' : 'summer-night';
-  }
-
-  // 계절 슬롯: 여름은 시간대로 summer / summer-night, 그 외는 고정 계절테마
+  // 계절 슬롯: 계절별 고정 테마(여름은 여름밤 단일)
   function getSeasonalTheme() {
-    const s = getSeason();
-    return s === 'summer' ? getSummerTheme() : SEASON_DAY[s];
+    return SEASON_DAY[getSeason()];
   }
 
   // dev 아닐 때 토글 순환: [계절테마, 낮(official), 밤(dark)] 3슬롯 고정
@@ -16847,6 +16861,7 @@ renderHomeReminders();
   const isDev = localStorage.getItem('devMode') === 'true';
   let saved = localStorage.getItem('theme') || getSeasonalTheme();
   if (saved === 'light') saved = 'official';
+  if (saved === 'summer') saved = 'summer-night';
   if (!isDev) {
     // 낮(official)·밤(dark) 모드는 그대로 유지, 그 외(계절테마)는 현재 계절로 수렴
     if (saved !== 'official' && saved !== 'dark') saved = getSeasonalTheme();
@@ -19482,15 +19497,27 @@ function goToRgGuideSection(tab, sectionId) {
     }, 15000);
   }
 
-  function openPanel(title, body, actions) {
+  function openPanel(title, body, actions, panelClass) {
     panelTitle.textContent = title;
     panelText.textContent = body;
+    panelActions.className = "ilgu-panel-actions" + (panelClass ? " " + panelClass : "");
     panelActions.innerHTML = "";
     actions.forEach(function (action) {
       const btn = document.createElement("button");
       btn.type = "button";
-      btn.className = "ilgu-panel-action" + (action.primary ? " primary" : "");
-      btn.textContent = action.label;
+      btn.className = "ilgu-panel-action" + (action.primary ? " primary" : "") + (action.icon ? " has-icon" : "");
+      if (action.icon) {
+        const ico = document.createElement("span");
+        ico.className = "ilgu-panel-action-ico";
+        ico.textContent = action.icon;
+        const lbl = document.createElement("span");
+        lbl.className = "ilgu-panel-action-label";
+        lbl.textContent = action.label;
+        btn.appendChild(ico);
+        btn.appendChild(lbl);
+      } else {
+        btn.textContent = action.label;
+      }
       btn.addEventListener("click", function (e) {
         e.stopPropagation();
         clearPanelAutoClose();
@@ -19504,12 +19531,12 @@ function goToRgGuideSection(tab, sectionId) {
   }
 
   const MAIN_MENU_JUMPS = [
-    { id: "open-explorer", short: "소방시설 탐색기" },
-    { id: "open-multiuse-decoder", short: "다중이용업소 탐색기" },
-    { id: "open-date-calculator", short: "법정기한 계산기" },
-    { id: "open-report-guide", short: "자체점검 가이드" },
-    { id: "open-facilities", short: "소방시설 도감" },
-    { id: "open-occupancy-calculator", short: "유틸리티 도구함" },
+    { id: "open-explorer", short: "소방시설 탐색기", icon: "🧯" },
+    { id: "open-multiuse-decoder", short: "다중이용업소 탐색기", icon: "👥" },
+    { id: "open-date-calculator", short: "법정기한 계산기", icon: "📅" },
+    { id: "open-report-guide", short: "자체점검 가이드", icon: "📋" },
+    { id: "open-facilities", short: "소방시설 도감", icon: "📖" },
+    { id: "open-occupancy-calculator", short: "유틸리티 도구함", icon: "🧮" },
   ];
 
   function openMenuJumpPanel() {
@@ -19517,6 +19544,7 @@ function goToRgGuideSection(tab, sectionId) {
     const actions = MAIN_MENU_JUMPS.map(function (m) {
       return {
         label: m.short,
+        icon: m.icon,
         onClick: function () {
           closePanel();
           document.getElementById(m.id)?.click();
@@ -19524,7 +19552,7 @@ function goToRgGuideSection(tab, sectionId) {
       };
     });
     actions.push({ label: "← 뒤로", onClick: openHomePanel });
-    openPanel("어디로 갈까요?", "메뉴를 선택하면 바로 이동해요.", actions);
+    openPanel("어디로 갈까요?", "메뉴를 선택하면 바로 이동해요.", actions, "menu-jump");
   }
 
   function openHomePanel() {

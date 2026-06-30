@@ -13,6 +13,9 @@
   --amber-dim: rgba(249, 171, 0, 0.1);
   --blue: #4285f4;
   --blue-dim: rgba(66, 133, 244, 0.1);
+  /* 신고기한(달력 report) 전용 액센트: 범위·기한·범례 공통 소스 */
+  --report: #4285f4;
+  --report-soft: #9fc4ff;
   --green: #34a853;
   --green-dim: rgba(52, 168, 83, 0.1);
   --text: #ececec;
@@ -2481,12 +2484,12 @@ html[data-theme="official"] #occupancy-content .dc-ref-row:not(:first-child) {
 }
 
 .cal-day.report-range {
-  background: rgba(66, 133, 244, 0.14);
+  background: color-mix(in srgb, var(--report) 14%, transparent);
   color: #fff;
 }
 
 .cal-day.appoint-range.report-range {
-  background: linear-gradient(135deg, rgba(66, 133, 244, 0.16) 0%, rgba(66, 133, 244, 0.16) 50%, color-mix(in srgb, var(--red) 16%, transparent) 50%, color-mix(in srgb, var(--red) 16%, transparent) 100%);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--report) 16%, transparent) 0%, color-mix(in srgb, var(--report) 16%, transparent) 50%, color-mix(in srgb, var(--red) 16%, transparent) 50%, color-mix(in srgb, var(--red) 16%, transparent) 100%);
 }
 
 .cal-day.deadline {
@@ -2503,19 +2506,32 @@ html[data-theme="official"] #occupancy-content .dc-ref-row:not(:first-child) {
   box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--red) 85%, transparent);
 }
 
+/* 신고기한(report) 색은 테마별 --report / --report-soft 변수로 통일 → 범위·기한·범례가 항상 같은 색 */
 .cal-day.report-deadline {
-  background: rgba(66, 133, 244, 0.42);
-  color: #9fc4ff;
+  background: color-mix(in srgb, var(--report) 42%, transparent);
+  color: var(--report-soft);
   font-weight: 700;
-  box-shadow: inset 0 0 0 1.5px rgba(66, 133, 244, 0.85);
+  box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--report) 85%, transparent);
 }
 
 .cal-day.appoint-range.report-deadline {
-  background: linear-gradient(135deg, rgba(66, 133, 244, 0.42) 0%, rgba(66, 133, 244, 0.42) 50%, color-mix(in srgb, var(--red) 16%, transparent) 50%, color-mix(in srgb, var(--red) 16%, transparent) 100%);
-  color: #9fc4ff;
+  background: linear-gradient(135deg, color-mix(in srgb, var(--report) 42%, transparent) 0%, color-mix(in srgb, var(--report) 42%, transparent) 50%, color-mix(in srgb, var(--red) 16%, transparent) 50%, color-mix(in srgb, var(--red) 16%, transparent) 100%);
+  color: var(--report-soft);
   font-weight: 700;
-  box-shadow: inset 0 0 0 1.5px rgba(66, 133, 244, 0.85);
+  box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--report) 85%, transparent);
 }
+
+/* 마감 날짜 글자(선/조/신): 숫자 자리에 표기 */
+.cal-day.deadline-label {
+  font-family: var(--sans);
+  font-size: 13px;
+  font-weight: 800;
+}
+/* 글자색은 마감 종류색(빨강 조·선 / 파랑 신)으로 — 테마의 .cal-day{color}·주말색(.sun/.sat)이
+   우선순위로 이겨버려 검게 나오므로 !important로 범례 마커와 색을 일치시킴 */
+.cal-day.deadline.deadline-label,
+.cal-day.appoint-deadline.deadline-label { color: var(--red-soft) !important; }
+.cal-day.report-deadline.deadline-label { color: var(--report-soft) !important; }
 
 .cal-day.holiday::after {
   content: '';
@@ -2553,8 +2569,30 @@ html[data-theme="official"] #occupancy-content .dc-ref-row:not(:first-child) {
   flex-shrink: 0;
 }
 
+/* 글자(선/조/신) 든 범례 마커 */
+.cl-dot-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 19px;
+  height: 19px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  font-family: var(--sans);
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+/* 신고기한(신) 범례 마커: 칸과 동일하게 --report/--report-soft 사용 */
+.cl-label-report {
+  background: color-mix(in srgb, var(--report) 42%, transparent);
+  border: 1px solid color-mix(in srgb, var(--report) 85%, transparent);
+  color: var(--report-soft);
+}
+
 .cl-dot-appoint-range { background: color-mix(in srgb, var(--red) 18%, transparent); }
-.cl-dot-report-range  { background: rgba(66, 133, 244, 0.14); }
+.cl-dot-report-range  { background: color-mix(in srgb, var(--report) 20%, transparent); }
 
 .cl-dot-holiday { background: transparent; position: relative; }
 .cl-dot-holiday::after {
@@ -2570,11 +2608,9 @@ html[data-theme="official"] #occupancy-content .dc-ref-row:not(:first-child) {
 }
 
 html[data-theme="official"] .cl-dot-appoint-range { background: rgba(192, 39, 29, 0.22); }
-html[data-theme="official"] .cl-dot-report-range  { background: rgba(26, 115, 232, 0.22); }
 html[data-theme="official"] .cl-dot-holiday::after { background: #7040c0; }
 
 html[data-theme="blossom"] .cl-dot-appoint-range { background: rgba(200, 75, 110, 0.30); }
-html[data-theme="blossom"] .cl-dot-report-range  { background: rgba(112, 96, 176, 0.25); }
 html[data-theme="blossom"] .cl-dot-holiday::after { background: #7a40c0; }
 
 /* ?�?� Inspection Decoder Result ?�?� */
@@ -4639,6 +4675,23 @@ html[data-theme="blossom"] #date-content .info-box.amber { border-left-color: va
   letter-spacing: 0.3px;
 }
 
+.contact-intranet-note {
+  margin: 10px 0 0;
+  padding: 10px 13px;
+  border-radius: 8px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.7;
+  word-break: keep-all;
+}
+
+.contact-intranet-note strong {
+  color: var(--text);
+  font-weight: 700;
+}
+
 .contact-copy-btn {
   flex-shrink: 0;
   width: 28px;
@@ -5147,10 +5200,6 @@ html[data-theme="blossom"] #date-content .info-box.amber { border-left-color: va
   background: linear-gradient(135deg, #fbdce0, #f9b6c2);
   color: #b1325b;
 }
-.theme-swatch-summer {
-  background: linear-gradient(135deg, #d8f0f8, #c0e8f5);
-  color: #0369a1;
-}
 .theme-swatch-summer-night {
   background: linear-gradient(135deg, #07101e, #132236);
   color: #22d3ee;
@@ -5364,6 +5413,8 @@ html[data-theme="light"] {
   --amber: #c47f00;
   --amber-dim: rgba(196, 127, 0, 0.1);
   --blue: #1a73e8;
+  --report: #1a73e8;
+  --report-soft: #1248a0;
   --blue-dim: rgba(26, 115, 232, 0.1);
   --green: #1e8a3e;
   --green-dim: rgba(30, 138, 62, 0.1);
@@ -5464,11 +5515,6 @@ html[data-theme="light"] .status-review {
   color: #7a4f00;
   background: rgba(196, 127, 0, 0.12);
   border-color: rgba(196, 127, 0, 0.22);
-}
-
-html[data-theme="light"] .cal-day.report-deadline,
-html[data-theme="light"] .cal-day.appoint-range.report-deadline {
-  color: #1248a0;
 }
 
 html[data-theme="light"] .cal-day.holiday::after {
@@ -6902,6 +6948,8 @@ html[data-theme="official"] {
   --amber: #b06800;
   --amber-dim: rgba(176, 104, 0, 0.09);
   --blue: #003087;
+  --report: #1a73e8;
+  --report-soft: #003087;
   --blue-dim: rgba(0, 48, 135, 0.08);
   --green: #1a6e35;
   --green-dim: rgba(26, 110, 53, 0.09);
@@ -7022,14 +7070,10 @@ html[data-theme="official"] .cal-day.appoint-range {
   background: rgba(192, 39, 29, 0.22);
 }
 html[data-theme="official"] .cal-day.report-range {
-  background: rgba(26, 115, 232, 0.22);
+  background: color-mix(in srgb, var(--report) 22%, transparent);
 }
 html[data-theme="official"] .cal-day:hover:not(.empty):not(.other-month) {
   background: rgba(0, 0, 0, 0.05);
-}
-html[data-theme="official"] .cal-day.report-deadline,
-html[data-theme="official"] .cal-day.appoint-range.report-deadline {
-  color: #1a73e8;
 }
 html[data-theme="official"] .cal-day.holiday::after {
   background: #7040c0;
@@ -7137,6 +7181,8 @@ html[data-theme="blossom"] {
   --amber: #c07030;
   --amber-dim: rgba(192, 112, 48, 0.1);
   --blue: #7060b0;
+  --report: #7060b0;
+  --report-soft: #3a2c70;
   --blue-dim: rgba(112, 96, 176, 0.1);
   --green: #507850;
   --green-dim: rgba(80, 120, 80, 0.1);
@@ -7277,7 +7323,7 @@ html[data-theme="blossom"] .cal-day.appoint-range {
   background: rgba(200, 75, 110, 0.30);
 }
 html[data-theme="blossom"] .cal-day.report-range {
-  background: rgba(112, 96, 176, 0.25);
+  background: color-mix(in srgb, var(--report) 25%, transparent);
 }
 html[data-theme="blossom"] .cal-day:hover:not(.empty):not(.other-month) {
   background: rgba(200, 75, 110, 0.07);
@@ -7379,156 +7425,6 @@ html[data-theme="blossom"] .cal-day.holiday::after {
 }
 
 /* ══════════════════════════════════════════════════
-   SUMMER THEME 🌊 여름 해변
-   ══════════════════════════════════════════════════ */
-html[data-theme="summer"] {
-  --bg: #eaf6fc;
-  --surface: #f5fbfe;
-  --surface2: #e0f3fa;
-  --surface3: #cce8f5;
-  --border: #90c8e0;
-  --border2: #6ab5d0;
-  --red: #0369a1;
-  --red-soft: #0891b2;
-  --red-dim: rgba(3, 105, 161, 0.08);
-  --red-dim2: rgba(3, 105, 161, 0.14);
-  --amber: #b07820;
-  --amber-dim: rgba(176, 120, 32, 0.1);
-  --blue: #0284c7;
-  --blue-dim: rgba(2, 132, 199, 0.1);
-  --green: #0f766e;
-  --green-dim: rgba(15, 118, 110, 0.1);
-  --text: #06202e;
-  --text-muted: #1a4a60;
-  --text-dim: #347082;
-  --shadow-sm: 0 1px 4px rgba(3, 105, 161, 0.12), 0 1px 2px rgba(3, 105, 161, 0.07);
-  --shadow-md: 0 4px 14px rgba(3, 105, 161, 0.16), 0 2px 5px rgba(3, 105, 161, 0.09);
-  --shadow-lg: 0 8px 28px rgba(3, 105, 161, 0.20), 0 4px 10px rgba(3, 105, 161, 0.10);
-}
-html[data-theme="summer"] .topbar {
-  background: rgba(220, 242, 252, 0.92);
-  backdrop-filter: blur(20px);
-  border-bottom-color: var(--border);
-}
-html[data-theme="summer"] .home-header {
-  background: linear-gradient(135deg, #ceedf8 0%, #b0ddf0 100%);
-  border-bottom-color: var(--border);
-}
-html[data-theme="summer"] .home-header::before {
-  background: radial-gradient(ellipse 80% 160% at 0% 50%, rgba(8, 145, 178, 0.1) 0%, transparent 65%);
-}
-html[data-theme="summer"] .home-header::after {
-  background: linear-gradient(to bottom, #0891b2 0%, rgba(8, 145, 178, 0.2) 100%);
-}
-html[data-theme="summer"] .home-badge { color: #0369a1; }
-html[data-theme="summer"] .home-badge::before { background: #0891b2; box-shadow: 0 0 6px #0891b2; }
-html[data-theme="summer"] .home-title span { color: #0369a1; }
-html[data-theme="summer"] .btn-primary {
-  background: #0891b2; color: #fff;
-  box-shadow: 0 2px 8px rgba(8, 145, 178, 0.35);
-}
-html[data-theme="summer"] .btn-primary:hover {
-  background: #0284c7; color: #fff;
-  box-shadow: 0 4px 14px rgba(8, 145, 178, 0.45);
-}
-html[data-theme="summer"] button:focus-visible,
-html[data-theme="summer"] input:focus-visible { outline-color: #0891b2; }
-html[data-theme="summer"] .question-input input:focus,
-html[data-theme="summer"] .calc-input:focus,
-html[data-theme="summer"] .calc-textarea:focus {
-  border-color: #0891b2; background: #f5fbfd;
-  box-shadow: 0 0 0 3px rgba(8, 145, 178, 0.12);
-}
-html[data-theme="summer"] .wiz-prog-fill { background: linear-gradient(90deg, #0891b2, #38bdf8); }
-html[data-theme="summer"] .phase-steps li.is-done .ph-dot,
-html[data-theme="summer"] .phase-steps li.is-active .ph-dot { background: #0891b2; border-color: #0891b2; }
-html[data-theme="summer"] .phase-steps li.is-done::before,
-html[data-theme="summer"] .phase-steps li.is-active::before { background: #0891b2; }
-html[data-theme="summer"] .phase-steps li.is-active .ph-dot { box-shadow: 0 0 0 3px rgba(8, 145, 178, 0.22); }
-html[data-theme="summer"] .wq-label,
-html[data-theme="summer"] .section-label { color: #0369a1; }
-html[data-theme="summer"] .choice-button.selected {
-  border-color: #0891b2; background: var(--red-dim2); color: #0369a1;
-}
-html[data-theme="summer"] .choice-button.selected span { color: rgba(8, 145, 178, 0.6); }
-html[data-theme="summer"] .choice-button.selected::after { color: #0891b2; }
-html[data-theme="summer"] .calc-mode-btn.active,
-html[data-theme="summer"] .holiday-toggle-btn.active {
-  background: var(--red-dim2); border-color: #0891b2; color: #0369a1;
-}
-html[data-theme="summer"] .rc-grade.g-sp {
-  color: #0369a1; border-color: rgba(8, 145, 178, 0.3); background: rgba(8, 145, 178, 0.1);
-}
-html[data-theme="summer"] .calc-result {
-  background: linear-gradient(140deg, #e8f8fc 0%, #f5fbfd 60%, var(--surface) 100%);
-  border-color: rgba(8, 145, 178, 0.2);
-}
-html[data-theme="summer"] .calc-result-date { color: #0369a1; }
-html[data-theme="summer"] .cal-day { color: #0a2832; }
-html[data-theme="summer"] .cal-day.sun { color: #b83820; }
-html[data-theme="summer"] .cal-day.sat { color: #1a70b8; }
-html[data-theme="summer"] .cal-day.other-month { color: #5a9aaa; }
-html[data-theme="summer"] .cal-day.selected { box-shadow: inset 0 0 0 2px #0891b2; color: #0a2832; }
-html[data-theme="summer"] .cal-day.in-range,
-html[data-theme="summer"] .cal-day.appoint-range { background: rgba(8, 145, 178, 0.18); }
-html[data-theme="summer"] .cal-day.report-range { background: rgba(3, 105, 161, 0.15); }
-html[data-theme="summer"] .cal-day:hover:not(.empty):not(.other-month) { background: rgba(8, 145, 178, 0.07); }
-html[data-theme="summer"] .info-box.blue {
-  color: #0369a1; background: rgba(8, 145, 178, 0.08);
-  border-color: rgba(8, 145, 178, 0.2); border-left-color: #0891b2;
-}
-html[data-theme="summer"] .info-box.amber {
-  color: #805010; background: rgba(192, 128, 32, 0.08);
-  border-color: rgba(192, 128, 32, 0.2); border-left-color: var(--amber);
-}
-html[data-theme="summer"] .floating-tooltip,
-html[data-theme="summer"] .toast { background: #f5fbfd; border-color: var(--border2); color: var(--text); }
-html[data-theme="summer"] .calc-table td { color: #0a2832; }
-html[data-theme="summer"] .calc-result-block {
-  background: rgba(8, 145, 178, 0.04); border-color: rgba(8, 145, 178, 0.1);
-}
-html[data-theme="summer"] .assistant-staffing-result {
-  background: rgba(2, 132, 199, 0.08); border-color: rgba(2, 132, 199, 0.2);
-}
-html[data-theme="summer"] .assistant-staffing-count { color: #0284c7; }
-html[data-theme="summer"] .calc-result-date-appoint { color: #0369a1; }
-html[data-theme="summer"] .calc-result-date-report { color: #0284c7; }
-html[data-theme="summer"] .insp-operational .ir-badge,
-html[data-theme="summer"] .insp-operational .ir-title,
-html[data-theme="summer"] .insp-operational .mu-type { color: #0284c7; }
-html[data-theme="summer"] .contact-tag { background: rgba(8, 145, 178, 0.1); color: #0369a1; }
-html[data-theme="summer"] .contact-card { border-color: rgba(8, 145, 178, 0.18); }
-html[data-theme="summer"] .menu-card:hover { border-color: rgba(8, 145, 178, 0.3); }
-html[data-theme="summer"] .result-reason { color: #0a2832; }
-html[data-theme="summer"] .status-required {
-  color: #1a5c28; background: rgba(26, 92, 40, 0.14); border-color: rgba(26, 92, 40, 0.3);
-}
-html[data-theme="summer"] .status-review {
-  color: #7a4400; background: rgba(180, 100, 0, 0.12); border-color: rgba(180, 100, 0, 0.3);
-}
-html[data-theme="summer"] .status-not-required {
-  color: #2a6070; background: rgba(42, 96, 112, 0.08); border-color: rgba(42, 96, 112, 0.2);
-}
-html[data-theme="summer"] .cal-day.holiday::after { background: #7040b0; }
-html[data-theme="summer"] .home-bottom-btns {
-  background: transparent;
-  backdrop-filter: none;
-}
-html[data-theme="summer"] .home-bottom-btns .shortcut-add-btn {
-  background: rgba(240, 250, 253, 0.55);
-  backdrop-filter: blur(6px);
-  color: #0369a1;
-}
-html[data-theme="summer"] .home-bottom-btns .shortcut-add-btn:hover {
-  background: rgba(255, 255, 255, 0.78);
-  color: #075985;
-}
-
-html[data-theme="summer"] .reminder-card-type { color: var(--red); border-color: rgba(3, 105, 161, 0.25); }
-html[data-theme="summer"] .reminder-card-warning { color: var(--red); border-color: var(--red); }
-html[data-theme="summer"] .reminder-date-urgent { color: var(--red); }
-
-/* ══════════════════════════════════════════════════
    SUMMER NIGHT THEME 🌌 여름밤
    ══════════════════════════════════════════════════ */
 html[data-theme="summer-night"] {
@@ -7545,6 +7441,8 @@ html[data-theme="summer-night"] {
   --amber: #f59e0b;
   --amber-dim: rgba(245, 158, 11, 0.1);
   --blue: #818cf8;
+  --report: #818cf8;
+  --report-soft: #c7cdfd;
   --blue-dim: rgba(129, 140, 248, 0.1);
   --green: #34d399;
   --green-dim: rgba(52, 211, 153, 0.1);
@@ -7616,11 +7514,11 @@ html[data-theme="summer-night"] .calc-result-date { color: #22d3ee; }
 html[data-theme="summer-night"] .cal-day { color: #c0dcf0; }
 html[data-theme="summer-night"] .cal-day.sun { color: #f87171; }
 html[data-theme="summer-night"] .cal-day.sat { color: #818cf8; }
-html[data-theme="summer-night"] .cal-day.other-month { color: #304860; }
+html[data-theme="summer-night"] .cal-day.other-month { color: #6d90b0; }
 html[data-theme="summer-night"] .cal-day.selected { box-shadow: inset 0 0 0 2px #06b6d4; color: #d8eeff; }
 html[data-theme="summer-night"] .cal-day.in-range,
 html[data-theme="summer-night"] .cal-day.appoint-range { background: rgba(6, 182, 212, 0.25); }
-html[data-theme="summer-night"] .cal-day.report-range { background: rgba(129, 140, 248, 0.2); }
+html[data-theme="summer-night"] .cal-day.report-range { background: color-mix(in srgb, var(--report) 20%, transparent); }
 html[data-theme="summer-night"] .cal-day:hover:not(.empty):not(.other-month) { background: rgba(6, 182, 212, 0.07); }
 html[data-theme="summer-night"] .info-box.blue {
   color: #93c5fd; background: rgba(129, 140, 248, 0.08);
@@ -7677,6 +7575,8 @@ html[data-theme="autumn"] {
   --amber: #a06020;
   --amber-dim: rgba(160, 96, 32, 0.1);
   --blue: #405890;
+  --report: #405890;
+  --report-soft: #243a66;
   --blue-dim: rgba(64, 88, 144, 0.1);
   --green: #407040;
   --green-dim: rgba(64, 112, 64, 0.1);
@@ -7753,7 +7653,7 @@ html[data-theme="autumn"] .cal-day.other-month { color: #987850; }
 html[data-theme="autumn"] .cal-day.selected { box-shadow: inset 0 0 0 2px #c05018; color: #280e00; }
 html[data-theme="autumn"] .cal-day.in-range,
 html[data-theme="autumn"] .cal-day.appoint-range { background: rgba(192, 80, 24, 0.25); }
-html[data-theme="autumn"] .cal-day.report-range { background: rgba(64, 88, 144, 0.2); }
+html[data-theme="autumn"] .cal-day.report-range { background: color-mix(in srgb, var(--report) 20%, transparent); }
 html[data-theme="autumn"] .cal-day:hover:not(.empty):not(.other-month) { background: rgba(192, 80, 24, 0.07); }
 html[data-theme="autumn"] .info-box.blue {
   color: #304080; background: rgba(64, 88, 144, 0.08);
@@ -7813,6 +7713,8 @@ html[data-theme="winter"] {
   --amber: #8070c0;
   --amber-dim: rgba(128, 112, 192, 0.1);
   --blue: #3060b0;
+  --report: #8070c0;
+  --report-soft: #382c6c;
   --blue-dim: rgba(48, 96, 176, 0.1);
   --green: #307870;
   --green-dim: rgba(48, 120, 112, 0.1);
@@ -7889,7 +7791,7 @@ html[data-theme="winter"] .cal-day.other-month { color: #7090b0; }
 html[data-theme="winter"] .cal-day.selected { box-shadow: inset 0 0 0 2px #4878c8; color: #0c1c30; }
 html[data-theme="winter"] .cal-day.in-range,
 html[data-theme="winter"] .cal-day.appoint-range { background: rgba(72, 120, 200, 0.2); }
-html[data-theme="winter"] .cal-day.report-range { background: rgba(128, 112, 192, 0.18); }
+html[data-theme="winter"] .cal-day.report-range { background: color-mix(in srgb, var(--report) 18%, transparent); }
 html[data-theme="winter"] .cal-day:hover:not(.empty):not(.other-month) { background: rgba(72, 120, 200, 0.07); }
 html[data-theme="winter"] .info-box.blue {
   color: #2050a0; background: rgba(48, 96, 176, 0.08);
@@ -8905,6 +8807,41 @@ html[data-theme="blossom"] .ilgu-resize-handle {
   color: #fff;
 }
 
+/* 메뉴 이동 패널: 아이콘 왼쪽 + 한 줄(홈 메뉴 카드 느낌) */
+.ilgu-panel-actions.menu-jump {
+  grid-template-columns: 1fr;
+  gap: 6px;
+}
+
+.ilgu-panel-action.has-icon {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 12px;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.ilgu-panel-action-ico {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 8px;
+  background: var(--surface3);
+  font-size: 15px;
+  line-height: 1;
+}
+
+.ilgu-panel-action-label {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 .ilgu-drop-target {
   outline: 2px solid color-mix(in srgb, var(--red-soft) 82%, transparent);
   outline-offset: 3px;
@@ -8913,7 +8850,6 @@ html[data-theme="blossom"] .ilgu-resize-handle {
 html[data-theme="light"] .ilgu-assistant-panel,
 html[data-theme="official"] .ilgu-assistant-panel,
 html[data-theme="blossom"] .ilgu-assistant-panel,
-html[data-theme="summer"] .ilgu-assistant-panel,
 html[data-theme="autumn"] .ilgu-assistant-panel,
 html[data-theme="winter"] .ilgu-assistant-panel {
   background: rgba(255, 255, 255, 0.94);
@@ -8922,7 +8858,6 @@ html[data-theme="winter"] .ilgu-assistant-panel {
 html[data-theme="light"] .ilgu-panel-action,
 html[data-theme="official"] .ilgu-panel-action,
 html[data-theme="blossom"] .ilgu-panel-action,
-html[data-theme="summer"] .ilgu-panel-action,
 html[data-theme="autumn"] .ilgu-panel-action,
 html[data-theme="winter"] .ilgu-panel-action {
   background: #f6f6f6;
