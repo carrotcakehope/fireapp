@@ -45,7 +45,7 @@ function trackMenuClick(menuName) {
 // ── 패치노트 설정 (여기만 수정하면 됩니다) ──────────────────────────────
 const PATCH_NOTES = {
   version: "v1.0.1",
-  date: "2026-06-17",
+  date: "2026-06-30",
   items: [
     { type: "notice",  text: "자그마한 피드백이라도 큰 도움이 됩니다. 편한 마음으로 언제든 연락주세요!" },
     { type: "new",     text: "① 참고법령 안내 기능 추가<br> ② 법정기한계산기 공휴일 자동반영<br>③ 안내 펫 일구 기능 추가"},
@@ -3532,7 +3532,11 @@ function showResults() {
     explorerViewState.lastInput = input;
     renderMultiuseSafetyCard(input);
     const backBtn = document.getElementById("back-to-main-result");
-    if (backBtn) backBtn.textContent = "이전 질문으로";
+    if (backBtn) {
+      backBtn.textContent = "이전 질문으로";
+      backBtn.classList.remove("btn-primary");
+      backBtn.classList.add("btn-ghost");
+    }
     showIlguLoading(() => { showExplorerCard("multiuse-result"); scrollToTop(); });
     return;
   }
@@ -6126,7 +6130,7 @@ const yearState = {
     yEraChoice: "after2004",
     yOccupancyType: "neighborhood",
     yAutoCalcAreas: "yes",
-    yPermitdate: "2026-06-17",
+    yPermitdate: "2026-06-30",
     yTotalArea: "1500",
     yAboveGroundFloors: "4",
     yBasementFloors: "0",
@@ -16470,7 +16474,11 @@ document.getElementById("open-multiuse-safety").addEventListener("click", () => 
     renderMultiuseSafetyCard(input);
   }
   const backBtn = document.getElementById("back-to-main-result");
-  if (backBtn) backBtn.textContent = "기본 결과로";
+  if (backBtn) {
+    backBtn.textContent = "기본 결과로";
+    backBtn.classList.remove("btn-ghost");
+    backBtn.classList.add("btn-primary");
+  }
   showIlguLoading(() => { showExplorerCard("multiuse-result"); scrollToTop(); });
 });
 document.getElementById("back-to-main-result").addEventListener("click", () => {

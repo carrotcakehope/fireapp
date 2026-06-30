@@ -1740,15 +1740,20 @@ html[data-theme="official"] .lli-kind {
 
 /* ── 탐색기 결과 복사 버튼 ── */
 .explorer-copy-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
   width: 100%;
   margin-top: 8px;
-  background: transparent;
-  color: var(--red);
-  border: 1px solid color-mix(in srgb, var(--red) 50%, transparent);
+  background: color-mix(in srgb, var(--red) 12%, transparent);
+  color: var(--red-soft);
+  border: 1.5px solid color-mix(in srgb, var(--red) 55%, transparent);
   box-shadow: none;
 }
 .explorer-copy-btn:hover {
-  background: color-mix(in srgb, var(--red) 10%, transparent);
+  background: color-mix(in srgb, var(--red) 20%, transparent);
+  border-color: var(--red);
   box-shadow: none;
 }
 .explorer-copy-btn.is-copied {
@@ -4964,6 +4969,23 @@ html[data-theme="blossom"] #date-content .info-box.amber { border-left-color: va
   color: var(--text);
   line-height: 1.65;
   word-break: keep-all;
+}
+
+/* 이용 안내 본문에서 실제 '결과 복사' 버튼을 가리키는 인라인 칩 */
+.tip-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 1px 8px;
+  margin: 0 1px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--red) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--red) 45%, transparent);
+  color: var(--red-soft);
+  font-size: 11.5px;
+  font-weight: 700;
+  white-space: nowrap;
+  vertical-align: 1px;
 }
 
 /* ── 이용안내 부가 카드 (설치/테마/알림판/참고사항) ── */
