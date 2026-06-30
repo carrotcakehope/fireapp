@@ -1721,6 +1721,11 @@ html[data-theme="official"] .lli-kind {
 #date-content .dc-hero-actions .dc-hero-save-btn {
   flex: 1;
   margin-top: 0;
+  white-space: nowrap;
+}
+/* 긴 '메인화면에 표시'에 폭을 더 줘 한 줄 유지, '결과 복사'는 짧으니 덜 차지 */
+#date-content .dc-hero-actions #add-to-home-btn {
+  flex: 1.25;
 }
 #date-content .dc-hero-actions .dc-copy-result-btn {
   background: transparent;
@@ -3037,13 +3042,13 @@ html[data-theme="blossom"] :is(#inspection-content, #multiuse-content) .info-box
   gap: 8px;
   width: 100%;
   margin-top: 4px;
-  padding: 13px 16px;
+  padding: 11px 12px;
   border: none;
   border-radius: 10px;
   background: var(--red);
   color: #fff;
   cursor: pointer;
-  font-size: 13px;
+  font-size: 12.5px;
   font-weight: 700;
   letter-spacing: -0.1px;
   box-shadow: 0 2px 8px color-mix(in srgb, var(--red) 30%, transparent);
