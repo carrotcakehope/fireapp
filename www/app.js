@@ -45,7 +45,7 @@ function trackMenuClick(menuName) {
 // ── 패치노트 설정 (여기만 수정하면 됩니다) ──────────────────────────────
 const PATCH_NOTES = {
   version: "v1.0.1",
-  date: "2026-06-30",
+  date: "2026-07-01",
   items: [
     { type: "notice",  text: "자그마한 피드백이라도 큰 도움이 됩니다. 편한 마음으로 언제든 연락주세요!" },
     { type: "new",     text: "① 참고법령 안내 기능 추가<br> ② 법정기한계산기 공휴일 자동반영<br>③ 안내 펫 일구 기능 추가"},
@@ -6150,7 +6150,7 @@ const yearState = {
     yEraChoice: "after2004",
     yOccupancyType: "neighborhood",
     yAutoCalcAreas: "yes",
-    yPermitdate: "2026-06-30",
+    yPermitdate: "2026-07-01",
     yTotalArea: "1500",
     yAboveGroundFloors: "4",
     yBasementFloors: "0",
@@ -6411,7 +6411,7 @@ const yearSteps = [
     help: "용도를 선택하면 해당 소방시설 기준을 건축허가일 기준으로 안내합니다.",
     options: [
       { value: "neighborhood", label: "근린생활시설", description: "일반 상가·식당·사무실·의원 등" },
-      { value: "apartment", label: "공동주택", description: "아파트등 (연립·다세대·기숙사는 미지원)" },
+      { value: "apartment", label: "공동주택", description: "아파트만 지원 (연립·다세대·기숙사는 미지원)" },
       { value: "medical", label: "의료시설", description: "종합병원·병원·요양병원·정신의료기관 등" },
       { value: "lodging", label: "숙박시설", description: "호텔·모텔·여관·펜션 등" },
       { value: "elderly", label: "노유자시설", description: "요양원·복지관·어린이집·아동센터 등" },

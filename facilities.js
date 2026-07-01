@@ -17,7 +17,7 @@
   }
 
   openBtn.addEventListener('click', () => {
-    trackMenuClick("소방시설도감");
+    // 홈 카드 트래킹은 app.js(open-facilities 리스너)에서 "소방시설 도감"으로 처리 — 여기서 중복 발화 금지
     showScreen('screen-facilities');
     init();
   });
@@ -103,7 +103,7 @@
 
   // 특정 도감 항목으로 바로 이동
   function openFacilityItem(tabIdx, itemId) {
-    trackMenuClick('소방시설도감');
+    trackMenuClick('소방시설 도감');
     showScreen('screen-facilities');
     init();
     activateFacTab(tabIdx);
@@ -116,7 +116,7 @@
 
   // 탭 상단 intro 카드로 이동(독립 카드형: 비교표 등)
   function openFacilityIntro(tabIdx) {
-    trackMenuClick('소방시설도감');
+    trackMenuClick('소방시설 도감');
     showScreen('screen-facilities');
     init();
     activateFacTab(tabIdx);
@@ -130,7 +130,7 @@
 
   // 항목 내 "수계 공통 구성요소" 접힘 패널을 펼쳐서 이동
   function openFacilityWaterComp(tabIdx, itemId) {
-    trackMenuClick('소방시설도감');
+    trackMenuClick('소방시설 도감');
     showScreen('screen-facilities');
     init();
     activateFacTab(tabIdx);
@@ -175,7 +175,7 @@
     else { host.appendChild(acc); }
     overlay.classList.remove('hidden');
     host.scrollTop = 0;
-    trackMenuClick('소방시설도감');
+    trackMenuClick('소방시설 도감');
   }
   function closeFacilityModal() {
     const overlay = document.getElementById('fac-modal-overlay');
