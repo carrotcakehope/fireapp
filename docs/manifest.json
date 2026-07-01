@@ -7,6 +7,12 @@
   "background_color": "#0d0d0d",
   "theme_color": "#d93025",
   "orientation": "portrait-primary",
+  "related_applications": [
+    {
+      "platform": "webapp",
+      "url": "https://fire-assistant.github.io/app/manifest.json"
+    }
+  ],
   "icons": [
     {
       "src": "icon-192.png",

@@ -17175,10 +17175,11 @@ history.replaceState({ screen: 'home' }, '');
     deferredPrompt = null;
   });
 
-  // ── 메인 바로가기 버튼: 앱으로 실행 중이면 숨김 ──
+  // ── 메인 바로가기 버튼: 앱으로 실행 중이거나 이미 설치돼 있으면 숨김 ──
   const cardBtn = document.getElementById('open-install-guide');
   if (cardBtn) {
     if (isStandalone) {
+      // 이미 설치된 앱 아이콘으로 실행 중 → 버튼 불필요
       cardBtn.style.display = 'none';
     } else {
       const desc = document.getElementById('install-card-desc');
@@ -17188,6 +17189,26 @@ history.replaceState({ screen: 'home' }, '');
         else                desc.textContent = '바탕화면에 브라우저 바로가기 만들기';
       }
       cardBtn.addEventListener('click', openInstallModal);
+
+      // 브라우저 탭에서도 "우리 앱이 이미 설치돼 있는지" 감지해 버튼 표시/숨김.
+      // getInstalledRelatedApps: 안드로이드 크롬 지원, iOS 사파리 미지원(그때는 항상 노출).
+      // manifest.json 의 related_applications(platform:webapp) 등록이 있어야 동작함.
+      async function refreshInstallBtn() {
+        // 실행 중 standalone 전환 등은 재확인, iOS 등 미지원 환경은 그대로 노출
+        if (!navigator.getInstalledRelatedApps) return;
+        try {
+          const apps = await navigator.getInstalledRelatedApps();
+          const installed = apps.some(function (a) { return a.platform === 'webapp'; });
+          cardBtn.style.display = installed ? 'none' : '';
+        } catch (e) {
+          // 감지 실패 시 안전하게 버튼 노출 유지
+        }
+      }
+      refreshInstallBtn();
+      // 앱 설치/삭제 후 사이트 탭으로 돌아오면 재검사 → 설치 시 숨김, 삭제 시 다시 노출
+      document.addEventListener('visibilitychange', function () {
+        if (!document.hidden) refreshInstallBtn();
+      });
     }
   }
 
