@@ -45,7 +45,7 @@ function trackMenuClick(menuName) {
 // ── 패치노트 설정 (여기만 수정하면 됩니다) ──────────────────────────────
 const PATCH_NOTES = {
   version: "v1.0.1",
-  date: "2026-07-01",
+  date: "2026-07-05",
   items: [
     { type: "notice",  text: "자그마한 피드백이라도 큰 도움이 됩니다. 편한 마음으로 언제든 연락주세요!" },
     { type: "new",     text: "① 참고법령 안내 기능 추가<br> ② 법정기한계산기 공휴일 자동반영<br>③ 안내 펫 일구 기능 추가"},
@@ -6150,7 +6150,7 @@ const yearState = {
     yEraChoice: "after2004",
     yOccupancyType: "neighborhood",
     yAutoCalcAreas: "yes",
-    yPermitdate: "2026-07-01",
+    yPermitdate: "2026-07-05",
     yTotalArea: "1500",
     yAboveGroundFloors: "4",
     yBasementFloors: "0",
@@ -8365,7 +8365,7 @@ const yearStepOrder = new Map([
 
 // 자세한 버전(분법 이전) 자동산정 대상 키 (자동 ON이면 화면에서 숨김, 수동이면 맨 뒤로)
 const YEAR_AUTO_CANDIDATE_KEYS_BY_OCCUPANCY_BEFORE2004 = {
-  neighborhood: new Set(["yBefore2004HasLargeFloor450", "yBefore2004SprinklerFloor", "yBefore2004HasDetFloor300", "yBefore2004LargeFloor1000", "yFirstSecondFloorArea", "ySmokeControlArea"]),
+  neighborhood: new Set(["yBefore2004HasLargeFloor450", "yBefore2004SprinklerFloor", "yBefore2004HasDetFloor300", "yBefore2004LargeFloor1000", "yFirstSecondFloorArea", "ySmokeControlArea", "yHasLargeTargetFloor"]),
   lodging: new Set(["yBefore2004LodgingHasLargeFloor450", "yBefore2004LodgingSprinklerFloor", "yBefore2004LodgingAutoDetFloor300", "yBefore2004LodgingHasLargeFloor300", "yBefore2004LodgingHasLargeFloor1000", "yBefore2004LodgingHasFloor1500"]),
   medical: new Set(["yBefore2004MedicalHasLargeFloor450", "yBefore2004MedicalHasLargeFloor300", "yBefore2004MedicalSprinklerFloor", "yBefore2004MedicalAutoDetFloor300", "yBefore2004MedicalHasLargeFloor1000", "yBefore2004MedicalHasFloor1500"]),
   elderly: new Set(["yBefore2004ElderlyHasLargeFloor450", "yBefore2004ElderlySprinklerFloor", "yBefore2004ElderlyAutoDetFloor300", "yBefore2004ElderlyHasLargeFloor300", "yBefore2004ElderlyLargeFloor1000", "yBefore2004ElderlyHasFloor500Plus"]),
@@ -8639,8 +8639,8 @@ function yearGetActiveSteps() {
       if (step.key === "yBefore2004AptHasLargeFloor450") return ya.yAutoCalcAreas === "no" && pd > 0 && pd < YD.D19920728 && perDongTa < 2100;
       if (step.key === "yBefore2004AptHasLargeFloor600") return ya.yAutoCalcAreas === "no" && pd >= YD.D19920728 && perDongTa < 3000;
       if (step.key === "yBefore2004AptDetFloor600") return ya.yAutoCalcAreas === "no" && pd > 0 && pd < YD.D19920728 && perDongTa < 1000;
-      // 옥외소화전 1·2층 면적: 연면적 9,000㎡ 이상일 때만
-      if (step.key === "yAptFirstSecondFloorArea") return ta >= 9000;
+      // 옥외소화전 1·2층 면적: 자동산정 해제(상세) + 연면적 9,000㎡ 이상일 때만
+      if (step.key === "yAptFirstSecondFloorArea") return ya.yAutoCalcAreas === "no" && ta >= 9000;
       return false;
     }
 
@@ -8804,6 +8804,7 @@ function yearApplyAutoCalc() {
         ya.yBefore2004HasDetFloor300 = yearAutoDeriveLargeFloorMin3(300);
         ya.yBefore2004LargeFloor1000 = yearAutoDeriveLargeFloor(1000);
         ya.yBefore2004SprinklerFloor = yearAutoDeriveAboveFloor4Plus(sprThreshold);
+        ya.yHasLargeTargetFloor = yearAutoDeriveLargeFloor(300);
         break;
       case "lodging":
         ya.yBefore2004LodgingHasLargeFloor450 = yearAutoDeriveLargeFloor(450);
@@ -9163,6 +9164,8 @@ function yearRenderChoiceStep(step) {
       // 공동주택은 아파트등만 지원 → 세부분류 자동 고정(숨긴 질문 대체, stale row/dorm 방지)
       if (step.key === "yOccupancyType" && option.value === "apartment") {
         yearState.answers.yApartmentSubtype = "apt";
+        // 아파트등은 5층 이상부터 성립하므로, 기본값 4층은 무의미 → 5층으로 보정
+        if (yearState.answers.yAboveGroundFloors === "4") yearState.answers.yAboveGroundFloors = "5";
       }
       yearRenderCurrentStep();
     });
@@ -9516,8 +9519,16 @@ function yearRenderCompoundStep(step) {
       wrapper.appendChild(makeYearField("주차장동 연면적(㎡)", "yAptParkingArea", ya.yAptParkingArea, { min: 0, step: 0.1, placeholder: "예: 5000" }));
       wrapper.appendChild(makeYearField("주차장동 지상 층수", "yAptParkingAbove", ya.yAptParkingAbove, { min: 0, step: 1, placeholder: "예: 0" }));
       wrapper.appendChild(makeYearField("주차장동 지하 층수", "yAptParkingBelow", ya.yAptParkingBelow, { min: 0, step: 1, placeholder: "예: 2" }));
+      ya.yPilotiParkingFirstFloor = "no";
     } else {
       wrapper.appendChild(makeYearField("건물 내부 차고·주차장 바닥면적(㎡)", "yAptIndoorParkingArea", ya.yAptIndoorParkingArea, { min: 0, step: 0.1, placeholder: "없으면 0" }));
+      if (yPermitDateInt() < YD.D20190813) {
+        const divider = document.createElement("p");
+        divider.textContent = "추가 확인 사항";
+        divider.style.cssText = "margin:6px 0 10px;padding-top:12px;border-top:1px solid var(--border);font-size:11px;font-weight:700;letter-spacing:0.03em;color:var(--text-muted);";
+        wrapper.appendChild(divider);
+        wrapper.appendChild(makeYearPilotiField());
+      }
     }
     // 기계식 주차 대수는 주차 정보와 한 화면에서 입력 (분법 이후 전용)
     if (ya.yEraChoice === "after2004") {
@@ -11416,12 +11427,12 @@ function yearEvaluateApartmentBefore2004(inp) {
   } else if (pd < YD.D19970927) {
     kitReq = ag >= 11;
     kitReason = ag >= 11
-      ? "11층 이상 아파트로 11층 이상의 층 주방에 자동식소화기를 설치합니다."
+      ? "11층 이상 아파트로 11층 이상의 층 주방에 자동식소화기를 설치합니다. 다만 자체점검 시 세대 내부까지는 점검이 어려워, 점검보고서에는 설치 여부가 표시되지 않을 수 있습니다."
       : "11층 미만 아파트는 자동식소화기 의무 대상이 아닙니다.";
   } else {
     kitReq = ag >= 11;
     kitReason = ag >= 11
-      ? "11층 이상 아파트로 6층 이상의 층 주방에 자동식소화기를 설치합니다. (1997.9.27~ 6층 이상으로 확대)"
+      ? "11층 이상 아파트로 6층 이상의 층 주방에 자동식소화기를 설치합니다. (1997.9.27~ 6층 이상으로 확대) 다만 자체점검 시 세대 내부까지는 점검이 어려워, 점검보고서에는 설치 여부가 표시되지 않을 수 있습니다."
       : "11층 미만 아파트는 자동식소화기 의무 대상이 아닙니다.";
   }
   results.push(makeResult(categories.extinguishing, "자동식소화기", "", kitReq ? "required" : "notRequired", kitReason, ""));
@@ -11508,7 +11519,7 @@ function yearEvaluateApartmentBefore2004(inp) {
       : "현재 입력 기준으로는 설치 대상이 아닙니다.";
   } else if (pd < YD.D19940720) {
     detReq = ta >= 1000;
-    detReason = detReq ? "아파트·기숙사로서 연면적 1,000㎡ 이상입니다." : "연면적 1,000㎡ 미만이어서 설치 대상이 아닙니다.";
+    detReason = detReq ? "아파트로서 연면적 1,000㎡ 이상입니다." : "연면적 1,000㎡ 미만이어서 설치 대상이 아닙니다.";
   } else if (pd < YD.D20010320) {
     detReq = ta >= 1000 && mgmtTarget;
     detReason = (ta >= 1000)
@@ -11518,7 +11529,7 @@ function yearEvaluateApartmentBefore2004(inp) {
       : "연면적 1,000㎡ 미만이어서 설치 대상이 아닙니다.";
   } else {
     detReq = ta >= 1000;
-    detReason = detReq ? "아파트·기숙사로서 연면적 1,000㎡ 이상입니다. (2001.3.20~ 모든 아파트로 확대)" : "연면적 1,000㎡ 미만이어서 설치 대상이 아닙니다.";
+    detReason = detReq ? "아파트로서 연면적 1,000㎡ 이상입니다. (2001.3.20~ 모든 아파트로 확대)" : "연면적 1,000㎡ 미만이어서 설치 대상이 아닙니다.";
   }
   results.push(makeResult(categories.alarm, "자동화재탐지설비", "", detReq ? "required" : "notRequired", detReason, ""));
 
@@ -11544,7 +11555,7 @@ function yearEvaluateApartmentBefore2004(inp) {
       (corridor === "gat" ? "갓복도형" : "편복도형") + " 아파트로 피난기구 설치가 면제됩니다. (1982.9.15~ 편복도형 면제)", ""));
   } else {
     results.push(makeResult(categories.evacuation, "피난기구", "", "review",
-      "피난층·2층·11층 이상의 층을 제외한 층에 피난기구를 설치합니다. 설치 여부·수량은 층별 수용인원 등에 따라 달라지므로 직접 확인하세요. (편복도형·갓복도형 아파트는 면제)", ""));
+      "피난층·2층·11층 이상의 층을 제외한 층에 피난기구를 설치합니다. 설치 여부·수량은 층별 수용인원 등에 따라 달라지므로 직접 확인하세요. (편복도형·갓복도형 아파트는 면제) 다만 자체점검 시 세대 내부까지는 점검이 어려워, 점검보고서에는 설치 여부가 표시되지 않을 수 있습니다.", ""));
   }
 
   // ── 공기안전매트 (피난기구, 별도 추가) ──
@@ -14092,7 +14103,7 @@ function yearEvaluateApartment(inp) {
       : pd < YD.D20140708 ? "주방용 자동소화장치"
       : "주거용 주방자동소화장치";
     results.push(makeResult(categories.extinguishing, kitName, "", "required",
-      "아파트등은 모든 층의 주방에 " + kitName + "를 설치해야 합니다.", ""));
+      "아파트등은 모든 층의 주방에 " + kitName + "를 설치해야 합니다. 다만 자체점검 시 세대 내부까지는 점검이 어려워, 점검보고서에는 설치 여부가 표시되지 않을 수 있습니다.", ""));
   } else {
     results.push(makeResult(categories.extinguishing, "주거용 주방자동소화장치", "", "notRequired",
       (isRow ? "연립주택·다세대주택" : "기숙사") + "은 주거용 주방자동소화장치 의무 설치 대상이 아닙니다. (아파트등·오피스텔 대상)", ""));
@@ -14225,7 +14236,7 @@ function yearEvaluateApartment(inp) {
   const escapeReq = ag >= 3 || bf >= 1;
   results.push(makeResult(categories.evacuation, "피난기구", "",
     escapeReq ? "required" : "notRequired",
-    escapeReq ? "3층~10층 및 피난층이 아닌 지하층에 설치해야 합니다. (1·2층, 11층 이상, 피난층 면제)"
+    escapeReq ? "3층~10층 및 피난층이 아닌 지하층에 설치해야 합니다. (1·2층, 11층 이상, 피난층 면제) 다만 자체점검 시 세대 내부까지는 점검이 어려워, 점검보고서에는 설치 여부가 표시되지 않을 수 있습니다."
       : "1·2층 및 피난층만 있어 피난기구 설치가 면제됩니다.", ""));
 
   results.push(makeResult(categories.evacuation, "공기안전매트", "",
