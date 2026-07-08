@@ -45,7 +45,7 @@ function trackMenuClick(menuName) {
 // ── 패치노트 설정 (여기만 수정하면 됩니다) ──────────────────────────────
 const PATCH_NOTES = {
   version: "v1.0.1",
-  date: "2026-07-05",
+  date: "2026-07-08",
   items: [
     { type: "notice",  text: "자그마한 피드백이라도 큰 도움이 됩니다. 편한 마음으로 언제든 연락주세요!" },
     { type: "new",     text: "① 참고법령 안내 기능 추가<br> ② 법정기한계산기 공휴일 자동반영<br>③ 안내 펫 일구 기능 추가"},
@@ -3080,6 +3080,12 @@ function renderMultiuseRequiredSafetyList(multiuse, targetId) {
 
 function buildMultiuseTransitionalNotes(flags) {
   const notes = [];
+  if (flags.inBasement) {
+    notes.push({
+      title: "간이스프링클러설비 (지하층 영업장)",
+      text: "지하층 영업장은 2010년 11월 12일부터 바닥면적과 관계없이 간이스프링클러설비 설치대상입니다. 다만 2001년 5월 21일 ~ 2010년 11월 11일 사이에 영업을 시작한 영업장은 지하층 영업장 바닥면적이 150㎡ 이상일 때만 설치대상입니다.",
+    });
+  }
   if (flags.isSealed) {
     notes.push({
       title: "간이스프링클러설비 (밀폐구조 업소)",
@@ -3186,6 +3192,7 @@ function evaluateMultiuseFacilities(input) {
     usesAV: input.multiuseUsesAV,
     hasEvacuationRoute: input.multiuseHasEvacuationRoute,
     isGosiwon: input.multiuseIsGosiwon,
+    inBasement: input.multiuseInBasement,
   });
 
   const reasonItems = [...requiredItems, ...extraSafetyItems, ...etcItems];
@@ -6150,7 +6157,7 @@ const yearState = {
     yEraChoice: "after2004",
     yOccupancyType: "neighborhood",
     yAutoCalcAreas: "yes",
-    yPermitdate: "2026-07-05",
+    yPermitdate: "2026-07-08",
     yTotalArea: "1500",
     yAboveGroundFloors: "4",
     yBasementFloors: "0",
