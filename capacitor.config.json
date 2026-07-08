@@ -1,6 +1,6 @@
 {
   "appId": "com.firesafety.assistant",
-  "appName": "예방업무 어시스턴트",
+  "appName": "Fire Assistant",
   "webDir": "www",
   "server": {
     "androidScheme": "https",
