@@ -45,7 +45,7 @@ function trackMenuClick(menuName) {
 // ── 패치노트 설정 (여기만 수정하면 됩니다) ──────────────────────────────
 const PATCH_NOTES = {
   version: "v1.0.1",
-  date: "2026-07-08",
+  date: "2026-07-16",
   items: [
     { type: "notice",  text: "자그마한 피드백이라도 큰 도움이 됩니다. 편한 마음으로 언제든 연락주세요!" },
     { type: "new",     text: "① 참고법령 안내 기능 추가<br> ② 법정기한계산기 공휴일 자동반영<br>③ 안내 펫 일구 기능 추가"},
@@ -1110,7 +1110,7 @@ const PHASE_SIZE_KEYS = new Set([
   // 자세한버전
   "yTotalArea", "yAboveGroundFloors", "yBasementSet", "yWindowlessSet",
   "yNeighborhoodArea", "yLodgingArea", "yElderlyArea", "yMedicalArea", "ySalesArea", "yBefore2004SalesArea",
-  "yAptBuildingCount", "yAptHouseholdCount", "yBefore2004AptHouseholds",
+  "yAptAreaSet", "yAptBuildingCount", "yAptHouseholdCount", "yBefore2004AptHouseholds",
 ]);
 function phaseOf(key) {
   if (PHASE_USE_KEYS.has(key)) return 0;
@@ -6157,7 +6157,7 @@ const yearState = {
     yEraChoice: "after2004",
     yOccupancyType: "neighborhood",
     yAutoCalcAreas: "yes",
-    yPermitdate: "2026-07-08",
+    yPermitdate: "2026-07-16",
     yTotalArea: "1500",
     yAboveGroundFloors: "4",
     yBasementFloors: "0",
@@ -6349,7 +6349,8 @@ const yearState = {
     yBefore2004OfficeOver100A: "no",         // 누전경보기: 계약전류 100A 초과
     // 공동주택 전용 (분법 이후)
     yApartmentSubtype: "apt",
-    yAptBuildingCount: "1",      // 동 수 (연면적을 동당 평균으로 환산)
+    yAptAreaMode: "repDong",     // 연면적 입력 방식: repDong=대표동 기준(기본) / average=주거동 평균
+    yAptBuildingCount: "1",      // 동 수 (average 모드에서만 사용. repDong 모드는 1 고정)
     yAptHouseholdCount: "150",   // 세대수 (공기안전매트 판단)
     yAptHouseholds: "no",        // 50세대 미만 연립·다세대 여부 (물분무등 주차장 예외)
     yAptIsNationalHousing: "no", // 국민주택규모 이하 + 지하 대피시설 (연결살수 700㎡ 특례)
@@ -6444,6 +6445,16 @@ const yearSteps = [
     condition: () => false,
   },
   {
+    // 연면적 + 동 수를 한 화면에 합친 공동주택 전용 스텝. yTotalArea·yAptBuildingCount를 여기서 함께 입력받는다.
+    key: "yAptAreaSet",
+    type: "ycompound",
+    title: "건축물 연면적(㎡)",
+    help: (ya) => ya.yAptAreaMode === "average"
+      ? "자체점검 실시결과 보고서에 있는 연면적과 동 수를 그대로 입력하세요. 동당 평균으로 환산해 판정하므로 결과가 부정확할 수 있습니다."
+      : "소방시설 설치 여부는 동(棟)별로 판정합니다. 단지에서 가장 층수가 높고 연면적이 큰 주거동 하나를 기준으로 입력하세요.",
+    condition: (ya) => ya.yOccupancyType === "apartment",
+  },
+  {
     key: "yAptBuildingCount",
     type: "ynumber",
     title: "단지의 동(棟) 수는 몇 개인가요?",
@@ -6451,7 +6462,8 @@ const yearSteps = [
     placeholder: "예: 3",
     min: 1,
     step: 1,
-    condition: (ya) => ya.yOccupancyType === "apartment",
+    // yAptAreaSet으로 흡수됨 (연면적과 한 화면). 단독 질문으로는 더 이상 노출하지 않는다.
+    condition: () => false,
   },
   {
     key: "yAptHouseholdCount",
@@ -6570,12 +6582,16 @@ const yearSteps = [
     placeholder: "예: 1500",
     min: 0,
     step: 0.1,
+    // 공동주택은 yAptAreaSet에서 동 수와 함께 입력받는다.
+    condition: (ya) => ya.yOccupancyType !== "apartment",
   },
   {
     key: "yAboveGroundFloors",
     type: "ynumber",
     title: "지상 층수는 몇 층입니까?",
-    help: "지하층을 제외한 지상 층수를 입력하세요.",
+    help: (ya) => (ya.yOccupancyType === "apartment" && ya.yAptAreaMode !== "average")
+      ? "앞서 연면적을 입력한 그 대표동의 지상 층수를 입력하세요. (지하층 제외)"
+      : "지하층을 제외한 지상 층수를 입력하세요.",
     placeholder: "예: 5",
     min: 1,
     step: 1,
@@ -8211,6 +8227,7 @@ const yearStepOrder = new Map([
 
   // 공통 건축물 정보
   "yTotalArea",
+  "yAptAreaSet",
   "yAptBuildingCount",
   "yAptHouseholdCount",
   "yBefore2004AptHouseholds",
@@ -8638,7 +8655,7 @@ function yearGetActiveSteps() {
       const ta = parseFloat(ya.yTotalArea) || 0;
       const perDongTa = ta / Math.max(parseInt(ya.yAptBuildingCount) || 1, 1); // 동당 연면적
       if (step.key === "yWindowlessSet") return !yearIsAutoAreaMode();
-      const alwaysShow = ["yOccupancyType", "yPermitDate", "yTotalArea", "yAptBuildingCount", "yAboveGroundFloors", "yBasementSet",
+      const alwaysShow = ["yOccupancyType", "yPermitDate", "yAptAreaSet", "yAboveGroundFloors", "yBasementSet",
         "yBefore2004AptHouseholds", "yBefore2004AptElecSet", "yAptParkingBuildingSet"];
       if (alwaysShow.includes(step.key)) return true;
       if (step.key === "yBefore2004AptCorridorType") return ya.yAutoCalcAreas === "no";
@@ -8991,6 +9008,11 @@ function makeYearField(labelText, name, value, extra = {}) {
   input.addEventListener("input", (e) => {
     yearState.answers[name] = e.target.value;
     if (name === "yAptBuildingCount" && yearIsAutoAreaMode()) yearRecalcApartmentAreaTargets();
+    // 연면적을 yAptAreaSet(공동주택 합친 화면)에서 받을 때도 ynumber 스텝과 같은 파생 재계산이 돌아야 한다.
+    if (name === "yTotalArea") {
+      yearRecalcF12();
+      if (yearIsAutoAreaMode()) yearRecalcApartmentAreaTargets();
+    }
     if (name === "yBasementAreaSum") yearRecalcF12();
     if (name === "yBasementAreaSum" || name === "yWindowlessArea") yearRecalcSmokeAreaTargets();
   });
@@ -9358,6 +9380,48 @@ function yearRenderCompoundStep(step) {
   wrapper.className = "choice-list";
   const ya = yearState.answers;
 
+  // 공동주택 연면적: 대표동 기준(기본) / 주거동 평균 두 방식을 한 화면에서 고른다.
+  if (step.key === "yAptAreaSet") {
+    const isAverage = ya.yAptAreaMode === "average";
+
+    const seg = document.createElement("div");
+    seg.className = "occ-segmented";
+    seg.dataset.occSegmented = "staffing"; // 2칸 그리드 재사용
+    [
+      { value: "repDong", label: "대표동 기준 (권장)" },
+      { value: "average", label: "보고서 기준 (간이)" },
+    ].forEach((opt) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      if (ya.yAptAreaMode === opt.value) btn.classList.add("active");
+      btn.textContent = opt.label;
+      btn.addEventListener("click", () => {
+        if (ya.yAptAreaMode === opt.value) return;
+        ya.yAptAreaMode = opt.value;
+        // 대표동 기준은 나눗셈을 하지 않으므로 동 수를 1로 고정한다.
+        if (opt.value === "repDong") ya.yAptBuildingCount = "1";
+        yearRenderCurrentStep();
+      });
+      seg.appendChild(btn);
+    });
+    wrapper.appendChild(seg);
+
+    if (isAverage) {
+      wrapper.appendChild(makeYearField("연면적(㎡)", "yTotalArea", ya.yTotalArea, { min: 0, step: 0.1, placeholder: "예: 45000" }));
+      wrapper.appendChild(makeYearField("동 수(개)", "yAptBuildingCount", ya.yAptBuildingCount, { min: 1, step: 1, placeholder: "예: 3" }));
+      const note = document.createElement("div");
+      note.className = "info-box amber";
+      note.innerHTML = `<div class="ib-title">결과가 부정확할 수 있습니다</div>보고서 연면적에는 주차동·경비동 같은 부속동이 섞여 있습니다. 그대로 동 수로 나누면 동당 평균이 실제 주거동보다 작게 나와, <strong>설치 대상인데도 대상이 아닌 것으로 판정될 수 있습니다.</strong> 정확히 보려면 대표동 기준으로 다시 확인하세요.`;
+      wrapper.appendChild(note);
+    } else {
+      wrapper.appendChild(makeYearField("대표동 연면적(㎡)", "yTotalArea", ya.yTotalArea, { min: 0, step: 0.1, placeholder: "예: 1500" }));
+      const note = document.createElement("div");
+      note.className = "info-box blue";
+      note.innerHTML = `<div class="ib-title">대표동 고르는 법</div>건축물대장(또는 내부 프로그램)에서 단지 안 주거동 중 <strong>층수가 가장 높고 연면적이 가장 큰 동</strong> 하나를 찾아 그 동의 연면적만 넣으세요. 주차동·경비동 등 부속동은 제외합니다. 다음 질문의 층수도 같은 동 기준으로 입력하세요.`;
+      wrapper.appendChild(note);
+    }
+  }
+
   if (step.key === "yBasementSet") {
     const floorsField = makeYearField("지하층수", "yBasementFloors", ya.yBasementFloors, { min: 0, step: 1, placeholder: "없으면 0" });
     const areaField = makeYearField("지하층 바닥면적 합계(㎡)", "yBasementAreaSum", ya.yBasementAreaSum, { min: 0, step: 0.1, placeholder: "없으면 0" });
@@ -9522,6 +9586,7 @@ function yearRenderCompoundStep(step) {
 
   if (step.key === "yAptParkingBuildingSet") {
     wrapper.appendChild(makeYearBinaryField("주차전용 별동(지하주차장 등)이 있습니까?", "yAptHasParkingBuilding"));
+    let showPiloti = false;
     if (ya.yAptHasParkingBuilding === "yes") {
       wrapper.appendChild(makeYearField("주차장동 연면적(㎡)", "yAptParkingArea", ya.yAptParkingArea, { min: 0, step: 0.1, placeholder: "예: 5000" }));
       wrapper.appendChild(makeYearField("주차장동 지상 층수", "yAptParkingAbove", ya.yAptParkingAbove, { min: 0, step: 1, placeholder: "예: 0" }));
@@ -9529,17 +9594,20 @@ function yearRenderCompoundStep(step) {
       ya.yPilotiParkingFirstFloor = "no";
     } else {
       wrapper.appendChild(makeYearField("건물 내부 차고·주차장 바닥면적(㎡)", "yAptIndoorParkingArea", ya.yAptIndoorParkingArea, { min: 0, step: 0.1, placeholder: "없으면 0" }));
-      if (yPermitDateInt() < YD.D20190813) {
-        const divider = document.createElement("p");
-        divider.textContent = "추가 확인 사항";
-        divider.style.cssText = "margin:6px 0 10px;padding-top:12px;border-top:1px solid var(--border);font-size:11px;font-weight:700;letter-spacing:0.03em;color:var(--text-muted);";
-        wrapper.appendChild(divider);
-        wrapper.appendChild(makeYearPilotiField());
-      }
+      showPiloti = yPermitDateInt() < YD.D20190813;
     }
-    // 기계식 주차 대수는 주차 정보와 한 화면에서 입력 (분법 이후 전용)
-    if (ya.yEraChoice === "after2004") {
+    // 기계식 주차 대수는 주차 정보와 한 화면에서 입력.
+    // 분법 이전에도 물분무등 기준(20대↑)이 있으므로 1992.7.28 이후 허가면 함께 묻는다.
+    if (ya.yEraChoice === "after2004" || yPermitDateInt() >= YD.D19920728) {
       wrapper.appendChild(makeYearField("기계식 주차 대수(대)", "yAptMechanicalParkingCapacity", ya.yAptMechanicalParkingCapacity, { min: 0, step: 1, placeholder: "없으면 0" }));
+    }
+    // 필로티는 다른 용도(appendYearParkingElecGroup)와 같이 면적·대수 입력 뒤에 '추가 확인 사항'으로 둔다.
+    if (showPiloti) {
+      const divider = document.createElement("p");
+      divider.textContent = "추가 확인 사항";
+      divider.style.cssText = "margin:6px 0 10px;padding-top:12px;border-top:1px solid var(--border);font-size:11px;font-weight:700;letter-spacing:0.03em;color:var(--text-muted);";
+      wrapper.appendChild(divider);
+      wrapper.appendChild(makeYearPilotiField());
     }
   }
 
@@ -9617,7 +9685,8 @@ function yearRenderCurrentStep() {
   const step = activeSteps[yearState.currentStep];
   document.getElementById("year-question-kicker").textContent = `QUESTION ${yearState.currentStep + 1}`;
   document.getElementById("year-question-title").textContent = step.title;
-  document.getElementById("year-question-help").textContent = step.help;
+  document.getElementById("year-question-help").textContent =
+    typeof step.help === "function" ? step.help(yearState.answers) : step.help;
   const inputEl = document.getElementById("year-question-input");
   inputEl.innerHTML = "";
 
@@ -9644,6 +9713,13 @@ function yearUpdateProgress() {
 
 function yearCurrentStepIsValid() {
   const step = yearGetActiveSteps()[yearState.currentStep];
+  // ycompound는 기본적으로 무검증이나, 연면적은 비면 이후 판정이 전부 깨지므로 여기서 막는다.
+  if (step.key === "yAptAreaSet") {
+    const ya = yearState.answers;
+    if (!(Number(ya.yTotalArea) > 0)) return false;
+    if (ya.yAptAreaMode === "average" && !(parseInt(ya.yAptBuildingCount, 10) >= 1)) return false;
+    return true;
+  }
   if (step.type === "ynumber") {
     const v = yearState.answers[step.key];
     return v !== "" && !Number.isNaN(Number(v));
@@ -11486,20 +11562,27 @@ function yearEvaluateApartmentBefore2004(inp) {
     "분법 이전 시기에는 공동주택에 대한 간이스프링클러설비 설치 의무가 없었습니다.", ""));
 
   // ── 물분무등소화설비 ──
+  // 기계식 주차(20대↑)는 1992.7.28 전부개정에서 차고(제3호)와 분리된 독립 제4호가 되면서
+  // "아파트는 공동주택관리령 제7조 해당분만"이라는 한정이 붙지 않는다 → 아파트라도 한정 없이 적용.
+  // 별동 주차장이 있으면 기계식은 별동 몫이므로(별동은 이 엔진을 재사용해 따로 판정) 본동에서는 뺀다.
+  const mechParking = inp.aptHasParkingBuilding ? 0 : inp.aptMechanicalParkingCapacity;
   let wsReq, wsReason;
   if (preBefore1992) {
     wsReq = elecArea >= 300;
     wsReason = wsReq ? "전기실·발전실·변전실 등 바닥면적이 300㎡ 이상입니다." : "현재 입력 기준으로는 설치 대상이 아닙니다.";
   } else if (pd < YD.D19950810) {
     const garageReq = parkingArea >= 200 && mgmtTarget;
-    wsReq = elecArea >= 300 || garageReq;
+    const mechReq = mechParking >= 20;
+    wsReq = elecArea >= 300 || garageReq || mechReq;
     wsReason = elecArea >= 300 ? "전기실·발전실 등 바닥면적이 300㎡ 이상입니다."
+      : mechReq ? "승강기 등 기계장치에 의한 주차시설이 20대 이상입니다. (기계식 주차는 차고와 달리 공동주택관리령 제7조 한정을 받지 않습니다.)"
       : garageReq ? "의무관리대상 아파트의 부설 차고·주차장 바닥면적이 200㎡ 이상입니다. (1992.7.28~1995.8.9 공동주택관리령 제7조 한정)"
       : (parkingArea >= 200 ? "부설 차고가 200㎡ 이상이나 의무관리대상(300세대↑ 또는 150세대↑·6층↑) 아파트가 아니어서 이 시기에는 제외됩니다." : "현재 입력 기준으로는 설치 대상이 아닙니다.");
   } else {
-    wsReq = elecArea >= 300 || parkingArea >= 200;
+    wsReq = elecArea >= 300 || parkingArea >= 200 || mechParking >= 20;
     wsReason = elecArea >= 300 ? "전기실·발전실 등 바닥면적이 300㎡ 이상입니다."
       : parkingArea >= 200 ? "건물 내 차고·주차장 바닥면적이 200㎡ 이상입니다."
+      : mechParking >= 20 ? "승강기 등 기계장치에 의한 주차시설이 20대 이상입니다."
       : "현재 입력 기준으로는 설치 대상이 아닙니다.";
   }
   results.push(makeResult(categories.extinguishing, "물분무등소화설비", "", wsReq ? "required" : "notRequired", wsReason, ""));
@@ -11718,6 +11801,7 @@ function yearEvaluateParkingBuildingBefore2004(inp) {
     windowlessArea: 0,
     hasWindowlessFloor: false,
     aptBuildingCount: 1,                 // 주차장 별동은 1동 취급(면적 안 나눔)
+    aptHasParkingBuilding: false,        // 별동 자신을 판정하는 중 → 기계식 주차를 이 엔진에서 보게 함
     before2004AptHouseholds: 999999,     // 독립 주차장: 차고 물분무·자탐을 제7조 무관하게 적용되도록 강제
     before2004AptCorridorType: "none",
     aptElectricalRoomArea: 0,
@@ -15888,19 +15972,25 @@ function yearShowResults() {
     suppressBefore2004LowRiseEscapeItems(results, inp);
     const dongCount = Math.max(inp.aptBuildingCount || 1, 1);
     const perDong = Math.round(inp.totalArea / dongCount);
+    const isAvgMode = yearState.answers.yAptAreaMode === "average";
     const aptChips = [
       ibChipHtml("🏢", "용도", "공동주택(아파트)"),
       ibChipHtml("📅", "건축허가일", permitStr),
-      ibChipHtml("📐", "연면적", `${ibNumFmt(inp.totalArea)}㎡`),
-      ibChipHtml("🏘️", "동 수", `${dongCount}개 (동당 약 ${ibNumFmt(perDong)}㎡)`),
+      isAvgMode
+        ? ibChipHtml("📐", "연면적", `${ibNumFmt(inp.totalArea)}㎡ (보고서 기준)`)
+        : ibChipHtml("📐", "연면적", `${ibNumFmt(inp.totalArea)}㎡ (대표동)`),
+      isAvgMode
+        ? ibChipHtml("🏘️", "동 수", `${dongCount}개 (동당 약 ${ibNumFmt(perDong)}㎡)`)
+        : ibChipHtml("🏘️", "판정 기준", "대표동 1개 기준"),
       ibChipHtml("🚪", "세대수", `${ibNumFmt(inp.before2004AptHouseholds)}세대`),
       ibFloorsChip(inp.aboveGroundFloors, inp.basementFloors),
     ];
     if (hasParkingBuilding) {
       aptChips.push(ibChipHtml("🅿️", "별동 주차장", `${ibNumFmt(inp.aptParkingArea)}㎡ (지상 ${inp.aptParkingAbove} · 지하 ${inp.aptParkingBelow})`));
     }
-    const summaryHtml = ibSummaryHtml(aptChips,
-      `<div class="ib-note">※ 단지 단위 근사: 지상 연면적만 동당 평균(÷동수), 지하 바닥면적(통합 주차장 포함)·층수·세대수는 단지 통합/최고 기준. 별동 주차장은 따로 판정해 합산. 동마다 규모가 크게 다르면 동별로 따로 확인하세요.</div>`);
+    const summaryHtml = ibSummaryHtml(aptChips, isAvgMode
+      ? `<div class="ib-note">※ 보고서 기준(간이) 방식: 지상 연면적만 동당 평균(÷동수), 지하 바닥면적(통합 주차장 포함)·층수·세대수는 단지 통합/최고 기준. 별동 주차장은 따로 판정해 합산. 연면적에 부속동이 섞여 있으면 동당 평균이 실제 주거동보다 작게 나옵니다. 정확히 보려면 대표동 기준으로 다시 확인하세요.</div>`
+      : `<div class="ib-note">※ 대표동 기준: 입력한 대표동 1개를 그대로 판정했습니다(면적 나눔 없음). 지하 바닥면적(통합 주차장 포함)·세대수는 단지 통합 기준. 별동 주차장은 따로 판정해 합산. 다른 동이 대표동보다 크면 그 동으로 다시 확인하세요.</div>`);
     // 아파트 스프링클러는 16층 이상 층만 설치(전층 아님) → SP로 연결살수설비 면제 불가
     const exceptionItems = buildBefore2004ExceptionItems(results, pd, { sprinklerSuppressesConnSpray: false });
     const allRequiredItems = results.filter((r) => r.status === "required" || r.status === "review");
@@ -16020,12 +16110,13 @@ function yearShowResults() {
     } else if (kind === "apartment") {
       const dongCount = inp.aptBuildingCount || 1;
       const avgFloor = Math.round(yearApartmentAverageFloorArea() * 10) / 10;
-      parts.push(`동당 평균 층면적 ${avgFloor}㎡`);
+      const avgMode = yearState.answers.yAptAreaMode === "average";
+      parts.push(avgMode ? `동당 평균 층면적 ${avgFloor}㎡` : `대표동 층당 면적 ${avgFloor}㎡`);
       parts.push(`1·2층 ${inp.aptFirstSecondFloorArea}㎡`);
       parts.push(`지하층 합계 ${inp.basementAreaSum}㎡`);
       parts.push(`600㎡ 이상 층 ${inp.aptHasFloor600 ? "있음" : "없음"}`);
       parts.push(`1,000㎡ 이상 층 ${inp.aptHasFloor1000 ? "있음" : "없음"}`);
-      parts.push(`동 수 ${dongCount}개`);
+      if (avgMode) parts.push(`동 수 ${dongCount}개`);
     }
     return `<div class="ib-note">※ 면적 자동산정 적용: ${parts.join(", ")} (직사각형·전 층 동일 용도 가정)</div>`;
   };
@@ -16119,16 +16210,22 @@ function yearShowResults() {
     const dongCount = inp.aptBuildingCount || 1;
     const perDong = dongCount > 0 ? Math.round(inp.totalArea / dongCount) : inp.totalArea;
     const householdText = inp.apartmentSubtype === "apt" ? `, ${inp.aptHouseholdCount}세대` : "";
+    const isAvgMode = yearState.answers.yAptAreaMode === "average";
     const aptChips = [
       ibChip("🏢", "용도", `공동주택(${subtypeLabel})`),
       permitChip(),
-      ibChip("📐", "연면적", `${nf(inp.totalArea)}㎡`),
-      ibChip("🏘️", "동 수", `${dongCount}개 (동당 약 ${nf(perDong)}㎡)`),
+      isAvgMode
+        ? ibChip("📐", "연면적", `${nf(inp.totalArea)}㎡ (보고서 기준)`)
+        : ibChip("📐", "연면적", `${nf(inp.totalArea)}㎡ (대표동)`),
+      isAvgMode
+        ? ibChip("🏘️", "동 수", `${dongCount}개 (동당 약 ${nf(perDong)}㎡)`)
+        : ibChip("🏘️", "판정 기준", "대표동 1개 기준"),
     ];
     if (inp.apartmentSubtype === "apt") aptChips.push(ibChip("🚪", "세대수", `${nf(inp.aptHouseholdCount)}세대`));
     aptChips.push(ibChip("🏬", "층수", `지상 ${inp.aboveGroundFloors} · 지하 ${inp.basementFloors}`));
-    summaryHtml = ibSummary(aptChips,
-      `<div class="ib-note">※ 단지 단위 근사: 면적 기준은 동당 평균(연면적÷동수), 층수·지하는 최고 동·통합 지하 기준. 동마다 규모가 크게 다르면 동별로 따로 확인하세요.</div>${autoNoteParts("apartment")}`);
+    summaryHtml = ibSummary(aptChips, (isAvgMode
+      ? `<div class="ib-note">※ 보고서 기준(간이) 방식: 면적 기준은 동당 평균(연면적÷동수), 층수·지하는 최고 동·통합 지하 기준. 연면적에 부속동이 섞여 있으면 동당 평균이 실제 주거동보다 작게 나옵니다. 정확히 보려면 대표동 기준으로 다시 확인하세요.</div>`
+      : `<div class="ib-note">※ 대표동 기준: 입력한 대표동 1개를 그대로 판정했습니다(면적 나눔 없음). 지하는 통합 지하 기준. 다른 동이 대표동보다 크면 그 동으로 다시 확인하세요.</div>`) + autoNoteParts("apartment"));
   } else {
     results = yearEvaluateNeighborhood(inp);
     exceptionItems = yearBuildNeighborhoodExceptionItems(results, inp);
@@ -16327,6 +16424,8 @@ function yearWizardRestart() {
   ya.yBefore2004ReligiousElectricalRoomArea = "";
   ya.ySalesArea = ya.yTotalArea;
   // 공동주택 전용
+  ya.yAptAreaMode = "repDong";
+  ya.yAptBuildingCount = "1";
   ya.yAptHouseholdCount = "150";
   ya.yBefore2004AptHouseholds = "150";
   ya.yAptIndoorParkingArea = "0";
