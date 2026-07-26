@@ -45,7 +45,7 @@ function trackMenuClick(menuName) {
 // ── 패치노트 설정 (여기만 수정하면 됩니다) ──────────────────────────────
 const PATCH_NOTES = {
   version: "v1.0.1",
-  date: "2026-07-16",
+  date: "2026-07-26",
   items: [
     { type: "notice",  text: "자그마한 피드백이라도 큰 도움이 됩니다. 편한 마음으로 언제든 연락주세요!" },
     { type: "new",     text: "① 참고법령 안내 기능 추가<br> ② 법정기한계산기 공휴일 자동반영<br>③ 안내 펫 일구 기능 추가"},
@@ -4388,7 +4388,7 @@ function renderDateCalculator() {
   // 공휴일 로딩 안내
   const isHolidayLoading = Object.values(state.dateCalc.apiHolidays).some(v => v === null);
   const holidayHint = mode.supportsHolidaySelection
-    ? `공휴일은 자동 적용됩니다${isHolidayLoading ? " <span style='color:var(--text-dim)'>(불러오는 중…)</span>" : ""}. 임시공휴일 등이 빠져있으면 캘린더 상단 "공휴일" 버튼으로 추가하세요.`
+    ? `공휴일은 자동 적용됩니다${isHolidayLoading ? " <span style='color:var(--text-dim)'>(불러오는 중…)</span>" : ""}. 임시공휴일 등이 빠져있으면 캘린더 상단 "공휴일 추가" 버튼으로 추가하세요.`
     : "";
 
   root.innerHTML = `
@@ -6157,7 +6157,7 @@ const yearState = {
     yEraChoice: "after2004",
     yOccupancyType: "neighborhood",
     yAutoCalcAreas: "yes",
-    yPermitdate: "2026-07-16",
+    yPermitdate: "2026-07-26",
     yTotalArea: "1500",
     yAboveGroundFloors: "4",
     yBasementFloors: "0",
