@@ -44,13 +44,13 @@ function trackMenuClick(menuName) {
 
 // ── 패치노트 설정 (여기만 수정하면 됩니다) ──────────────────────────────
 const PATCH_NOTES = {
-  version: "v1.0.1",
-  date: "2026-07-26",
+  version: "v1.0.2",
+  date: "2026-09-06",
   items: [
-    { type: "notice",  text: "자그마한 피드백이라도 큰 도움이 됩니다. 편한 마음으로 언제든 연락주세요!" },
-    { type: "new",     text: "① 참고법령 안내 기능 추가<br> ② 법정기한계산기 공휴일 자동반영<br>③ 안내 펫 일구 기능 추가"},
-    { type: "improve", text: "메인화면 메뉴 배치 및 이름, UI 변경 등" },
-    { type: "fix",     text: "유틸리티 도구함 숫자입력 버그 수정" },
+    { type: "notice",  text: "가을테마는 괜찮나요? 낙엽이 예쁘게 떨어지니, 테마 변경 한번 해보세요! <br>자그마한 피드백이라도 큰 도움이 됩니다. 편한 마음으로 언제든 연락주세요!" },
+    { type: "new",     text: "없음"},
+    { type: "improve", text: "법정기한 계산기 달력에서 월표시 기능 개선" },
+    { type: "fix",     text: "소방시설 탐색기 공장 용도 픽스 예정" },
   ],
 };
 // ────────────────────────────────────────────────────────────────────────
@@ -4098,11 +4098,14 @@ function renderDateCalculator() {
     const countedDates = addInspectReportDays(baseDate, mode.days, holidayKeys);
     countedDates.forEach((date) => rangeKeys.add(dateKey(date)));
     deadline = countedDates[countedDates.length - 1];
+    // 범위 안의 공휴일도 칸을 채워 구멍 없이 이어지게 (칠한 칸 − 보라 점 = 산정 일수).
+    // 단 주말 공휴일은 제외 — 주말은 점이 없어 "칠했는데 점도 없다 = 세는 날"로 읽히는데,
+    // 토요일 공휴일만 칠해지면 주말이 산정에 포함된 것처럼 보인다.
     if (deadline) {
       const cur = new Date(baseDate); cur.setDate(cur.getDate() + 1);
       while (cur <= deadline) {
         const k = dateKey(cur);
-        if (holidayKeys.has(k)) rangeKeys.add(k);
+        if (holidayKeys.has(k) && !isWeekend(cur)) rangeKeys.add(k);
         cur.setDate(cur.getDate() + 1);
       }
     }
@@ -4173,11 +4176,12 @@ function renderDateCalculator() {
     reportDates.forEach((date) => reportRangeKeys.add(dateKey(date)));
     // 자체점검과 동일하게: 신고 범위 안의 공휴일도 칸을 채워 구멍 없이 이어지게
     // (addInspectReportDays는 공휴일을 건너뛰어 reportDates에서 빠지므로 따로 메움)
+    // 단 주말 공휴일은 제외 — 주말은 애초에 안 세는데 칠해지면 산정에 포함된 것처럼 보인다.
     if (reportDeadline) {
       let rcur = addDays(completionDeadline, 1);
       while (rcur <= reportDeadline) {
         const rk = dateKey(rcur);
-        if (holidayKeys.has(rk)) reportRangeKeys.add(rk);
+        if (holidayKeys.has(rk) && !isWeekend(rcur)) reportRangeKeys.add(rk);
         rcur = addDays(rcur, 1);
       }
     }
@@ -4269,28 +4273,46 @@ function renderDateCalculator() {
 
   const viewYear = state.dateCalc.viewYear;
   const viewMonth = state.dateCalc.viewMonth;
-  const firstDay = new Date(viewYear, viewMonth, 1);
+
+  // 한 달치 셀 생성 — 그 달 날짜만 그리고 앞뒤 남의 달 칸은 빈칸으로 둔다.
+  // (9월 블록에 10월 1·2·3이 섞여 보이던 문제. 빈칸이라 요일 정렬은 그대로 유지)
+  // 단일 달일 때도 똑같이 비운다: 달이 늘어날 때 "화면이 확 달라진" 느낌을 줄이기 위함.
+  // 월 수를 "기산일 달 ~ 기한 달"로 세므로 단일 달 = 기한도 그 달 안 → 회색 칸을 지워도 잃는 정보가 없다.
+  const buildMonthCells = (cellYear, cellMonth) => {
+  const firstDay = new Date(cellYear, cellMonth, 1);
   const startWeekday = firstDay.getDay();
-  const daysInMonth = new Date(viewYear, viewMonth + 1, 0).getDate();
-  const prevMonthDays = new Date(viewYear, viewMonth, 0).getDate();
+  const daysInMonth = new Date(cellYear, cellMonth + 1, 0).getDate();
+  const prevMonthDays = new Date(cellYear, cellMonth, 0).getDate();
   const cells = [];
+  const kinds = [];
+  const dates = [];
 
   for (let i = 0; i < 42; i += 1) {
     let date;
     let otherMonth = false;
     if (i < startWeekday) {
-      date = new Date(viewYear, viewMonth - 1, prevMonthDays - startWeekday + i + 1);
+      date = new Date(cellYear, cellMonth - 1, prevMonthDays - startWeekday + i + 1);
       otherMonth = true;
+      kinds.push("prev");
     } else if (i >= startWeekday + daysInMonth) {
-      date = new Date(viewYear, viewMonth + 1, i - (startWeekday + daysInMonth) + 1);
+      date = new Date(cellYear, cellMonth + 1, i - (startWeekday + daysInMonth) + 1);
       otherMonth = true;
+      kinds.push("next");
     } else {
-      date = new Date(viewYear, viewMonth, i - startWeekday + 1);
+      date = new Date(cellYear, cellMonth, i - startWeekday + 1);
+      kinds.push("cur");
     }
 
+    // 남의 달 자리는 요일 정렬용 빈칸으로만 남긴다
+    if (otherMonth) {
+      cells.push('<div class="cal-day cal-day-blank" aria-hidden="true"></div>');
+      dates.push(date);
+      continue;
+    }
+
+    dates.push(date);
     const classes = ["cal-day"];
     const key = formatInputDate(date);
-    if (otherMonth) classes.push("other-month");
     if (date.getDay() === 0) classes.push("sun");
     if (date.getDay() === 6) classes.push("sat");
     if (sameDate(date, baseDate)) classes.push("selected");
@@ -4314,6 +4336,51 @@ function renderDateCalculator() {
 
     cells.push(`<button class="${classes.join(" ")}" type="button" data-date="${key}">${cellText}</button>`);
   }
+
+  // 통째로 빈 줄(그 달 날짜가 하나도 없는 주)은 버린다. 빈칸뿐이라 지워도 사라지는 정보가 없다.
+  let firstRow = 0;
+  let lastRow = 5;
+  const rowIsEmpty = (row) => kinds.slice(row * 7, row * 7 + 7).every((k) => k !== "cur");
+  while (firstRow < lastRow && rowIsEmpty(firstRow)) firstRow += 1;
+  while (lastRow > firstRow && rowIsEmpty(lastRow)) lastRow -= 1;
+  return cells.slice(firstRow * 7, (lastRow + 1) * 7);
+  };
+
+  // ── 표시할 달 수 결정 ──
+  // 여러 달 모드는 그 달 날짜만 그리므로, 기산일이 속한 달부터 마지막 기한이 속한 달까지
+  // 달력을 이어 붙인다. (안전관리자 = 선임 30일 + 신고 14일 = 44일이라 늘 2~3개월)
+  const stripTime = (d) => { const x = new Date(d); x.setHours(0, 0, 0, 0); return x; };
+  const calRangeEnd = stripTime(reportDeadline || appointDeadline || deadline || baseDate);
+  const monthSpan = (calRangeEnd.getFullYear() - baseDate.getFullYear()) * 12
+    + (calRangeEnd.getMonth() - baseDate.getMonth()) + 1;
+  const monthCount = Math.min(4, Math.max(1, monthSpan));
+  const isMultiMonth = monthCount > 1;
+
+  const monthBlocksHTML = Array.from({ length: monthCount }, (_, idx) => {
+    const d = new Date(viewYear, viewMonth + idx, 1);
+    const by = d.getFullYear();
+    const bm = d.getMonth();
+    return `
+      <div class="dc-cal-month-block">
+        ${isMultiMonth ? `<div class="dc-cal-month-caption">${by}년 ${bm + 1}월</div>` : ""}
+        <div class="cal-dow">
+          <span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span>
+        </div>
+        <div class="cal-grid">${buildMonthCells(by, bm).join("")}</div>
+      </div>
+    `;
+  }).join("");
+
+  // 헤더 제목: 여러 달이면 "2026년 7월 – 8월" 형태로
+  const calHeaderTitle = (() => {
+    if (!isMultiMonth) return `${viewYear}년 ${viewMonth + 1}월`;
+    const last = new Date(viewYear, viewMonth + monthCount - 1, 1);
+    const ly = last.getFullYear();
+    const lm = last.getMonth() + 1;
+    return ly === viewYear
+      ? `${viewYear}년 ${viewMonth + 1}월 – ${lm}월`
+      : `${viewYear}년 ${viewMonth + 1}월 – ${ly}년 ${lm}월`;
+  })();
 
   // D-day 계산 헬퍼
   const calcDDay = (target) => {
@@ -4431,7 +4498,7 @@ function renderDateCalculator() {
     <div class="dc-split">
       <div class="dc-split-left">
     <div class="dc-main-grid">
-      <section class="dc-cal-section">
+      <section class="dc-cal-section${isMultiMonth ? " is-multi" : ""}">
         <div class="dc-cal-header">
           ${state.dateCalc.editingMonth ? `
             <div class="dc-cal-edit">
@@ -4443,7 +4510,7 @@ function renderDateCalculator() {
             </div>
           ` : `
             <button class="dc-cal-nav-btn" type="button" data-cal-nav="-1">‹</button>
-            <button class="dc-cal-month" type="button" data-cal-month-edit title="연·월 직접 입력">${viewYear}년 ${viewMonth + 1}월</button>
+            <button class="dc-cal-month" type="button" data-cal-month-edit title="연·월 직접 입력">${calHeaderTitle}</button>
             <button class="dc-cal-nav-btn" type="button" data-cal-nav="1">›</button>
           `}
         </div>
@@ -4456,10 +4523,13 @@ function renderDateCalculator() {
           </div>
           ${holidayHint ? `<p class="dc-cal-hint">${holidayHint}</p>` : ""}
         ` : ""}
-        <div class="cal-dow">
-          <span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span>
-        </div>
-        <div class="cal-grid">${cells.join("")}</div>
+        ${isMultiMonth ? `
+          <p class="dc-cal-multi-note">
+            <span class="cmn-icon" aria-hidden="true">📅</span>
+            <span>기한이 달을 넘어가 <strong>${monthCount}개월</strong>을 이어서 표시합니다.</span>
+          </p>
+        ` : ""}
+        <div class="dc-cal-months">${monthBlocksHTML}</div>
         <div class="dc-cal-legend">${legendMarkup}</div>
       </section>
     </div>
@@ -4500,7 +4570,8 @@ function renderDateCalculator() {
 
   const syncDateSplitHeight = () => {
     const calSection = root.querySelector(".dc-cal-section");
-    if (!calSection || !window.matchMedia("(min-width: 900px)").matches) {
+    // 여러 달 모드에선 좌측 스티키를 풀었으므로(styles.css) 우측 높이도 달력에 묶지 않는다
+    if (!calSection || calSection.classList.contains("is-multi") || !window.matchMedia("(min-width: 900px)").matches) {
       root.style.removeProperty("--dc-side-height");
       return;
     }
@@ -6157,7 +6228,7 @@ const yearState = {
     yEraChoice: "after2004",
     yOccupancyType: "neighborhood",
     yAutoCalcAreas: "yes",
-    yPermitdate: "2026-07-26",
+    yPermitdate: "2026-09-06",
     yTotalArea: "1500",
     yAboveGroundFloors: "4",
     yBasementFloors: "0",

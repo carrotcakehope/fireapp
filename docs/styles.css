@@ -3712,6 +3712,71 @@ html[data-theme="blossom"] #date-content .info-box.amber { border-left-color: va
   padding: 4px 0;
 }
 
+/* ── 여러 달 이어 표시 ──
+   42칸 그리드 하나는 연속 42일까지만 담는다. 안전관리자(30+14=44일)처럼 더 긴 범위는
+   달을 여러 개 세로로 쌓아야 기산일·선임·신고가 한 화면에 다 보인다. */
+#date-content .dc-cal-months {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+/* 달이 여러 개로 늘어난 이유를 설명하는 상시 한 줄.
+   안전관리자(44일)처럼 늘 여러 달인 모드가 있어 '경고'가 아니라 '설명' 톤으로 조용하게. */
+#date-content .dc-cal-multi-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  margin: 0;
+  padding: 8px 11px;
+  border-radius: 8px;
+  border-left: 3px solid var(--border2);
+  background: var(--surface2);
+  color: var(--text-muted);
+  font-size: 11.5px;
+  line-height: 1.6;
+  word-break: keep-all;
+}
+#date-content .dc-cal-multi-note .cmn-icon {
+  flex-shrink: 0;
+  line-height: 1.5;
+}
+#date-content .dc-cal-multi-note strong {
+  color: var(--text);
+  font-weight: 700;
+}
+
+/* 여러 달 모드에서 남의 달 자리를 채우는 빈칸 — 요일 정렬만 맞추고 아무것도 안 보인다 */
+#date-content .cal-day-blank {
+  background: transparent;
+  border: none;
+  pointer-events: none;
+}
+
+/* 단일 달일 때는 기존 .dc-cal-section gap(10px)과 같은 간격을 유지해 예전 모습 그대로 */
+#date-content .dc-cal-month-block {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+#date-content .dc-cal-section.is-multi .dc-cal-month-block {
+  gap: 4px;
+}
+#date-content .dc-cal-month-caption {
+  padding-bottom: 2px;
+  color: var(--text-muted);
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.4px;
+  text-align: center;
+}
+/* 달력이 길어지면 PC 좌측 스티키 컬럼이 뷰포트보다 커져 아래쪽이 영영 안 보인다 → 스티키 해제 */
+@media (min-width: 900px) {
+  .dc-split-left:has(.dc-cal-section.is-multi) {
+    position: static;
+  }
+}
+
 /* date: 페이지 자체 스크롤로 전환 (height:100vh 해제) */
 #screen-date {
   height: auto !important;
