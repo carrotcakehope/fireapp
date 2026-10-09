@@ -45,10 +45,11 @@ function trackMenuClick(menuName) {
 // ── 패치노트 설정 (여기만 수정하면 됩니다) ──────────────────────────────
 const PATCH_NOTES = {
   version: "v1.0.2",
-  date: "2026-09-06",
+  date: "2026-10-09",
   items: [
-    { type: "notice",  text: "가을테마는 괜찮나요? 낙엽이 예쁘게 떨어지니, 테마 변경 한번 해보세요! <br>자그마한 피드백이라도 큰 도움이 됩니다. 편한 마음으로 언제든 연락주세요!" },
-    { type: "new",     text: "소방시설 탐색기 공장 용도 동별 세분화(예정)"},
+    { type: "notice",  text: "어플을 배포한지 벌써 3개월이 됐네요. 사용하면서 불편한게 있으시면 편하게
+연락주세요!" },
+    { type: "new",     text: "소방시설 탐색기 공장 용도 동별 세분화(진행중)"},
     { type: "improve", text: "법정기한 계산기 달력 월표시 기능 개선" },
     { type: "fix",     text: "법정기한 계산기 자체점검, 부적합 주말 표시 버그 수정" },
   ],
@@ -6228,7 +6229,7 @@ const yearState = {
     yEraChoice: "after2004",
     yOccupancyType: "neighborhood",
     yAutoCalcAreas: "yes",
-    yPermitdate: "2026-09-06",
+    yPermitdate: "2026-10-09",
     yTotalArea: "1500",
     yAboveGroundFloors: "4",
     yBasementFloors: "0",
