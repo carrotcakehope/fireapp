@@ -226,15 +226,6 @@
           </div>
         </button>
 
-        <button id="open-lab" class="menu-card" type="button" style="display:none;">
-          <div class="menu-icon mc-blue">🧪</div>
-          <div class="menu-text">
-            <div class="mt-num">07</div>
-            <div class="mt-title">실험실</div>
-            <div class="mt-desc">앞으로 만들 기능들을 먼저 작업하고 시험하는 공간</div>
-          </div>
-        </button>
-
       </div>
 
       <div class="menu-right" id="home-reminders"></div>
@@ -865,40 +856,6 @@
     <div class="scroll-content" id="occupancy-content"></div>
   </section>
 
-  <section id="screen-lab" class="screen">
-    <div class="topbar">
-      <button id="back-from-lab" class="back-btn" type="button">←</button>
-      <span class="tb-title">실험실</span>
-    </div>
-    <div class="scroll-content">
-      <section class="wq-card menu-select">
-        <p class="wq-label">LAB</p>
-        <h2 class="wq-title">실험 중인 기능</h2>
-        <p class="wq-sub">앞으로 만들 기능들을 먼저 다듬고 시험하는 공간입니다.</p>
-        <div class="choice-list" style="margin-top:16px;">
-          <button id="open-layout-learn" class="choice-button choice-card" type="button">
-            <span class="cc-icon mc-blue">🗺️</span>
-            <span class="cc-body">
-              <span class="cc-num">01</span>
-              <strong>소방시설 배치 배우기</strong>
-              <span class="cc-desc">건물 구조를 입력하고 소방시설 배치를 시각화합니다.</span>
-            </span>
-            <span class="cc-arrow">›</span>
-          </button>
-          <button id="lab-open-multiuse-safety" class="choice-button choice-card" type="button">
-            <span class="cc-icon mc-green">🧯</span>
-            <span class="cc-body">
-              <span class="cc-num">02</span>
-              <strong>다중이용업소 안전시설 탐색</strong>
-              <span class="cc-desc">다중이용업소에 설치해야 하는 소방·안전시설을 확인합니다.</span>
-            </span>
-            <span class="cc-arrow">›</span>
-          </button>
-        </div>
-      </section>
-    </div>
-  </section>
-
   <template id="result-item-template">
     <article class="result-item">
       <div class="result-top">
@@ -1053,78 +1010,6 @@
     </div>
   </div>
 
-  <!-- 소방시설 배치 배우기 -->
-  <section id="screen-layout-learn" class="screen">
-    <div class="topbar">
-      <button id="back-from-layout-learn" class="back-btn" type="button">←</button>
-      <span class="tb-title">소방시설 배치 배우기</span>
-    </div>
-    <div class="ll-container">
-
-      <!-- 좌측: 건물 정보 입력 -->
-      <div class="ll-input-panel">
-        <div class="ll-panel-title">건물 정보 입력</div>
-
-        <div class="ll-field-group">
-          <label class="ll-label">연면적 (㎡)</label>
-          <input type="number" id="ll-total-area" class="ll-area-inp" style="width:100%;height:32px;font-size:13px;" placeholder="예) 3000" min="0">
-        </div>
-
-        <div class="ll-field-group">
-          <label class="ll-label">지상 층수</label>
-          <div class="ll-stepper">
-            <button class="ll-step-btn" id="ll-above-dec" type="button">−</button>
-            <span class="ll-step-val" id="ll-above-val">3</span>
-            <button class="ll-step-btn" id="ll-above-inc" type="button">+</button>
-          </div>
-        </div>
-
-        <div class="ll-field-group">
-          <label class="ll-label">지하 층수</label>
-          <div class="ll-stepper">
-            <button class="ll-step-btn" id="ll-below-dec" type="button">−</button>
-            <span class="ll-step-val" id="ll-below-val">1</span>
-            <button class="ll-step-btn" id="ll-below-inc" type="button">+</button>
-          </div>
-        </div>
-
-        <div class="ll-field-group">
-          <label class="ll-label">계단 위치</label>
-          <div class="ll-radio-row">
-            <button class="ll-radio-btn" data-pos="left" type="button">좌</button>
-            <button class="ll-radio-btn active" data-pos="right" type="button">우</button>
-            <button class="ll-radio-btn" data-pos="center" type="button">중간</button>
-            <button class="ll-radio-btn" data-pos="both" type="button">양쪽</button>
-          </div>
-        </div>
-
-        <div class="ll-panel-title" style="margin-top:14px;margin-bottom:8px;">층별 용도·면적</div>
-        <div class="ll-floor-header">
-          <span>층</span><span>용도</span><span>㎡</span><span></span>
-        </div>
-        <div id="ll-floor-table"></div>
-      </div>
-
-      <!-- 중앙: 건물 단면도 SVG -->
-      <div class="ll-building-panel">
-        <div class="ll-panel-title">건물 단면도</div>
-        <div class="ll-svg-wrap">
-          <svg id="ll-building-svg" xmlns="http://www.w3.org/2000/svg" width="100%"></svg>
-        </div>
-      </div>
-
-      <!-- 우측: 층별 상세 (추후 확장) -->
-      <div class="ll-detail-panel">
-        <div class="ll-panel-title">층별 정보</div>
-        <div class="ll-detail-placeholder">
-          <div class="ll-placeholder-icon">🏢</div>
-          <p>건물 단면도에서<br>층을 클릭하면<br>상세 정보를<br>입력할 수 있습니다.</p>
-          <p class="ll-placeholder-sub">(다음 업데이트 예정)</p>
-        </div>
-      </div>
-
-    </div>
-  </section>
 
   <!-- 일구 로딩 오버레이 v2 -->
   <div id="ilgu-loading-overlay" class="ilgu-overlay hidden">
@@ -1151,7 +1036,6 @@
   <script src="./app.js?v=306"></script>
   <script src="./facilities-data.js?v=300"></script>
   <script src="./facilities.js?v=300"></script>
-  <script src="./layout-learn.js"></script>
   <script>
   (() => {
     const canvas = document.getElementById('sakuraCanvas');

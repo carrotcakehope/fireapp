@@ -823,9 +823,7 @@ const screens = {
   guide: document.getElementById("screen-guide"),
   reportGuide: document.getElementById("screen-report-guide"),
   occupancy: document.getElementById("screen-occupancy"),
-  lab: document.getElementById("screen-lab"),
   facilities: document.getElementById("screen-facilities"),
-  layoutLearn: document.getElementById("screen-layout-learn"),
   "developer-letter": document.getElementById("screen-developer-letter"),
 };
 
@@ -2498,11 +2496,11 @@ function showExplorerCard(view) {
 
 
 function renderMultiuseEntryButton(_input) {
-  // 다중이용업소 안전시설은 탐색기 결과에서 제거됨 (실험실에서 접근)
+  // 다중이용업소 안전시설은 탐색기 결과에서 제거됨 (다중이용업소 탐색기에서 접근)
 }
 
 function renderLodgingMultiuseEntryButton(_input) {
-  // 다중이용업소 안전시설은 탐색기 결과에서 제거됨 (실험실에서 접근)
+  // 다중이용업소 안전시설은 탐색기 결과에서 제거됨 (다중이용업소 탐색기에서 접근)
 }
 
 function renderMultiuseSafetyCard(input) {
@@ -5291,7 +5289,6 @@ function renderOccupancyCalculator() {
 }
 
 screens.occupancy = document.getElementById("screen-occupancy");
-screens.lab = document.getElementById("screen-lab");
 screens.facilities = document.getElementById("screen-facilities");
 document.getElementById("open-occupancy-calculator").addEventListener("click", () => {
   trackMenuClick("유틸리티 도구함");
@@ -5313,26 +5310,9 @@ document.getElementById("back-from-inspection").addEventListener("click", () => 
   renderReportGuide();
   showScreen('reportGuide');
 });
-document.getElementById("open-lab").addEventListener("click", () => {
-  showScreen("lab");
-});
-document.getElementById("back-from-lab").addEventListener("click", () => showScreen("home"));
-
-document.getElementById("lab-open-multiuse-safety").addEventListener("click", () => {
-  explorerRuntime.mode = "multiuse-only";
-  explorerRuntime.from = "lab";
-  applyExplorerModeUI();
-  showScreen("explorer");
-  restartMultiuseOnly();
-});
-document.getElementById("open-layout-learn").addEventListener("click", () => {
-  showScreen("layoutLearn");
-  if (typeof window.initLayoutLearn === "function") window.initLayoutLearn();
-});
-document.getElementById("back-from-layout-learn").addEventListener("click", () => showScreen("lab"));
 document.getElementById("back-from-explorer").addEventListener("click", () => {
-  if (explorerRuntime.mode === "multiuse-only") showScreen(explorerRuntime.from === "lab" ? "lab" : "multiuseSelect");
-  else showScreen(explorerRuntime.from === "lab" ? "lab" : "home");
+  if (explorerRuntime.mode === "multiuse-only") showScreen("multiuseSelect");
+  else showScreen("home");
 });
 // =============================================
 // 연도별 탐색기 (Year-based Explorer)
@@ -14740,6 +14720,64 @@ function yearApplyTransitionalProvisions(results, inp, era) {
   });
 }
 
+// 분법 이전(2004.5.29 이전) 허가 건물에 2012·2015·2019 경과조치 적용.
+// 분법 이전 판정에는 노유자 생활시설·요양병원 구분이 없어 재판정 방식을 못 쓰므로,
+// 입력만으로 확정되는 것은 '설치', 세부 용도에 따라 달라지는 것은 '검토 필요'로 표시한다.
+function yearApplyPre2004LaterProvisions(results, inp) {
+  const t = new Date();
+  const today = t.getFullYear() * 10000 + (t.getMonth() + 1) * 100 + t.getDate();
+  const ta = inp.totalArea || 0;
+  const ag = inp.aboveGroundFloors || 0;
+  const find = (name) => results.find((r) => r.name === name);
+  const isReq = (name) => find(name)?.status === "required";
+  const upsert = (category, name, status, reason) => {
+    const cur = find(name);
+    if (cur && cur.status === "required") return;
+    if (cur && cur.status === "review" && status === "review") return;
+    if (cur) { cur.status = status; cur.reason = reason; return; }
+    const lastSameCat = results.map((x) => x.category).lastIndexOf(category);
+    results.splice(lastSameCat >= 0 ? lastSameCat + 1 : results.length, 0, makeResult(category, name, "", status, reason, ""));
+  };
+  const hospitalDue = today > 20261231 ? "설치해야 했습니다" : "설치해야 합니다";
+
+  if (inp.occupancyType === "elderly") {
+    const head = "2012년 개정 경과조치로 기존 노유자시설도 2014.2.4까지 설치해야 했습니다.";
+    if (!isReq("스프링클러설비")) {
+      upsert(categories.extinguishing, "간이스프링클러설비", "review",
+        `${head} 노유자 생활시설이면 면적과 관계없이 해당하고, 그 외에는 해당 용도 바닥면적이 300㎡ 이상 600㎡ 미만이거나 창살이 있으면 해당합니다.`);
+    }
+    upsert(categories.alarm, "자동화재탐지설비", "review",
+      `${head} 노유자 생활시설이면 면적과 관계없이 해당하고, 그 외에는 연면적 400㎡ 이상이면 해당합니다.`);
+    upsert(categories.alarm, "자동화재속보설비", "review",
+      `${head} 노유자 생활시설이면 면적과 관계없이 해당하고, 그 외에는 바닥면적 500㎡ 이상인 층이 있으면 해당합니다. (24시간 상주 근무자가 있으면 면제될 수 있습니다)`);
+    return;
+  }
+
+  // 30층 이상: 2012년 개정(제23272호 부칙 제6조①) 속보설비는 층수만으로 확정
+  if (ag >= 30) {
+    upsert(categories.alarm, "자동화재속보설비", "required",
+      "허가 당시에는 대상이 아니었지만, 2012년 개정 경과조치로 기존 30층 이상 건물도 2013.2.4까지 설치해야 했습니다.");
+  }
+
+  if (inp.occupancyType === "medical") {
+    if (inp.before2004MedicalSubtype === "generalHospital") {
+      // 2019년 개정(제30029호 부칙 제5조 → 제33004호 부칙 제8조로 2026.12.31까지 연장): 종합병원 확정
+      const head = `허가 당시에는 대상이 아니었지만, 2019년 개정 경과조치로 기존 종합병원도 2026.12.31까지 ${hospitalDue}.`;
+      if (ta >= 600) upsert(categories.extinguishing, "스프링클러설비", "required", `${head} (해당 용도 바닥면적 600㎡ 이상)`);
+      else if (!isReq("스프링클러설비")) upsert(categories.extinguishing, "간이스프링클러설비", "required", `${head} (해당 용도 바닥면적 600㎡ 미만)`);
+      upsert(categories.alarm, "자동화재속보설비", "required", head);
+    } else {
+      // 병원·의원 등: 의원은 해당 없음, 병원·치과·한방병원은 2019년, 요양병원은 2015년 경과조치
+      const hospital = `병원·치과병원·한방병원이면 2019년 개정 경과조치로 2026.12.31까지 ${hospitalDue}`;
+      const nursing = "요양병원이면 2015년 개정 경과조치로 2018.6.30까지 설치해야 했습니다";
+      upsert(categories.extinguishing, ta >= 600 || isReq("스프링클러설비") ? "스프링클러설비" : "간이스프링클러설비", "review",
+        `${hospital}. ${nursing}(간이스프링클러설비로 대체 가능). 의원은 해당하지 않습니다.`);
+      upsert(categories.alarm, "자동화재속보설비", "review", `${hospital}. ${nursing}. 의원은 해당하지 않습니다.`);
+      upsert(categories.alarm, "자동화재탐지설비", "review", `${nursing}. 병원·의원은 이 경과조치 대상이 아닙니다.`);
+    }
+  }
+}
+
 // 용도별 [지하 차고·주차장 면적 합계, 기계식 주차 대수] 입력 키 (yearNormalizeAnswers 결과 기준)
 const YEAR_UNDERGROUND_PARKING_KEYS = {
   neighborhood: ["undergroundParkingArea", "mechanicalParkingCapacity"],
@@ -15114,6 +15152,7 @@ function yearShowResults() {
       : (inp.facilitySubtype === "bathhouse" ? "일반목욕장" : "근린생활시설");
     const results = yearEvaluateNeighborhoodBefore2004(inp);
     yearApplyTransitionalProvisions(results, inp, "before2004");
+    yearApplyPre2004LaterProvisions(results, inp);
     ensureEmergencyElevatorSmokeControl(results, inp, { allowRefugeElevator: true, requirePermitDateForRefugeElevator: true, usePermitBasedLodgingFlameproof: true });
     suppressBefore2004LowRiseEscapeItems(results, inp);
     const summaryHtml = ibSummaryHtml([
@@ -15146,6 +15185,7 @@ function yearShowResults() {
     const permitStr = `${py}년 ${pm}월 ${pd2}일`;
     const results = yearEvaluateLodgingBefore2004(inp);
     yearApplyTransitionalProvisions(results, inp, "before2004");
+    yearApplyPre2004LaterProvisions(results, inp);
     ensureEmergencyElevatorSmokeControl(results, inp, { allowRefugeElevator: true, requirePermitDateForRefugeElevator: true, usePermitBasedLodgingFlameproof: true });
     suppressBefore2004LowRiseEscapeItems(results, inp);
     const summaryHtml = ibSummaryHtml([
@@ -15178,6 +15218,7 @@ function yearShowResults() {
     const permitStr = `${py}년 ${pm}월 ${pd2}일`;
     const results = yearEvaluateElderlyBefore2004(inp);
     yearApplyTransitionalProvisions(results, inp, "before2004");
+    yearApplyPre2004LaterProvisions(results, inp);
     ensureEmergencyElevatorSmokeControl(results, inp, { allowRefugeElevator: true, requirePermitDateForRefugeElevator: true, usePermitBasedLodgingFlameproof: true });
     suppressBefore2004LowRiseEscapeItems(results, inp);
     const summaryHtml = ibSummaryHtml([
@@ -15211,6 +15252,7 @@ function yearShowResults() {
     const subtypeLabel = inp.before2004MedicalSubtype === "hospital" ? "종합병원" : "병원·의원 등";
     const results = yearEvaluateMedicalBefore2004(inp);
     yearApplyTransitionalProvisions(results, inp, "before2004");
+    yearApplyPre2004LaterProvisions(results, inp);
     ensureEmergencyElevatorSmokeControl(results, inp, { allowRefugeElevator: true, requirePermitDateForRefugeElevator: true, usePermitBasedLodgingFlameproof: true });
     suppressBefore2004LowRiseEscapeItems(results, inp);
     const summaryHtml = ibSummaryHtml([
@@ -15243,6 +15285,7 @@ function yearShowResults() {
     const permitStr = `${py}년 ${pm}월 ${pd2}일`;
     const results = yearEvaluateReligiousBefore2004(inp);
     yearApplyTransitionalProvisions(results, inp, "before2004");
+    yearApplyPre2004LaterProvisions(results, inp);
     ensureEmergencyElevatorSmokeControl(results, inp, { allowRefugeElevator: true, requirePermitDateForRefugeElevator: true, usePermitBasedLodgingFlameproof: true });
     suppressBefore2004LowRiseEscapeItems(results, inp);
     const summaryHtml = ibSummaryHtml([
@@ -15275,6 +15318,7 @@ function yearShowResults() {
     const eraNote = pd < YD.D19920728 ? "(허가일 기준 구 「시장」 적용)" : "";
     const results = yearEvaluateSalesBefore2004(inp);
     yearApplyTransitionalProvisions(results, inp, "before2004");
+    yearApplyPre2004LaterProvisions(results, inp);
     ensureEmergencyElevatorSmokeControl(results, inp, { allowRefugeElevator: true, requirePermitDateForRefugeElevator: true, usePermitBasedLodgingFlameproof: true });
     suppressBefore2004LowRiseEscapeItems(results, inp);
     const summaryHtml = ibSummaryHtml([
@@ -15308,6 +15352,7 @@ function yearShowResults() {
     const permitStr = `${py}년 ${pm}월 ${pd2}일`;
     const results = yearEvaluateOfficeBefore2004(inp);
     yearApplyTransitionalProvisions(results, inp, "before2004");
+    yearApplyPre2004LaterProvisions(results, inp);
     ensureEmergencyElevatorSmokeControl(results, inp, { allowRefugeElevator: true, requirePermitDateForRefugeElevator: true, usePermitBasedLodgingFlameproof: true });
     suppressBefore2004LowRiseEscapeItems(results, inp);
     const summaryHtml = ibSummaryHtml([
@@ -15341,6 +15386,7 @@ function yearShowResults() {
     const permitStr = `${py}년 ${pm}월 ${pd2}일`;
     const results = yearEvaluateApartmentBefore2004(inp);
     yearApplyTransitionalProvisions(results, inp, "before2004");
+    yearApplyPre2004LaterProvisions(results, inp);
     const hasParkingBuilding = inp.aptHasParkingBuilding && (inp.aptParkingArea || 0) > 0;
     if (hasParkingBuilding) {
       mergeAptUnionResults(results, yearEvaluateParkingBuildingBefore2004(inp));
@@ -15394,6 +15440,7 @@ function yearShowResults() {
     const permitStr = `${py}년 ${pm}월 ${pd2}일`;
     const results = yearEvaluateFactoryBefore2004(inp);
     yearApplyTransitionalProvisions(results, inp, "before2004");
+    yearApplyPre2004LaterProvisions(results, inp);
     ensureEmergencyElevatorSmokeControl(results, inp, { allowRefugeElevator: true, requirePermitDateForRefugeElevator: true, usePermitBasedLodgingFlameproof: true });
     suppressBefore2004LowRiseEscapeItems(results, inp);
     const chips = [
@@ -15986,7 +16033,7 @@ document.getElementById("prev-step").addEventListener("click", () => {
     if (explorerRuntime.mode === "multiuse-only") {
       showScreen("multiuseSelect");
     } else {
-      showScreen(explorerRuntime.from === "lab" ? "lab" : "home");
+      showScreen("home");
     }
   } else {
     moveStep(-1);
@@ -16473,9 +16520,9 @@ history.replaceState({ screen: 'home' }, '');
       }
       // 첫 질문 → 진입 출처로 (UI back-from-explorer와 동일: 전용모드는 lab/multiuseSelect)
       if (explorerRuntime.mode === "multiuse-only") {
-        showScreen(explorerRuntime.from === "lab" ? "lab" : "multiuseSelect");
+        showScreen("multiuseSelect");
       } else {
-        showScreen(explorerRuntime.from === "lab" ? "lab" : "home");
+        showScreen("home");
       }
       return false;
     }
@@ -16511,12 +16558,6 @@ history.replaceState({ screen: 'home' }, '');
         return true;
       }
       showScreen("home");
-      return false;
-    }
-
-    // 평면도 학습 → lab (UI back-from-layout-learn과 동일)
-    if (current === "layoutLearn") {
-      showScreen("lab");
       return false;
     }
 
@@ -18231,7 +18272,6 @@ renderHomeMeta();
 // ── 개발자 모드 숨겨진 토글 (버전 5번 탭) ────────────────────────────────
 function applyDevMode() {
   var on = localStorage.getItem('devMode') === 'true';
-  document.getElementById('open-lab').style.display = on ? '' : 'none';
   renderHomeMeta();
   if (typeof window.syncIlguAssistantAvailability === 'function') {
     window.syncIlguAssistantAvailability();
@@ -18256,12 +18296,12 @@ applyDevMode();
         localStorage.removeItem('devMode');
         localStorage.setItem('gaSuppressedUntil', String(Date.now() + 5 * 60 * 1000));
         window['ga-disable-G-LKQZX5YS2H'] = true;
-        showToast('개발자 모드 OFF — 실험실 숨김');
+        showToast('개발자 모드 OFF');
       } else {
         localStorage.setItem('devMode', 'true');
         localStorage.removeItem('gaSuppressedUntil');
         window['ga-disable-G-LKQZX5YS2H'] = true;
-        showToast('개발자 모드 ON — 실험실 표시됨 🧪');
+        showToast('개발자 모드 ON');
       }
       applyDevMode();
     }
@@ -18365,21 +18405,6 @@ function goToRgGuideSection(tab, sectionId) {
 // ── 홈 검색 기능 ─────────────────────────────────────────────────
 (function initHomeSearch() {
   const SEARCH_ITEMS = [
-    {
-      icon: "🏗️", title: "소방시설 배치 배우기", desc: "건물 구조 입력 후 소방시설 배치 시각화",
-      keywords: ["배치", "배우기", "시각화", "단면도", "레이아웃"],
-      action: () => { showScreen("lab"); },
-    },
-    {
-      icon: "🧪", title: "실험실", desc: "앞으로 만들 기능들을 먼저 작업하고 시험하는 공간",
-      keywords: ["실험실", "테스트", "개발중", "소방시설 배치 배우기", "배치"],
-      action: () => { showScreen("lab"); },
-    },
-    {
-      icon: "🧯", title: "소방시설 탐색기 (간단한 버전)", desc: "현행 법령 기준으로 빠르게 설치 의무 도출",
-      keywords: ["탐색기", "소방시설", "간단", "의무", "설치", "소화기", "스프링클러"],
-      action: () => { showScreen("lab"); },
-    },
     {
       icon: "🔍", title: "소방시설 탐색기 (자세한 버전)", desc: "건축허가일 기준 법령 적용 상세 결과",
       keywords: ["탐색기", "자세한", "연도별", "건축허가", "법령", "소방시설"],
@@ -18807,7 +18832,6 @@ function goToRgGuideSection(tab, sectionId) {
     "open-report-guide": { title: "\uc790\uccb4\uc810\uac80 \uac00\uc774\ub4dc", body: "\uc790\uccb4\uc810\uac80 \ubcf4\uace0\uc11c\ub97c \uc5b4\ub5bb\uac8c \uc77d\uace0 \uc791\uc131\ud560\uc9c0 \ud55c \ubc88\uc5d0 \ubcf4\ub294 \uc548\ub0b4\uc5d0\uc694." },
     "open-facilities": { title: "\uc18c\ubc29\uc2dc\uc124 \uc0ac\uc804", body: "\uc18c\ubc29\uc2dc\uc124\uc758 \uc885\ub958, \uad6c\uc131, \uc124\uce58 \uae30\uc900\uc744 \uae30\ub2a5\ubcc4\ub85c \ud655\uc778\ud558\ub294 \uc790\ub8cc\uc2e4\uc774\uc5d0\uc694." },
     "open-occupancy-calculator": { title: "\uc720\ud2f8\ub9ac\ud2f0 \uacf5\uad6c\ud568", body: "\uc218\uc6a9\uc778\uc6d0\uacfc \uc18c\ubc29\uc548\uc804\uad00\ub9ac\ubcf4\uc870\uc790 \ud544\uc694 \uc778\uc6d0\ucc98\ub7fc \uc791\uc740 \uacc4\uc0b0\uc744 \ubaa8\uc544\ub454 \uacf3\uc774\uc5d0\uc694." },
-    "open-lab": { title: "\uc2e4\ud5d8\uc2e4", body: "\uc544\uc9c1 \uc900\ube44 \uc911\uc778 \uae30\ub2a5\uc744 \uba3c\uc800 \ub9cc\uc838\ubcf4\ub294 \uacf5\uac04\uc774\uc5d0\uc694." },
     "open-install-guide": { title: "\ubc14\ub85c\uac00\uae30 \ucd94\uac00", body: "\uc790\uc8fc \uc4f0\ub294 \uae30\uae30\uc5d0 \uc571\ucc98\ub7fc \uc5f4 \uc218 \uc788\uac8c \ud648 \ud654\uba74\uc774\ub098 \ubc14\ud0d5\ud654\uba74\uc5d0 \ucd94\uac00\ud558\ub294 \uc548\ub0b4\uc5d0\uc694." },
     "open-guide": { title: "\uc0ac\uc6a9 \uc548\ub0b4", body: "\uc0ac\uc774\ud2b8\uc758 \uae30\ubcf8 \uc0ac\uc6a9\ubc95\uacfc \uc8fc\uc694 \uae30\ub2a5\uc744 \uc9e7\uac8c \ud655\uc778\ud560 \uc218 \uc788\uc5b4\uc694." },
     "open-contact": { title: "\uac1c\ubc1c\uc790\uc5d0\uac8c \ubb38\uc758", body: "\uc624\ub958, \uac1c\uc120 \uc81c\uc548, \ucd94\uac00\ud558\uace0 \uc2f6\uc740 \uae30\ub2a5\uc744 \uba54\uc77c\ub85c \ubcf4\ub0b4\ub294 \uc785\uad6c\uc5d0\uc694." },
