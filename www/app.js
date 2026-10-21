@@ -6447,6 +6447,8 @@ const yearState = {
     yFactoryHasFloor1500: "no",               // 바닥면적 1,500㎡ 이상 층
     yFactoryHas24HourStaff: "no",             // 24시간 상시 근무자
     yFactoryHas50Workers: "no",               // 50인 이상 옥내작업장
+    yFactoryHasGasFacility: "no",             // 가스시설 (2026.3.1~ 가스누설경보기)
+    yFactoryIsLithiumPrimary: "no",           // 리튬1차 전지공장 (2026.3.1~ 시각경보기)
     yFactoryFirstSecondFloorArea: "",          // 지상 1·2층 바닥면적 합계
     yFactoryIndoorParkingArea: "",
     yFactoryMechanicalParkingCapacity: "",
@@ -7765,6 +7767,28 @@ const yearSteps = [
     condition: (ya, pd) => ya.yOccupancyType === "factory" && pd >= YD.D20040530 && (parseFloat(ya.yTotalArea) || 0) < 400,
   },
   {
+    key: "yFactoryHasGasFacility",
+    type: "ychoice",
+    title: "가스시설이 설치돼 있습니까?",
+    help: "2026년 3월 1일 이후 허가분부터 가스시설이 있는 공장은 가스누설경보기를 설치해야 합니다.",
+    options: [
+      { value: "yes", label: "예", description: "주방·보일러 등 가스시설이 설치돼 있음" },
+      { value: "no", label: "아니오", description: "가스시설이 없음" },
+    ],
+    condition: (ya, pd) => ya.yOccupancyType === "factory" && pd >= YD.D20260301,
+  },
+  {
+    key: "yFactoryIsLithiumPrimary",
+    type: "ychoice",
+    title: "리튬1차 전지공장입니까?",
+    help: "리튬을 주요 전극재료로 사용하며 재충전이 불가능한 1차 전지를 제조·가공·조립·보관 또는 충전 등을 하는 공장입니다. 2026년 3월 1일 이후 허가분부터 자동화재탐지설비 대상인 리튬1차 전지공장은 시각경보기를 설치해야 합니다.",
+    options: [
+      { value: "yes", label: "예", description: "리튬1차 전지공장" },
+      { value: "no", label: "아니오", description: "해당 없음" },
+    ],
+    condition: (ya, pd) => ya.yOccupancyType === "factory" && pd >= YD.D20260301,
+  },
+  {
     key: "yFactoryFirstSecondFloorArea",
     type: "ynumber",
     title: "지상 1층·2층 바닥면적 합계(㎡)",
@@ -8414,12 +8438,23 @@ const yearStepOrder = new Map([
   "yBefore2004AptHasLargeFloor600",
   "yBefore2004AptDetFloor600",
 
+  // 공장 질문 (기존 yearSteps 정의 순서 그대로, 가스시설 질문보다 앞)
+  "yFactorySpecialCombustibleSet",
+  "yFactoryIsSandwichPanel",
+  "yFactoryHasFloor1500",
+  "yFactoryHas24HourStaff",
+  "yFactoryHas50Workers",
+  "yFactoryFirstSecondFloorArea",
+  "yFactoryParkingElecSet",
+
   // 가스시설 질문
   "yLodgingHasGasFacility",
   "yElderlyHasGasFacility",
   "yMedicalHasGasFacility",
   "yReligiousHasGasFacility",
   "ySalesHasGasFacility",
+  "yFactoryHasGasFacility",
+  "yFactoryIsLithiumPrimary",
 
   // 다중이용업소 질문
   "yHasMultiuseBusiness",
@@ -10064,6 +10099,8 @@ function yearNormalizeAnswers() {
     factoryHasFloor1500: ya.yFactoryHasFloor1500 === "yes",
     factoryHas24HourStaff: ya.yFactoryHas24HourStaff === "yes",
     factoryHas50Workers: ya.yFactoryHas50Workers === "yes",
+    factoryHasGasFacility: ya.yFactoryHasGasFacility === "yes",
+    factoryIsLithiumPrimary: ya.yFactoryIsLithiumPrimary === "yes",
     factoryFirstSecondFloorArea: parseFloat(ya.yFactoryFirstSecondFloorArea) || 0,
     factoryIndoorParkingArea: indoorPk("yFactoryIndoorParkingArea"),
     factoryMechanicalParkingCapacity: parseInt(ya.yFactoryMechanicalParkingCapacity) || 0,
@@ -15343,11 +15380,22 @@ function yearEvaluateFactory(inp) {
     autoDetBy6F ? "2022년 12월 1일 이후 층수가 6층 이상인 건축물입니다." :
     "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
 
-  // ── 시각경보기 (자동화재탐지설비 설치 대상 공장) ──
-  results.push(makeResult(categories.alarm, "시각경보기", "",
-    autoDetReq ? "required" : "notRequired",
-    autoDetReq ? "자동화재탐지설비 설치 대상 공장에 함께 설치해야 합니다." :
-    "자동화재탐지설비 설치 대상이 아닙니다.", ""));
+  // ── 시각경보기 (공장은 대상 용도가 아니었고, 2026.3.1~ 자탐 대상 리튬1차 전지공장만 신설: 별표4 제2호라목5)) ──
+  if (pd >= YD.D20260301) {
+    const visualReq = autoDetReq && inp.factoryIsLithiumPrimary;
+    results.push(makeResult(categories.alarm, "시각경보기", "",
+      visualReq ? "required" : "notRequired",
+      visualReq ? "자동화재탐지설비 설치 대상인 리튬1차 전지공장은 시각경보기를 설치해야 합니다." :
+      !inp.factoryIsLithiumPrimary ? "리튬1차 전지공장이 아니어서 설치 대상이 아닙니다." :
+      "자동화재탐지설비 설치 대상이 아니어서 설치 대상이 아닙니다.", ""));
+  }
+
+  // ── 가스누설경보기 (2026.3.1~ 가스시설이 있는 공장 신설: 별표4 제2호차목2)) ──
+  results.push(makeResult(categories.alarm, "가스누설경보기", "",
+    pd >= YD.D20260301 && inp.factoryHasGasFacility ? "required" : "notRequired",
+    pd < YD.D20260301 ? "2026년 3월 1일 이전 허가 공장은 가스누설경보기 설치 대상이 아니었습니다." :
+    inp.factoryHasGasFacility ? "가스시설이 설치된 공장입니다." :
+    "가스시설이 없어 설치 대상이 아닙니다.", ""));
 
   // ── 자동화재속보설비 (공장은 2022.12.1 폐지, 2004~2022: 1,500㎡ 이상 층) ──
   let autoNotifyStatus = "notRequired";
@@ -15501,7 +15549,10 @@ function yearApplyUndergroundParking2026(results, inp) {
   const autoDet = find("자동화재탐지설비");
   if (largeUnderground && autoDet && autoDet.status !== "required") {
     promote(autoDet, "지하 차고·주차장 면적 합계가 200㎡ 이상이어서 건축물의 모든 층에 설치해야 합니다. (2026.3.1 이후 허가분)");
-    promote(find("시각경보기"), "자동화재탐지설비 설치 대상이므로 함께 설치해야 합니다.");
+    // 공장은 리튬1차 전지공장만 시각경보기 대상 (별표4 제2호라목5))
+    if (inp.occupancyType !== "factory" || inp.factoryIsLithiumPrimary) {
+      promote(find("시각경보기"), "자동화재탐지설비 설치 대상이므로 함께 설치해야 합니다.");
+    }
   }
 
   if (smallUnderground) {
