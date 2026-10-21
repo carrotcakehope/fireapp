@@ -31,6 +31,34 @@ if %errorlevel% neq 0 (
 )
 echo.
 
+:: Grade the year explorer against tests\정답지.md (wrong answers must never reach the phone app)
+echo [0/4] Grading year explorer...
+where node > nul 2>&1
+if %errorlevel% neq 0 goto grade_skip
+node tests\grade.js
+if errorlevel 2 goto grade_changed
+if errorlevel 1 goto grade_failed
+goto grade_done
+:grade_failed
+echo.
+echo [ERROR] Grading failed - deploy aborted. Fix app.js or review tests\정답지.md
+pause
+exit /b 1
+:grade_changed
+echo.
+choice /C YN /M "Approve the answer-sheet changes above and deploy"
+if errorlevel 2 (
+    echo  Deploy aborted - answer sheet not approved
+    pause
+    exit /b 1
+)
+node tests\grade.js --approve
+goto grade_done
+:grade_skip
+echo  [WARN] node not found - grading skipped
+:grade_done
+echo.
+
 :: Stamp deploy date into app.js (version stays manual)
 echo [1/4] Updating deploy date...
 powershell -NoProfile -Command "$q=[char]34; $d=Get-Date -Format 'yyyy-MM-dd'; $f=Join-Path (Get-Location).Path 'app.js'; $enc=New-Object System.Text.UTF8Encoding($false); $c=[System.IO.File]::ReadAllText($f,[System.Text.Encoding]::UTF8); $c=$c -replace ('date:\s*'+$q+'\d{4}-\d{2}-\d{2}'+$q), ('date: '+$q+$d+$q); [System.IO.File]::WriteAllText($f,$c,$enc); Write-Host (' app.js date -> ' + $d)"
@@ -117,6 +145,7 @@ git add index.html styles.css app.js manifest.json
 if exist facilities.js     git add facilities.js
 if exist facilities-data.js git add facilities-data.js
 if exist layout-learn.js   git add layout-learn.js
+if exist tests git add tests/
 git commit -m "update: web deploy" --allow-empty
 git push origin main
 if %errorlevel% neq 0 (

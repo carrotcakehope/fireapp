@@ -45,7 +45,7 @@ function trackMenuClick(menuName) {
 // ── 패치노트 설정 (여기만 수정하면 됩니다) ──────────────────────────────
 const PATCH_NOTES = {
   version: "v1.0.2",
-  date: "2026-10-21",
+  date: "2026-10-22",
   items: [
     { type: "notice",  text: "이걸 배포한지 벌써 3개월이 됐네요. 사용하면서 불편한게 있으시면 편하게 연락주세요!" },
     { type: "new",     text: "소방시설 탐색기 공장 용도 동별 세분화(진행중)"},
@@ -5368,7 +5368,7 @@ const yearState = {
     yEraChoice: "after2004",
     yOccupancyType: "neighborhood",
     yAutoCalcAreas: "yes",
-    yPermitdate: "2026-10-21",
+    yPermitdate: "2026-10-22",
     yTotalArea: "1500",
     yAboveGroundFloors: "4",
     yBasementFloors: "0",
@@ -5841,12 +5841,12 @@ const yearSteps = [
     key: "yHasLargeFloorFor1000",
     type: "ychoice",
     title: "지하층·무창층·4층 이상 층 중 바닥면적 1,000㎡ 이상인 층이 있습니까?",
-    help: "허가일 당시(2018년 1월 이전) 스프링클러설비 설치 여부를 판단합니다.",
+    help: "스프링클러설비 설치 여부를 판단합니다. (해당 층에 설치)",
     options: [
       { value: "yes", label: "예", description: "해당 층이 있음" },
       { value: "no", label: "아니오", description: "해당 층이 없음" },
     ],
-    condition: (ya, pd) => ya.yOccupancyType === "neighborhood" && pd >= YD.D20040530 && pd < YD.D20180127 && !yearIsAutoAreaMode(),
+    condition: (ya, pd) => ya.yOccupancyType === "neighborhood" && pd >= YD.D20040530 && !yearIsAutoAreaMode(),
   },
   {
     key: "yNeighborhoodArea",
@@ -5900,7 +5900,7 @@ const yearSteps = [
       { value: "yes", label: "예", description: "입원실이 있는 의원급" },
       { value: "no", label: "아니오", description: "해당 없음" },
     ],
-    condition: (ya, pd) => ya.yOccupancyType === "neighborhood" && pd >= YD.D20180627 && ya.yIsPostpartum !== "yes",
+    condition: (ya, pd) => ya.yOccupancyType === "neighborhood" && pd >= YD.D20190806 && ya.yIsPostpartum !== "yes",
   },
   {
     key: "yHasHemodialysis",
@@ -6063,12 +6063,12 @@ const yearSteps = [
     key: "yLodgingHasLargeFloorFor1000",
     type: "ychoice",
     title: "지하층·무창층·4층 이상 층 중 바닥면적 1,000㎡ 이상인 층이 있습니까?",
-    help: "2004~2017년 기간에는 이 조건이 스프링클러 설치 여부를 결정합니다.",
+    help: "스프링클러설비 설치 여부를 판단합니다. (해당 층에 설치)",
     options: [
       { value: "yes", label: "예", description: "해당 조건의 층이 하나라도 있음" },
       { value: "no", label: "아니오", description: "조건에 맞는 층이 없음" },
     ],
-    condition: (ya, pd) => ya.yOccupancyType === "lodging" && pd >= YD.D20040530 && pd < YD.D20170128 && !yearIsAutoAreaMode(),
+    condition: (ya, pd) => ya.yOccupancyType === "lodging" && pd >= YD.D20040530 && !yearIsAutoAreaMode(),
   },
   {
     key: "yLodgingHasGasFacility",
@@ -7689,9 +7689,9 @@ function yearGetActiveSteps() {
   const ya = yearState.answers;
   const pd = yPermitDateInt();
   const clinicApplicable = pd >= YD.D20190806 && ya.yIsClinicWithInpatient === "yes";
-  const hemApplicable = pd >= YD.D20241231 && ya.yHasHemodialysis === "yes";
+  // 인공신장실은 속보설비 대상이 아니다(2024.12.31 개정은 간이스프링클러만 추가)
   const postpartumApplicable = pd >= YD.D20220225 && ya.yIsPostpartum === "yes";
-  const autoDispatch = clinicApplicable || hemApplicable || postpartumApplicable;
+  const autoDispatch = clinicApplicable || postpartumApplicable;
   const YEAR_EXPLORER_MULTIUSE_KEYS = [
     "yHasMultiuseBusiness",
     "yMultiuseSimpleSprinklerCheck",
@@ -12322,6 +12322,32 @@ function yearEvaluateFactoryBefore2004(inp) {
   return results;
 }
 
+// 용도무관 스프링클러 기준 (2004.5.30~ 별표4 소화설비 제3호다목·사목 → 별표5 제1호라목3)·7) → 2022.12.1~ 별표4 제1호라목1)·7))
+// - 층수 11층(2018.1.27~ 6층, 제27810호 부칙 제1조 단서) 이상: 모든 층
+// - 지하층·무창층 또는 4층 이상인 층으로서 바닥면적 1천㎡ 이상인 층: 해당 층 (2018년 이후에도 유지됨)
+// largeFloorAnswer: 그 용도에 "지하·무창·4층 이상 1,000㎡ 층" 질문이 있으면 그 답(true/false),
+//   질문이 없는 용도는 null → 자동산정과 같은 방식(층별 평균 면적)으로 추정한다.
+// 해당하면 사유 문자열, 아니면 null
+function yearCommonSprinklerReason(inp, largeFloorAnswer) {
+  const ag = inp.aboveGroundFloors || 0;
+  const bf = inp.basementFloors || 0;
+  const thr = inp.pd >= YD.D20180127 ? 6 : 11;
+  if (ag >= thr) return `층수가 ${thr}층 이상으로 전층 설치 대상입니다.`;
+  let largeFloor = largeFloorAnswer;
+  if (largeFloor === null || largeFloor === undefined) {
+    const ba = inp.basementAreaSum || 0;
+    largeFloor = (bf > 0 && ba / bf >= 1000) ||
+      (inp.hasWindowlessFloor && inp.windowlessArea >= 1000) ||
+      (ag >= 4 && ((inp.totalArea || 0) - ba) / ag >= 1000);
+  }
+  return largeFloor ? "지하층·무창층·4층 이상 층 중 바닥면적 1,000㎡ 이상인 층이 있어 해당 층에 설치 대상입니다." : null;
+}
+
+// 용도무관 기준 중 "모든 층" 설치에 해당하는지 (1,000㎡ 층 기준은 해당 층만이라 간이스프링클러를 빼면 안 됨)
+function yearCommonSprinklerAllFloors(inp) {
+  return (inp.aboveGroundFloors || 0) >= (inp.pd >= YD.D20180127 ? 6 : 11);
+}
+
 function yearEvaluateNeighborhood(inp) {
   const results = [];
   const { pd } = inp;
@@ -12340,55 +12366,42 @@ function yearEvaluateNeighborhood(inp) {
       "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
 
   // ── 스프링클러 ──
-  let sprinklerReq = false;
-  let sprinklerReason = "";
-  if (pd >= YD.D20040530 && pd < YD.D20180127) {
-    sprinklerReq = inp.aboveGroundFloors >= 11 || inp.hasLargeFloorFor1000;
-    sprinklerReason = inp.aboveGroundFloors >= 11 ? "층수가 11층 이상으로 전층 설치 대상입니다." :
-      inp.hasLargeFloorFor1000 ? "지하층·무창층·4층 이상 층 중 바닥면적 1,000㎡ 이상인 층이 있어 해당 층에 설치 대상입니다." :
-      "현재 입력 기준으로는 설치 대상이 아닙니다.";
-  } else if (pd >= YD.D20180127 && pd < YD.D20220225) {
-    sprinklerReq = inp.aboveGroundFloors >= 6;
-    sprinklerReason = inp.aboveGroundFloors >= 6 ? "층수가 6층 이상으로 전층 설치 대상입니다." :
-      "현재 입력 기준으로는 설치 대상이 아닙니다.";
-  } else if (pd >= YD.D20220225) {
-    const postpartumBig = inp.isPostpartum && inp.postpartumAreaRange === "over600";
-    sprinklerReq = inp.aboveGroundFloors >= 6 || postpartumBig;
-    sprinklerReason = inp.aboveGroundFloors >= 6 ? "층수가 6층 이상으로 전층 설치 대상입니다." :
-      postpartumBig ? "조산원·산후조리원이고 바닥면적이 600㎡ 이상입니다." :
-      "현재 입력 기준으로는 설치 대상이 아닙니다.";
-  }
+  const commonSprinkler = yearCommonSprinklerReason(inp, inp.hasLargeFloorFor1000);
+  // 2022.2.25~ 조산원·산후조리원 바닥면적 600㎡ 이상 (제31949호 별표5 제1호라목4)가))
+  const postpartumBig = pd >= YD.D20220225 && inp.isPostpartum && inp.postpartumAreaRange === "over600";
+  const sprinklerReq = !!commonSprinkler || postpartumBig;
+  const sprinklerReason = commonSprinkler ||
+    (postpartumBig ? "조산원·산후조리원이고 바닥면적이 600㎡ 이상입니다." : "현재 입력 기준으로는 설치 대상이 아닙니다.");
+  const sprinklerAllFloors = yearCommonSprinklerAllFloors(inp) || postpartumBig;
   results.push(makeResult(categories.extinguishing, "스프링클러설비", "",
     sprinklerReq ? "required" : "notRequired", sprinklerReason, ""));
 
   // ── 간이스프링클러 ──
   let simpleSprinklerReq = false;
   let simpleSprinklerReason = "";
-  if (sprinklerReq) {
+  if (sprinklerAllFloors) {
     simpleSprinklerReason = "스프링클러설비 전층 설치 대상이므로 간이스프링클러설비는 제외됩니다.";
   } else if (pd >= YD.D20040530 && pd < YD.D20061207) {
     simpleSprinklerReq = inp.totalArea >= 1000;
     simpleSprinklerReason = inp.totalArea >= 1000 ?
       "주용도 근린생활시설로서 연면적이 1,000㎡ 이상입니다." :
       "현재 입력 기준으로는 설치 대상이 아닙니다.";
-  } else if (pd >= YD.D20061207 && pd < YD.D20180627) {
+  } else if (pd >= YD.D20061207 && pd < YD.D20190806) {
     simpleSprinklerReq = inp.neighborhoodArea >= 1000;
     simpleSprinklerReason = inp.neighborhoodArea >= 1000 ?
       "근린생활시설로 사용하는 바닥면적 합계가 1,000㎡ 이상입니다." :
       "현재 입력 기준으로는 설치 대상이 아닙니다.";
-  } else if (pd >= YD.D20180627 && pd < YD.D20221201) {
-    simpleSprinklerReq = inp.neighborhoodArea >= 1000 || inp.isClinicWithInpatient;
-    simpleSprinklerReason = inp.neighborhoodArea >= 1000 ? "근린생활시설로 사용하는 바닥면적 합계가 1,000㎡ 이상입니다." :
-      inp.isClinicWithInpatient ? "입원실이 있는 의원·치과의원·한의원입니다." :
-      "현재 입력 기준으로는 설치 대상이 아닙니다.";
-  } else if (pd >= YD.D20221201 && pd < YD.D20241231) {
-    const smallPostpartum = inp.isPostpartum && inp.postpartumAreaRange === "under600";
+  } else if (pd >= YD.D20190806 && pd < YD.D20241231) {
+    // 입원실 있는 의원: 2019.8.6(제30029호) 별표5 제1호마목1)나)
+    // 조산원·산후조리원 600㎡ 미만: 2022.2.25(제31949호) 별표5 제1호마목1)다)
+    const smallPostpartum = pd >= YD.D20220225 && inp.isPostpartum && inp.postpartumAreaRange === "under600";
     simpleSprinklerReq = inp.neighborhoodArea >= 1000 || inp.isClinicWithInpatient || smallPostpartum;
     simpleSprinklerReason = inp.neighborhoodArea >= 1000 ? "근린생활시설로 사용하는 바닥면적 합계가 1,000㎡ 이상입니다." :
       inp.isClinicWithInpatient ? "입원실이 있는 의원·치과의원·한의원입니다." :
       smallPostpartum ? "조산원·산후조리원이고 바닥면적이 600㎡ 미만입니다." :
       "현재 입력 기준으로는 설치 대상이 아닙니다.";
   } else if (pd >= YD.D20241231) {
+    // 인공신장실 있는 의원: 2024.12.31(제35151호) 별표4 제1호마목2)나)
     const smallPostpartum = inp.isPostpartum && inp.postpartumAreaRange === "under600";
     const clinicReq = inp.isClinicWithInpatient || inp.hasHemodialysis;
     simpleSprinklerReq = inp.neighborhoodArea >= 1000 || clinicReq || smallPostpartum;
@@ -12399,8 +12412,8 @@ function yearEvaluateNeighborhood(inp) {
       "현재 입력 기준으로는 설치 대상이 아닙니다.";
   }
   results.push(makeResult(categories.extinguishing, "간이스프링클러설비", "",
-    sprinklerReq ? "notRequired" : (simpleSprinklerReq ? "required" : "notRequired"),
-    sprinklerReq ? simpleSprinklerReason : (simpleSprinklerReason || "현재 입력 기준으로는 설치 대상이 아닙니다."), ""));
+    sprinklerAllFloors ? "notRequired" : (simpleSprinklerReq ? "required" : "notRequired"),
+    sprinklerAllFloors ? simpleSprinklerReason : (simpleSprinklerReason || "현재 입력 기준으로는 설치 대상이 아닙니다."), ""));
 
   // ── 물분무등소화설비 (기준 동일) ──
   const waterSprayReq = inp.indoorParkingArea >= 200 || inp.mechanicalParkingCapacity >= 20 || inp.electricalRoomArea >= 300;
@@ -12429,15 +12442,12 @@ function yearEvaluateNeighborhood(inp) {
   let autoDetReq = false;
   let autoDetReason = "";
   const detThreshold = inp.facilitySubtype === "bathhouse" ? 1000 : 600;
-  if (pd >= YD.D20040530 && pd < YD.D20220225) {
-    autoDetReq = inp.totalArea >= detThreshold;
-    autoDetReason = autoDetReq ?
-      (inp.facilitySubtype === "bathhouse" ? "목욕장이며 연면적이 1,000㎡ 이상입니다." : "연면적이 600㎡ 이상입니다.") :
-      "현재 입력 기준으로는 설치 대상이 아닙니다.";
-  } else if (pd >= YD.D20220225) {
-    const floorTrig = inp.aboveGroundFloors >= 6;
+  if (pd >= YD.D20040530) {
+    // 6층 이상 모든 층: 2022.12.1 전부개정(제33004호) 별표4 제2호다목2)에서 신설
+    const floorTrig = pd >= YD.D20221201 && inp.aboveGroundFloors >= 6;
     const areaTrig = inp.totalArea >= detThreshold;
-    const postpartumTrig = inp.isPostpartum;
+    // 조산원·산후조리원: 2022.2.25(제31949호) 별표5 제2호라목11) 신설
+    const postpartumTrig = pd >= YD.D20220225 && inp.isPostpartum;
     autoDetReq = floorTrig || areaTrig || postpartumTrig;
     autoDetReason = floorTrig ? "층수가 6층 이상으로 모든 층에 설치 대상입니다." :
       areaTrig ? (inp.facilitySubtype === "bathhouse" ? "목욕장이며 연면적이 1,000㎡ 이상입니다." : "연면적이 600㎡ 이상입니다.") :
@@ -12467,12 +12477,12 @@ function yearEvaluateNeighborhood(inp) {
     results.push(makeResult(categories.alarm, "자동화재속보설비", "", "notRequired",
       "허가일 기준 당시 근린생활시설에 대한 자동화재속보설비 설치 기준이 없었습니다.", ""));
   } else {
-    const clinicApply = inp.isClinicWithInpatient || (pd >= YD.D20241231 && inp.hasHemodialysis);
+    // 인공신장실은 2024.12.31 개정에서 간이스프링클러에만 추가됐고 속보설비 대상은 아니다
+    const clinicApply = inp.isClinicWithInpatient;
     const postpartumApply = pd >= YD.D20220225 && inp.isPostpartum;
     const autoDispatchTarget = clinicApply || postpartumApply;
     if (autoDispatchTarget) {
       const dispatchReason = inp.isClinicWithInpatient ? "입원실이 있는 의원급에 해당합니다." :
-        (pd >= YD.D20241231 && inp.hasHemodialysis) ? "인공신장실이 있는 의원급에 해당합니다." :
         "조산원·산후조리원에 해당합니다.";
       results.push(makeResult(categories.alarm, "자동화재속보설비", "",
         inp.has24HourStaff ? "review" : "required",
@@ -12595,28 +12605,24 @@ function yearEvaluateLodging(inp) {
   // ── 스프링클러설비 ──
   let sprinklerReq = false;
   let sprinklerReason = "";
-  if (pd >= YD.D20040530 && pd < YD.D20170128) {
-    sprinklerReq = ag >= 11 || inp.lodgingHasLargeFloorFor1000;
-    sprinklerReason = ag >= 11 ? "층수가 11층 이상으로 전층 설치 대상입니다." :
-      inp.lodgingHasLargeFloorFor1000 ? "지하층·무창층·4층 이상 층 중 바닥면적 1,000㎡ 이상인 층이 있어 해당 층에 설치 대상입니다." :
-      "현재 입력 기준으로는 설치 대상이 아닙니다.";
-  } else if (pd >= YD.D20170128 && pd < YD.D20221201) {
-    sprinklerReq = ag >= 6;
-    sprinklerReason = ag >= 6 ? "층수가 6층 이상으로 전층 설치 대상입니다." :
-      "현재 입력 기준으로는 설치 대상이 아닙니다.";
-  } else if (pd >= YD.D20221201) {
-    sprinklerReq = ag >= 6 || la >= 600;
-    sprinklerReason = ag >= 6 ? "층수가 6층 이상으로 전층 설치 대상입니다." :
-      la >= 600 ? "숙박시설 사용 바닥면적이 600㎡ 이상으로 전층 설치 대상입니다." :
-      "현재 입력 기준으로는 설치 대상이 아닙니다.";
+  const commonSprinkler = yearCommonSprinklerReason(inp, inp.lodgingHasLargeFloorFor1000);
+  if (commonSprinkler) {
+    sprinklerReq = true;
+    sprinklerReason = commonSprinkler;
+  } else if (pd >= YD.D20221201 && la >= 600) {
+    sprinklerReq = true;
+    sprinklerReason = "숙박시설 사용 바닥면적이 600㎡ 이상으로 전층 설치 대상입니다.";
+  } else {
+    sprinklerReason = "현재 입력 기준으로는 설치 대상이 아닙니다.";
   }
   results.push(makeResult(categories.extinguishing, "스프링클러설비", "",
     sprinklerReq ? "required" : "notRequired", sprinklerReason, ""));
 
   // ── 간이스프링클러설비 ──
+  const sprinklerAllFloors = yearCommonSprinklerAllFloors(inp) || (pd >= YD.D20221201 && la >= 600);
   let simpleSprinklerReq = false;
   let simpleSprinklerReason = "";
-  if (sprinklerReq) {
+  if (sprinklerAllFloors) {
     simpleSprinklerReason = "스프링클러설비 설치 대상이므로 간이스프링클러설비는 제외됩니다.";
   } else if (pd >= YD.D20040530 && pd < YD.D20130210) {
     simpleSprinklerReason = "현재 입력 기준으로는 설치 대상이 아닙니다.";
@@ -12640,7 +12646,7 @@ function yearEvaluateLodging(inp) {
   }
   results.push(makeResult(categories.extinguishing, "간이스프링클러설비", "",
     simpleSprinklerReq ? "required" : "notRequired",
-    sprinklerReq ? "스프링클러설비 설치 대상이므로 제외됩니다." : simpleSprinklerReason, ""));
+    sprinklerAllFloors ? "스프링클러설비 설치 대상이므로 제외됩니다." : simpleSprinklerReason, ""));
 
   // ── 물분무등소화설비 ──
   const waterSprayReq = inp.lodgingIndoorParkingArea >= 200 || inp.lodgingMechanicalParkingCapacity >= 20 || inp.lodgingElectricalRoomArea >= 300;
@@ -12840,14 +12846,21 @@ function yearEvaluateElderly(inp) {
     sprinklerReason = ea >= 600 ? "노유자시설 사용 바닥면적 합계가 600㎡ 이상으로 전층 설치 대상입니다." :
       "노유자시설 사용 바닥면적이 600㎡ 미만이어서 설치 대상이 아닙니다.";
   }
+  const commonSprinkler = yearCommonSprinklerReason(inp, null);
+  if (!sprinklerReq && commonSprinkler) {
+    sprinklerReq = true;
+    sprinklerReason = commonSprinkler;
+  }
   results.push(makeResult(categories.extinguishing, "스프링클러설비", "",
     sprinklerReq ? "required" : "notRequired", sprinklerReason, ""));
 
   // ── 간이스프링클러설비 (2008.2.29 이후부터 법령 도입) ──
   if (pd >= YD.D20080229) {
+    // 노유자 자체 기준(600㎡)은 전층, 용도무관 1,000㎡ 층 기준은 해당 층만
+    const sprinklerAllFloors = sprinklerReq && (sprinklerReason !== commonSprinkler || yearCommonSprinklerAllFloors(inp));
     let simpleSprinklerReq = false;
     let simpleSprinklerReason = "";
-    if (sprinklerReq) {
+    if (sprinklerAllFloors) {
       simpleSprinklerReason = "스프링클러설비 설치 대상이므로 간이스프링클러설비는 제외됩니다.";
     } else if (pd < YD.D20120205) {
       // 2008.2.29 ~ 2012.2.4: 300~600㎡ 또는 창살 (2012.2.5 제23272호: 노유자 생활시설 추가)
@@ -12876,8 +12889,8 @@ function yearEvaluateElderly(inp) {
       }
     }
     results.push(makeResult(categories.extinguishing, "간이스프링클러설비", "",
-      sprinklerReq ? "notRequired" : (simpleSprinklerReq ? "required" : "notRequired"),
-      sprinklerReq ? "스프링클러설비 설치 대상이므로 제외됩니다." : simpleSprinklerReason, ""));
+      sprinklerAllFloors ? "notRequired" : (simpleSprinklerReq ? "required" : "notRequired"),
+      sprinklerAllFloors ? "스프링클러설비 설치 대상이므로 제외됩니다." : simpleSprinklerReason, ""));
   }
 
   // ── 물분무등소화설비 ──
@@ -13108,44 +13121,46 @@ function yearEvaluateMedical(inp) {
   // ── 스프링클러설비 ──
   let sprinklerReq = false;
   let sprinklerReason = "";
-  const commonSprinkler = ag >= 11;
+  // 용도무관 기준(11층→2018.1.27~ 6층, 1,000㎡ 층)
+  const commonSprinklerReason = yearCommonSprinklerReason(inp, null);
+  const commonSprinkler = !!commonSprinklerReason;
+  const commonOrNone = commonSprinklerReason || "현재 입력 기준으로는 설치 대상이 아닙니다.";
 
   if (pd >= YD.D20040530 && pd < YD.D20140708) {
     if (isPsychiatric) {
       sprinklerReq = ma >= 600 || commonSprinkler;
-      sprinklerReason = ma >= 600 ? "정신의료기관 바닥면적 합계가 600㎡ 이상으로 전층 설치 대상입니다." :
-        commonSprinkler ? "층수가 11층 이상입니다." : "현재 입력 기준으로는 설치 대상이 아닙니다.";
+      sprinklerReason = ma >= 600 ? "정신의료기관 바닥면적 합계가 600㎡ 이상으로 전층 설치 대상입니다." : commonOrNone;
     } else {
       sprinklerReq = commonSprinkler;
-      sprinklerReason = commonSprinkler ? "층수가 11층 이상입니다." : "현재 입력 기준으로는 설치 대상이 아닙니다.";
+      sprinklerReason = commonOrNone;
     }
   } else if (pd >= YD.D20140708 && pd < YD.D20190806) {
     if (isNursingHome || isPsychiatric) {
       sprinklerReq = ma >= 600 || commonSprinkler;
       const label = isNursingHome ? "요양병원" : "정신의료기관";
-      sprinklerReason = ma >= 600 ? `${label} 바닥면적 합계가 600㎡ 이상으로 전층 설치 대상입니다.` :
-        commonSprinkler ? "층수가 11층 이상입니다." : "현재 입력 기준으로는 설치 대상이 아닙니다.";
+      sprinklerReason = ma >= 600 ? `${label} 바닥면적 합계가 600㎡ 이상으로 전층 설치 대상입니다.` : commonOrNone;
     } else {
       sprinklerReq = commonSprinkler;
-      sprinklerReason = commonSprinkler ? "층수가 11층 이상입니다." : "현재 입력 기준으로는 설치 대상이 아닙니다.";
+      sprinklerReason = commonOrNone;
     }
   } else {
     if (isBigHospital || isPsychiatric) {
       sprinklerReq = ma >= 600 || commonSprinkler;
-      sprinklerReason = ma >= 600 ? "의료시설 바닥면적 합계가 600㎡ 이상으로 전층 설치 대상입니다." :
-        commonSprinkler ? "층수가 11층 이상입니다." : "현재 입력 기준으로는 설치 대상이 아닙니다.";
+      sprinklerReason = ma >= 600 ? "의료시설 바닥면적 합계가 600㎡ 이상으로 전층 설치 대상입니다." : commonOrNone;
     } else {
       sprinklerReq = commonSprinkler;
-      sprinklerReason = commonSprinkler ? "층수가 11층 이상입니다." : "현재 입력 기준으로는 설치 대상이 아닙니다.";
+      sprinklerReason = commonOrNone;
     }
   }
   results.push(makeResult(categories.extinguishing, "스프링클러설비", "",
     sprinklerReq ? "required" : "notRequired", sprinklerReason, ""));
 
   // ── 간이스프링클러설비 ──
+  // 의료시설 자체 기준(600㎡)은 전층, 용도무관 1,000㎡ 층 기준은 해당 층만
+  const sprinklerAllFloors = sprinklerReq && (sprinklerReason !== commonSprinklerReason || yearCommonSprinklerAllFloors(inp));
   let simpleSprinklerReq = false;
   let simpleSprinklerReason = "";
-  if (sprinklerReq) {
+  if (sprinklerAllFloors) {
     simpleSprinklerReason = "스프링클러설비 설치 대상이므로 간이스프링클러설비는 제외됩니다.";
   } else if (pd < YD.D20120205) {
     simpleSprinklerReason = "현재 입력 기준으로는 설치 대상이 아닙니다.";
@@ -13184,8 +13199,8 @@ function yearEvaluateMedical(inp) {
     }
   }
   results.push(makeResult(categories.extinguishing, "간이스프링클러설비", "",
-    sprinklerReq ? "notRequired" : (simpleSprinklerReq ? "required" : "notRequired"),
-    sprinklerReq ? "스프링클러설비 설치 대상이므로 제외됩니다." : simpleSprinklerReason, ""));
+    sprinklerAllFloors ? "notRequired" : (simpleSprinklerReq ? "required" : "notRequired"),
+    sprinklerAllFloors ? "스프링클러설비 설치 대상이므로 제외됩니다." : simpleSprinklerReason, ""));
 
   // ── 물분무등소화설비 ──
   const waterSprayReq = inp.medicalIndoorParkingArea >= 200 || inp.medicalMechanicalParkingCapacity >= 20 || inp.medicalElectricalRoomArea >= 300;
@@ -13731,6 +13746,12 @@ function yearEvaluateReligious(inp) {
       sprinklerReason = "수용인원이 100명 이상인 종교시설로 전층 설치 대상입니다.";
     }
   }
+  // 용도무관 기준(11층→2018.1.27~ 6층, 1,000㎡ 층)은 수용인원·목조 여부와 관계없이 적용
+  const commonSprinkler = yearCommonSprinklerReason(inp, null);
+  if (!sprinklerReq && commonSprinkler) {
+    sprinklerReq = true;
+    sprinklerReason = commonSprinkler;
+  }
   results.push(makeResult(categories.extinguishing, "스프링클러설비", "",
     sprinklerReq ? "required" : "notRequired", sprinklerReason, ""));
 
@@ -13945,6 +13966,12 @@ function yearEvaluateSales(inp) {
     sprinklerReason = sa >= threshold ? `${ag <= 3 ? "3층 이하 건축물로 바닥면적 합계 6,000㎡" : "4층 이상 건축물로 바닥면적 합계 5,000㎡"} 이상입니다. (전층)` :
       inp.salesOccupancy500Plus ? "수용인원이 500명 이상입니다. (전층)" :
       `${ag <= 3 ? "바닥면적 합계 6,000㎡" : "바닥면적 합계 5,000㎡"} 미만이고 수용인원 500명 미만이어서 설치 대상이 아닙니다.`;
+  }
+  // 용도무관 기준(11층→2018.1.27~ 6층, 1,000㎡ 층)
+  const commonSprinkler = yearCommonSprinklerReason(inp, null);
+  if (!sprinklerReq && commonSprinkler) {
+    sprinklerReq = true;
+    sprinklerReason = commonSprinkler;
   }
   results.push(makeResult(categories.extinguishing, "스프링클러설비", "",
     sprinklerReq ? "required" : "notRequired", sprinklerReason, ""));
@@ -14459,7 +14486,9 @@ function yearEvaluateFactory(inp) {
   // ── 스프링클러설비 ──
   const sprinklerFloorThreshold = pd >= YD.D20180127 ? 6 : 11;
   const sprinklerByFloor = ag >= sprinklerFloorThreshold;
-  const sprinklerByLargeFloor = hasBasement1000 || hasWindowless1000;
+  // 지하·무창 1,000㎡ 층 + 4층 이상 1,000㎡ 층(질문이 없어 지상 평균 면적으로 추정)
+  const sprinklerByLargeFloor = hasBasement1000 || hasWindowless1000 ||
+    (ag >= 4 && ((inp.totalArea || 0) - (inp.basementAreaSum || 0)) / ag >= 1000);
   // 공장 특화: 특수가연물 1,000배 이상
   // 샌드위치 패널(2014.7.8~): 지하·무창·4층↑ 500㎡ 이상 OR 특수가연물 500배 이상
   const sandwichSprinkler = pd >= YD.D20140708 && inp.factoryIsSandwichPanel &&
@@ -14475,7 +14504,7 @@ function yearEvaluateFactory(inp) {
     sprinklerReq ? "required" : "notRequired",
     sprinklerByFloor ? `층수가 ${sprinklerFloorThreshold}층 이상으로 전 층에 설치해야 합니다.` :
     sprinklerBySc1000 ? "특수가연물 지정수량 1,000배 이상을 저장·취급합니다." :
-    sprinklerByLargeFloor ? "지하층·무창층 중 바닥면적 1,000㎡ 이상인 층이 있어 해당 층에 설치해야 합니다." :
+    sprinklerByLargeFloor ? "지하층·무창층·4층 이상 층 중 바닥면적 1,000㎡ 이상인 층이 있어 해당 층에 설치해야 합니다." :
     sandwichByFloor ? "샌드위치 패널 구조 공장으로서 지하층·무창층 중 바닥면적 500㎡ 이상인 층이 있습니다." :
     sandwichBySc ? "샌드위치 패널 구조 공장으로서 특수가연물 지정수량 500배 이상을 저장·취급합니다." :
     "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
