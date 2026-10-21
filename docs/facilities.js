@@ -24,6 +24,9 @@
 
   backBtn.addEventListener('click', () => showScreen('screen-home'));
 
+  // 도감 '핵심 설치기준'이 어느 시점 법령 기준인지 표시 (법령 대조 시 갱신)
+  const CRITERIA_BASIS_DATE = '2026.10';
+
   let initialized = false;
   let activeTabIndex = 0;
 
@@ -419,6 +422,10 @@
 
     if (item.criteria?.length) {
       body.appendChild(makeSectionLabel('핵심 설치기준'));
+      const basis = document.createElement('div');
+      basis.className = 'fac-criteria-basis';
+      basis.textContent = `현행 기준(${CRITERIA_BASIS_DATE}) · 기존 건물은 설치 당시 기준이 적용되니 연도별 기준은 소방시설 탐색기에서 확인하세요.`;
+      body.appendChild(basis);
       const ul = document.createElement('ul');
       ul.className = 'rg-acc-desc';
       item.criteria.forEach(c => {
