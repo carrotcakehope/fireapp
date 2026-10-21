@@ -10,6 +10,27 @@ echo  Web Deploy Start
 echo ================================
 echo.
 
+:: Syntax check before deploying (broken JS makes the whole site dead)
+echo [0/4] Checking JS syntax...
+where node > nul 2>&1
+if %errorlevel% neq 0 (
+    echo  [WARN] node not found - syntax check skipped
+) else (
+    for %%F in (app.js sw.js facilities.js facilities-data.js layout-learn.js) do (
+        if exist %%F (
+            node --check %%F
+            if errorlevel 1 (
+                echo.
+                echo [ERROR] Syntax error in %%F - deploy aborted
+                pause
+                exit /b 1
+            )
+        )
+    )
+    echo       OK
+)
+echo.
+
 :: Stamp deploy date into app.js (version stays manual)
 echo [1/4] Updating deploy date...
 powershell -NoProfile -Command "$q=[char]34; $d=Get-Date -Format 'yyyy-MM-dd'; $f=Join-Path (Get-Location).Path 'app.js'; $enc=New-Object System.Text.UTF8Encoding($false); $c=[System.IO.File]::ReadAllText($f,[System.Text.Encoding]::UTF8); $c=$c -replace ('date:\s*'+$q+'\d{4}-\d{2}-\d{2}'+$q), ('date: '+$q+$d+$q); [System.IO.File]::WriteAllText($f,$c,$enc); Write-Host (' app.js date -> ' + $d)"

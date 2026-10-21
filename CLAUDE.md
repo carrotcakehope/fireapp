@@ -25,7 +25,7 @@
 
 ## 탐색기 3종 (app.js에 multiuse/다중이용업소 코드 보여도 혼동 말 것)
 
-- **소방시설 탐색기** = `steps[]` / `getActiveSteps()` / `state`. 간단(default)·연도별(자세한) 버전. 다중이용업소 질문 안 나옴.
-- **다중이용업소 탐색기** = 별도 메뉴(multiuse-only 모드), `multiuseSteps[]` 사용. 다중이용업소 질문은 여기 전용.
-- **연도별 탐색기** = `yearSteps[]` / `yearState`, `y` 접두사. 자체 다중이용업소 복제본(`yMultiuse*`, `yLodgingMultiuse*`) 보유.
-- 즉 "소방시설 탐색기" 작업 시 multiuse 코드는 대개 무관함.
+- **소방시설 탐색기** = 홈 `open-explorer` → **연도별 탐색기**(`yearSteps[]` / `yearState`, `y` 접두사)가 유일한 소방시설 탐색기다. 자체 다중이용업소 복제본(`yMultiuse*`, `yLodgingMultiuse*`) 보유.
+- **간단 버전 탐색기는 2026-10에 폐기됨** (판정 함수 `evaluate*Facility` 등 삭제). 되살리거나 "간단 버전도 고치자"고 제안하지 말 것.
+- **다중이용업소 안전시설 탐색** = multiuse-only 모드, `multiuseSteps[]` 사용. 옛 간단 버전과 같은 화면(`screen-explorer`)과 `steps[]`/`state`/`getActiveSteps()` 엔진을 공유하므로 그 엔진은 지우면 안 됨.
+- 즉 "소방시설 탐색기" 작업 시 `yearSteps`/`yearEvaluate*` 쪽만 보면 됨.
