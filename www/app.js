@@ -3708,7 +3708,7 @@ function ensureEmergencyElevatorSmokeControl(results, input, options = {}) {
 
 // 자세한 버전(분법 이후) 공통: 30층 이상 특정소방대상물 자동화재속보설비
 function ensureAutoFireNotify30F(results, input) {
-  if (input.occupancyType === "apartment") return; // 공동주택은 2012.9.14~2022.11.30 기준을 자체 처리
+  if (input.occupancyType === "apartment") return; // 공동주택은 2012.2.5~2022.11.30 기준을 자체 처리
   if (input.occupancyType === "office") return; // 업무시설은 전용 야간무인 기준+30층+24시간 면제를 자체 처리
   const pd = input.pd || input.permitDateInt || 0;
   const startDate = input.occupancyType === "sales" ? YD.D20150701 : YD.D20120205;
@@ -6389,7 +6389,7 @@ const yearState = {
     yOfficeHasNightUnmanned: "no",     // 야간 무인경비 (자동화재속보 2004~2012.9.13)
     yOfficeHasFloor1500: "no",         // 바닥면적 1,500㎡ 이상 층 (야간무인경비 속보)
     yOfficeHas24HourStaff: "no",       // 24시간 화재감시 근무자 (속보 면제 2014.7.8~)
-    yOfficeHasCO2System: "no",         // 이산화탄소소화설비 설치 (인명구조기구 2012.9.14~)
+    yOfficeHasCO2System: "no",         // 이산화탄소소화설비 설치 (인명구조기구 2012.2.5~)
     yOfficeLeakageAlarmCond: "no",     // 계약전류 100A 초과 + 비내화구조(철망) (누전경보기)
     yOfficeHasLargeTargetFloor: "no",  // 지하·무창·4층↑ 300㎡↑ 층 (옥내소화전)
     yOfficeHasLargeFloorFor1000: "no", // 지하·무창·4층↑ 1,000㎡↑ 층 (스프링클러 특정층)
@@ -13701,8 +13701,8 @@ function yearEvaluateElderly(inp) {
     let simpleSprinklerReason = "";
     if (sprinklerReq) {
       simpleSprinklerReason = "스프링클러설비 설치 대상이므로 간이스프링클러설비는 제외됩니다.";
-    } else if (pd < YD.D20120914) {
-      // 2008.2.29 ~ 2012.9.13: 300~600㎡ 또는 창살
+    } else if (pd < YD.D20120205) {
+      // 2008.2.29 ~ 2012.2.4: 300~600㎡ 또는 창살 (2012.2.5 제23272호: 노유자 생활시설 추가)
       if (!isLiving) {
         simpleSprinklerReq = (ea >= 300 && ea < 600) || inp.elderlyHasGrillWindow;
         simpleSprinklerReason = ea >= 300 && ea < 600
@@ -13714,7 +13714,7 @@ function yearEvaluateElderly(inp) {
         simpleSprinklerReason = "현재 입력 기준으로는 설치 대상이 아닙니다. (이 시기 생활시설에는 간이스프링클러 조항 없음)";
       }
     } else {
-      // 2012.9.14 이후
+      // 2012.2.5 이후
       if (isLiving) {
         simpleSprinklerReq = true;
         simpleSprinklerReason = "노유자 생활시설은 면적에 관계없이 간이스프링클러설비를 설치해야 합니다.";
@@ -13756,7 +13756,7 @@ function yearEvaluateElderly(inp) {
   // ── 자동화재탐지설비 ──
   let autoDetReq = false;
   let autoDetReason = "";
-  if (pd >= YD.D20120914) {
+  if (pd >= YD.D20120205) { // 제23272호: 노유자 생활시설 자탐 신설
     if (isLiving) {
       autoDetReq = true;
       autoDetReason = "노유자 생활시설은 면적에 관계없이 자동화재탐지설비를 설치해야 합니다.";
@@ -13789,7 +13789,7 @@ function yearEvaluateElderly(inp) {
   // ── 자동화재속보설비 ──
   let autoDispatchReq = false;
   let autoDispatchReason = "";
-  if (pd >= YD.D20120914) {
+  if (pd >= YD.D20120205) { // 제23272호: 노유자 생활시설 속보설비 신설
     if (isLiving) {
       if (inp.elderlyHas24HourStaff) {
         autoDispatchReq = false;
@@ -13813,7 +13813,7 @@ function yearEvaluateElderly(inp) {
       }
     }
   } else {
-    // 2004~2012: 500㎡ 이상 층
+    // 2004~2012.2.4: 500㎡ 이상 층
     if (inp.elderlyHasFloor500Plus) {
       autoDispatchReq = true;
       autoDispatchReason = "바닥면적이 500㎡ 이상인 층이 있습니다.";
@@ -14400,15 +14400,15 @@ function yearEvaluateApartment(inp) {
       : bf >= 3 ? "지하층 층수가 3층 이상입니다. (모든 층)"
       : "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
 
-  // 13. 자동화재속보설비 (2012.9.14~2022.11.30 30층 이상, 이후 공동주택 제외)
+  // 13. 자동화재속보설비 (2012.2.5~2022.11.30 30층 이상, 이후 공동주택 제외)
   let notifyReq = false, notifyReason = "";
   if (post2022) notifyReason = "공동주택은 2022.12.1부터 자동화재속보설비 설치 대상에서 제외됩니다.";
-  else if (pd >= YD.D20120914 && ag >= 30) { notifyReq = true; notifyReason = "층수가 30층 이상입니다. (2012.9.14~2022.11.30 용도무관 기준)"; }
+  else if (pd >= YD.D20120205 && ag >= 30) { notifyReq = true; notifyReason = "층수가 30층 이상입니다. (2012.2.5~2022.11.30 용도무관 기준)"; }
   else notifyReason = "현재 입력 기준으로는 자동화재속보설비 대상이 아닙니다.";
   results.push(makeResult(categories.alarm, "자동화재속보설비", "", notifyReq ? "required" : "notRequired", notifyReason, ""));
 
-  // 18. 인명구조기구(공기호흡기) — 이산화탄소소화설비 연계 (2012.9.14~)
-  if (pd >= YD.D20120914 && inp.aptHasCO2System) {
+  // 18. 인명구조기구(공기호흡기) — 이산화탄소소화설비 연계 (2012.2.5~)
+  if (pd >= YD.D20120205 && inp.aptHasCO2System) {
     results.push(makeResult(categories.evacuation, "인명구조기구(공기호흡기)", "", "required",
       "이산화탄소소화설비가 설치된 장소로 공기호흡기를 비치해야 합니다. (호스릴 방식 제외)", ""));
   }
@@ -14483,13 +14483,13 @@ function yearEvaluateApartment(inp) {
       : (bf >= 3 && ba >= 1000) ? "지하 3층 이상이고 지하층 바닥면적 합계 1,000㎡ 이상입니다. (지하층 모든 층)"
       : "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
 
-  // 27. 무선통신보조설비 (용도무관: 지하 3000㎡, 지하 3층+1000㎡, 2012.9.14~ 30층)
-  const radioReq = ba >= 3000 || (bf >= 3 && ba >= 1000) || (pd >= YD.D20120914 && ag >= 30);
+  // 27. 무선통신보조설비 (용도무관: 지하 3000㎡, 지하 3층+1000㎡, 2012.2.5~ 30층)
+  const radioReq = ba >= 3000 || (bf >= 3 && ba >= 1000) || (pd >= YD.D20120205 && ag >= 30);
   results.push(makeResult(categories.fireSupport, "무선통신보조설비", "",
     radioReq ? "required" : "notRequired",
     ba >= 3000 ? "지하층 바닥면적 합계 3,000㎡ 이상입니다. (지하층 모든 층)"
       : (bf >= 3 && ba >= 1000) ? "지하 3층 이상이고 지하층 바닥면적 합계 1,000㎡ 이상입니다. (지하층 모든 층)"
-      : (pd >= YD.D20120914 && ag >= 30) ? "층수가 30층 이상입니다. (16층 이상의 모든 층, 2012.9.14~)"
+      : (pd >= YD.D20120205 && ag >= 30) ? "층수가 30층 이상입니다. (16층 이상의 모든 층, 2012.2.5~)"
       : "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
 
   return results;
@@ -14984,7 +14984,7 @@ function yearEvaluateSales(inp) {
 
   // ── 무선통신보조설비 ──
   const radioBase = ba >= 3000 || (bf >= 3 && ba >= 1000);
-  const radioHigh = pd >= YD.D20120914 && ag >= 30;
+  const radioHigh = pd >= YD.D20120205 && ag >= 30;
   results.push(makeResult(categories.fireSupport, "무선통신보조설비", "",
     radioBase || radioHigh ? "required" : "notRequired",
     ba >= 3000 ? "지하층 바닥면적 합계가 3,000㎡ 이상입니다." :
@@ -15143,7 +15143,7 @@ function yearEvaluateOffice(inp) {
     autoNotifyReason = "2022년 12월 1일 이후 일반 업무시설은 자동화재속보설비 설치 의무가 없습니다.";
   } else {
     const officeOwnTarget = pd < YD.D20120914 && inp.officeHasNightUnmanned && inp.officeHasFloor1500;
-    const highRiseTarget = pd >= YD.D20120914 && ag >= 30;
+    const highRiseTarget = pd >= YD.D20120205 && ag >= 30; // 제23272호: 30층 이상 속보설비
     if (officeOwnTarget || highRiseTarget) {
       const exemptApplies = pd >= YD.D20140708 && inp.officeHas24HourStaff;
       if (exemptApplies) {
@@ -15155,7 +15155,7 @@ function yearEvaluateOffice(inp) {
         autoNotifyStatus = "required";
         autoNotifyReason = officeOwnTarget
           ? "야간에 무인경비시스템으로 관리하는 업무시설로서 바닥면적 1,500㎡ 이상인 층이 있습니다."
-          : "층수가 30층 이상인 특정소방대상물입니다. (2012.9.14~2022.11.30 공통 설치 기준)";
+          : "층수가 30층 이상인 특정소방대상물입니다. (2012.2.5~2022.11.30 공통 설치 기준)";
       }
     } else {
       autoNotifyReason = "현재 입력 기준으로는 설치 대상이 아닙니다.";
@@ -15176,11 +15176,11 @@ function yearEvaluateOffice(inp) {
     ag >= 3 ? "3층 이상 10층 이하 층에 피난기구를 설치해야 합니다." :
     "3층 이상 층이 없어 설치 대상이 아닙니다.", ""));
 
-  // ── 인명구조기구(공기호흡기) (이산화탄소소화설비, 2012.9.14~) ──
+  // ── 인명구조기구(공기호흡기) (이산화탄소소화설비, 2012.2.5~ 제23272호) ──
   let airReq = false;
   let airReason = "";
-  if (pd < YD.D20120914) {
-    airReason = "2012년 9월 14일 이전에는 업무시설 인명구조기구(공기호흡기) 의무 규정이 없었습니다.";
+  if (pd < YD.D20120205) {
+    airReason = "2012년 2월 5일 이전에는 업무시설 인명구조기구(공기호흡기) 의무 규정이 없었습니다.";
   } else if (inp.officeHasCO2System) {
     airReq = true;
     airReason = "이산화탄소소화설비(호스릴 제외)가 설치된 장소가 있어 출입구 외부 인근에 공기호흡기를 비치해야 합니다.";
@@ -15242,7 +15242,7 @@ function yearEvaluateOffice(inp) {
 
   // ── 무선통신보조설비 ──
   const radioBase = ba >= 3000 || (bf >= 3 && ba >= 1000);
-  const radioHigh = pd >= YD.D20120914 && ag >= 30;
+  const radioHigh = pd >= YD.D20120205 && ag >= 30;
   results.push(makeResult(categories.fireSupport, "무선통신보조설비", "",
     radioBase || radioHigh ? "required" : "notRequired",
     ba >= 3000 ? "지하층 바닥면적 합계가 3,000㎡ 이상입니다." :
@@ -15491,7 +15491,7 @@ function yearEvaluateFactory(inp) {
 
   // ── 무선통신보조설비 ──
   const radioBase = ba >= 3000 || (bf >= 3 && ba >= 1000);
-  const radioHigh = pd >= YD.D20120914 && ag >= 30;
+  const radioHigh = pd >= YD.D20120205 && ag >= 30;
   results.push(makeResult(categories.fireSupport, "무선통신보조설비", "",
     radioBase || radioHigh ? "required" : "notRequired",
     ba >= 3000 ? "지하층 바닥면적 합계가 3,000㎡ 이상입니다." :
@@ -15503,6 +15503,74 @@ function yearEvaluateFactory(inp) {
 }
 
 // ── 연도별 탐색기: 제외·대체 항목 계산 ──
+
+// ── 경과조치: 이미 지어진 건물도 기한 안에 갖춰야 했던 설비 (부칙의 의무 규정만, 법 제13조 재량 소급은 제외) ──
+// 허가일이 개정 시행일보다 앞서면 그 시행일 기준으로 다시 판정해서, 새로 대상이 되는 설비만 '설치'로 올린다.
+const YEAR_TRANSITIONAL_PROVISIONS = [
+  // 소방법 시행령 제11461호 부칙 ③: 피난기구·대형/중형 피난구유도등·유도표지 1985.6월말까지
+  { era: "before2004", start: 19840701, deadline: 19850630, year: 1984, target: "소방대상물", match: /^(피난기구|유도등)/ },
+  // 소방법 시행령 제17558호 부칙 제3조: 숙박시설 휴대용비상조명등 시행 후 1년 이내
+  { era: "before2004", start: 20020330, deadline: 20030329, year: 2002, occupancies: ["lodging"], target: "숙박시설", match: /^휴대용/ },
+  // 제23272호 부칙 제6조①: (노유자 제외) 30층 이상 속보설비 시행 후 1년 이내
+  { era: "after2004", start: 20120205, deadline: 20130204, year: 2012, exclude: ["elderly"], target: "건물", match: /^자동화재속보설비$/ },
+  // 제23272호 부칙 제6조①: (노유자 제외) 30층 이상 오피스텔 자동식소화기, CO₂ 설치 장소 공기호흡기 시행 후 1년 이내
+  { era: "after2004", start: 20120205, deadline: 20130204, year: 2012, exclude: ["elderly"], target: "건물", match: /공기호흡기|주방|자동식소화기/ },
+  // 제23272호 부칙 제6조②·제23571호 부칙 제5조: 노유자시설 간이SP·자탐·속보 시행 후 2년 이내
+  { era: "after2004", start: 20120205, deadline: 20140204, year: 2012, occupancies: ["elderly"], target: "노유자시설", match: /^(간이스프링클러설비|자동화재탐지설비|자동화재속보설비)$/ },
+  // 제26370호 부칙 제3조: 요양병원(정신병원·의료재활시설 제외) SP·간이SP·자탐·속보 2018.6.30까지
+  { era: "after2004", start: 20150701, deadline: 20180630, year: 2015, occupancies: ["medical"], when: (inp) => inp.medicalSubtype === "nursingHome", target: "요양병원",
+    match: /^(스프링클러설비|간이스프링클러설비|자동화재탐지설비|자동화재속보설비)$/, note: "스프링클러설비는 간이스프링클러설비로 대체 설치할 수 있습니다." },
+  // 제30029호 부칙 제5조 → 제33004호 부칙 제8조로 기한 연장: 종합병원·병원·치과병원·한방병원 SP·간이SP·속보 2026.12.31까지
+  { era: "after2004", start: 20190806, deadline: 20261231, year: 2019, occupancies: ["medical"], when: (inp) => inp.medicalSubtype === "generalHospital" || inp.medicalSubtype === "hospital", target: "종합병원·병원",
+    match: /^(스프링클러설비|간이스프링클러설비|자동화재속보설비)$/ },
+];
+
+// 분법 이후는 결과 화면과 같게 30층 속보 보정(ensureAutoFireNotify30F)까지 포함해 재판정
+const withNotify30F = (fn) => (i) => { const r = fn(i); ensureAutoFireNotify30F(r, i); return r; };
+const YEAR_TRANSITIONAL_EVALUATORS = {
+  after2004: {
+    neighborhood: withNotify30F(yearEvaluateNeighborhood), lodging: withNotify30F(yearEvaluateLodging), elderly: withNotify30F(yearEvaluateElderly),
+    medical: withNotify30F(yearEvaluateMedical), religious: withNotify30F(yearEvaluateReligious), sales: withNotify30F(yearEvaluateSales),
+    office: withNotify30F(yearEvaluateOffice), factory: withNotify30F(yearEvaluateFactory), apartment: withNotify30F(yearEvaluateApartment),
+  },
+  before2004: {
+    neighborhood: (i) => yearEvaluateNeighborhoodBefore2004(i), lodging: (i) => yearEvaluateLodgingBefore2004(i), elderly: (i) => yearEvaluateElderlyBefore2004(i),
+    medical: (i) => yearEvaluateMedicalBefore2004(i), religious: (i) => yearEvaluateReligiousBefore2004(i), sales: (i) => yearEvaluateSalesBefore2004(i),
+    office: (i) => yearEvaluateOfficeBefore2004(i), factory: (i) => yearEvaluateFactoryBefore2004(i), apartment: (i) => yearEvaluateApartmentBefore2004(i),
+  },
+};
+
+function yearApplyTransitionalProvisions(results, inp, era) {
+  const evaluate = YEAR_TRANSITIONAL_EVALUATORS[era][inp.occupancyType] || YEAR_TRANSITIONAL_EVALUATORS[era].neighborhood;
+  const fmt = (d) => `${Math.floor(d / 10000)}.${Math.floor(d / 100) % 100}.${d % 100}`;
+  const t = new Date();
+  const today = t.getFullYear() * 10000 + (t.getMonth() + 1) * 100 + t.getDate();
+  // 주방 소화설비는 시기마다 이름이 달라(자동식소화기→주방용 자동소화장치→주거용…) 같은 설비로 묶어 비교
+  const keyOf = (name) => (/주방|자동식소화기/.test(name) ? "주방소화" : name);
+  const findByKey = (list, key) => list.find((r) => keyOf(r.name) === key);
+
+  YEAR_TRANSITIONAL_PROVISIONS.forEach((p) => {
+    if (p.era !== era || inp.pd >= p.start) return;
+    if (p.occupancies && !p.occupancies.includes(inp.occupancyType)) return;
+    if (p.exclude && p.exclude.includes(inp.occupancyType)) return;
+    if (p.when && !p.when(inp)) return;
+    const later = evaluate({ ...inp, pd: p.start });
+    later.filter((r) => r.status === "required" && p.match.test(r.name)).forEach((r) => {
+      const key = keyOf(r.name);
+      const current = findByKey(results, key);
+      if (current && current.status === "required") return;
+      const reason = `허가 당시에는 대상이 아니었지만, ${p.year}년 개정 경과조치로 기존 ${p.target}도 ${fmt(p.deadline)}까지 설치해야 ${today > p.deadline ? "했습니다" : "합니다"}.${p.note ? " " + p.note : ""}`;
+      if (current) {
+        current.status = "required";
+        current.reason = reason;
+      } else {
+        const item = makeResult(r.category, r.name, "", "required", reason, "");
+        const lastSameCat = results.map((x) => x.category).lastIndexOf(r.category);
+        results.splice(lastSameCat >= 0 ? lastSameCat + 1 : results.length, 0, item);
+      }
+    });
+  });
+}
 
 // 용도별 [지하 차고·주차장 면적 합계, 기계식 주차 대수] 입력 키 (yearNormalizeAnswers 결과 기준)
 const YEAR_UNDERGROUND_PARKING_KEYS = {
@@ -15877,6 +15945,7 @@ function yearShowResults() {
       ? ({ restaurant: "음식점 등", marketBathhouse: "시장·공중목욕장", general: "기타 근린생활시설" }[inp.before2004FacilitySubtype] || "근린생활시설")
       : (inp.facilitySubtype === "bathhouse" ? "일반목욕장" : "근린생활시설");
     const results = yearEvaluateNeighborhoodBefore2004(inp);
+    yearApplyTransitionalProvisions(results, inp, "before2004");
     ensureEmergencyElevatorSmokeControl(results, inp, { allowRefugeElevator: true, requirePermitDateForRefugeElevator: true, usePermitBasedLodgingFlameproof: true });
     suppressBefore2004LowRiseEscapeItems(results, inp);
     const summaryHtml = ibSummaryHtml([
@@ -15908,6 +15977,7 @@ function yearShowResults() {
     const [py, pm, pd2] = rawPermit.split("-").map(Number);
     const permitStr = `${py}년 ${pm}월 ${pd2}일`;
     const results = yearEvaluateLodgingBefore2004(inp);
+    yearApplyTransitionalProvisions(results, inp, "before2004");
     ensureEmergencyElevatorSmokeControl(results, inp, { allowRefugeElevator: true, requirePermitDateForRefugeElevator: true, usePermitBasedLodgingFlameproof: true });
     suppressBefore2004LowRiseEscapeItems(results, inp);
     const summaryHtml = ibSummaryHtml([
@@ -15939,6 +16009,7 @@ function yearShowResults() {
     const [py, pm, pd2] = rawPermit.split("-").map(Number);
     const permitStr = `${py}년 ${pm}월 ${pd2}일`;
     const results = yearEvaluateElderlyBefore2004(inp);
+    yearApplyTransitionalProvisions(results, inp, "before2004");
     ensureEmergencyElevatorSmokeControl(results, inp, { allowRefugeElevator: true, requirePermitDateForRefugeElevator: true, usePermitBasedLodgingFlameproof: true });
     suppressBefore2004LowRiseEscapeItems(results, inp);
     const summaryHtml = ibSummaryHtml([
@@ -15971,6 +16042,7 @@ function yearShowResults() {
     const permitStr = `${py}년 ${pm}월 ${pd2}일`;
     const subtypeLabel = inp.before2004MedicalSubtype === "hospital" ? "종합병원" : "병원·의원 등";
     const results = yearEvaluateMedicalBefore2004(inp);
+    yearApplyTransitionalProvisions(results, inp, "before2004");
     ensureEmergencyElevatorSmokeControl(results, inp, { allowRefugeElevator: true, requirePermitDateForRefugeElevator: true, usePermitBasedLodgingFlameproof: true });
     suppressBefore2004LowRiseEscapeItems(results, inp);
     const summaryHtml = ibSummaryHtml([
@@ -16002,6 +16074,7 @@ function yearShowResults() {
     const [py, pm, pd2] = rawPermit.split("-").map(Number);
     const permitStr = `${py}년 ${pm}월 ${pd2}일`;
     const results = yearEvaluateReligiousBefore2004(inp);
+    yearApplyTransitionalProvisions(results, inp, "before2004");
     ensureEmergencyElevatorSmokeControl(results, inp, { allowRefugeElevator: true, requirePermitDateForRefugeElevator: true, usePermitBasedLodgingFlameproof: true });
     suppressBefore2004LowRiseEscapeItems(results, inp);
     const summaryHtml = ibSummaryHtml([
@@ -16033,6 +16106,7 @@ function yearShowResults() {
     const permitStr = `${py}년 ${pm}월 ${pd2}일`;
     const eraNote = pd < YD.D19920728 ? "(허가일 기준 구 「시장」 적용)" : "";
     const results = yearEvaluateSalesBefore2004(inp);
+    yearApplyTransitionalProvisions(results, inp, "before2004");
     ensureEmergencyElevatorSmokeControl(results, inp, { allowRefugeElevator: true, requirePermitDateForRefugeElevator: true, usePermitBasedLodgingFlameproof: true });
     suppressBefore2004LowRiseEscapeItems(results, inp);
     const summaryHtml = ibSummaryHtml([
@@ -16065,6 +16139,7 @@ function yearShowResults() {
     const [py, pm, pd2] = rawPermit.split("-").map(Number);
     const permitStr = `${py}년 ${pm}월 ${pd2}일`;
     const results = yearEvaluateOfficeBefore2004(inp);
+    yearApplyTransitionalProvisions(results, inp, "before2004");
     ensureEmergencyElevatorSmokeControl(results, inp, { allowRefugeElevator: true, requirePermitDateForRefugeElevator: true, usePermitBasedLodgingFlameproof: true });
     suppressBefore2004LowRiseEscapeItems(results, inp);
     const summaryHtml = ibSummaryHtml([
@@ -16097,6 +16172,7 @@ function yearShowResults() {
     const [py, pm, pd2] = rawPermit.split("-").map(Number);
     const permitStr = `${py}년 ${pm}월 ${pd2}일`;
     const results = yearEvaluateApartmentBefore2004(inp);
+    yearApplyTransitionalProvisions(results, inp, "before2004");
     const hasParkingBuilding = inp.aptHasParkingBuilding && (inp.aptParkingArea || 0) > 0;
     if (hasParkingBuilding) {
       mergeAptUnionResults(results, yearEvaluateParkingBuildingBefore2004(inp));
@@ -16149,6 +16225,7 @@ function yearShowResults() {
     const [py, pm, pd2] = rawPermit.split("-").map(Number);
     const permitStr = `${py}년 ${pm}월 ${pd2}일`;
     const results = yearEvaluateFactoryBefore2004(inp);
+    yearApplyTransitionalProvisions(results, inp, "before2004");
     ensureEmergencyElevatorSmokeControl(results, inp, { allowRefugeElevator: true, requirePermitDateForRefugeElevator: true, usePermitBasedLodgingFlameproof: true });
     suppressBefore2004LowRiseEscapeItems(results, inp);
     const chips = [
@@ -16256,6 +16333,7 @@ function yearShowResults() {
   if (inp.occupancyType === "lodging") {
     results = yearEvaluateLodging(inp);
     yearApplyUndergroundParking2026(results, inp);
+    yearApplyTransitionalProvisions(results, inp, "after2004");
     exceptionItems = yearBuildLodgingExceptionItems(results, inp);
     summaryHtml = ibSummary([
       ibChip("🏨", "용도", "숙박시설"),
@@ -16267,6 +16345,7 @@ function yearShowResults() {
   } else if (inp.occupancyType === "elderly") {
     results = yearEvaluateElderly(inp);
     yearApplyUndergroundParking2026(results, inp);
+    yearApplyTransitionalProvisions(results, inp, "after2004");
     exceptionItems = yearBuildElderlyExceptionItems(results, inp);
     const subtypeLabel = inp.elderlySubtype === "living" ? "노유자 생활시설" : "일반 노유자시설";
     summaryHtml = ibSummary([
@@ -16279,6 +16358,7 @@ function yearShowResults() {
   } else if (inp.occupancyType === "medical") {
     results = yearEvaluateMedical(inp);
     yearApplyUndergroundParking2026(results, inp);
+    yearApplyTransitionalProvisions(results, inp, "after2004");
     exceptionItems = yearBuildMedicalExceptionItems(results, inp);
     const medicalSubtypeLabels = {
       generalHospital: "종합병원",
@@ -16298,6 +16378,7 @@ function yearShowResults() {
   } else if (inp.occupancyType === "religious") {
     results = yearEvaluateReligious(inp);
     yearApplyUndergroundParking2026(results, inp);
+    yearApplyTransitionalProvisions(results, inp, "after2004");
     exceptionItems = yearBuildReligiousExceptionItems(results, inp);
     summaryHtml = ibSummary([
       ibChip("⛪", "용도", "종교시설"),
@@ -16308,6 +16389,7 @@ function yearShowResults() {
   } else if (inp.occupancyType === "sales") {
     results = yearEvaluateSales(inp);
     yearApplyUndergroundParking2026(results, inp);
+    yearApplyTransitionalProvisions(results, inp, "after2004");
     exceptionItems = yearBuildSalesExceptionItems(results, inp);
     const salesTags = [];
     if (inp.salesIsTraditionalMarket) salesTags.push("전통시장");
@@ -16323,6 +16405,7 @@ function yearShowResults() {
   } else if (inp.occupancyType === "office") {
     results = yearEvaluateOffice(inp);
     yearApplyUndergroundParking2026(results, inp);
+    yearApplyTransitionalProvisions(results, inp, "after2004");
     exceptionItems = yearBuildOfficeExceptionItems(results, inp);
     const officeTag = inp.officeIsOfficetel ? "(오피스텔)" : "";
     summaryHtml = ibSummary([
@@ -16334,6 +16417,7 @@ function yearShowResults() {
   } else if (inp.occupancyType === "factory") {
     results = yearEvaluateFactory(inp);
     yearApplyUndergroundParking2026(results, inp);
+    yearApplyTransitionalProvisions(results, inp, "after2004");
     exceptionItems = yearBuildFactoryExceptionItems(results, inp);
     const factoryScTag = inp.factoryHasSpecialCombustible ? ` (특수가연물 ${nf(inp.factorySpecialCombustibleMultiple)}배)` : "";
     summaryHtml = ibSummary([
@@ -16345,6 +16429,7 @@ function yearShowResults() {
   } else if (inp.occupancyType === "apartment") {
     results = yearEvaluateApartment(inp);
     yearApplyUndergroundParking2026(results, inp);
+    yearApplyTransitionalProvisions(results, inp, "after2004");
     exceptionItems = yearBuildApartmentExceptionItems(results, inp);
     const aptSubtypeLabels = { apt: "아파트등", row: "연립주택·다세대주택", dorm: "기숙사" };
     const subtypeLabel = aptSubtypeLabels[inp.apartmentSubtype] || "공동주택";
@@ -16370,6 +16455,7 @@ function yearShowResults() {
   } else {
     results = yearEvaluateNeighborhood(inp);
     yearApplyUndergroundParking2026(results, inp);
+    yearApplyTransitionalProvisions(results, inp, "after2004");
     exceptionItems = yearBuildNeighborhoodExceptionItems(results, inp);
     summaryHtml = ibSummary([
       ibChip("🏪", "용도", "근린생활시설"),
