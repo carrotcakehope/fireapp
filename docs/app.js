@@ -45,7 +45,7 @@ function trackMenuClick(menuName) {
 // ── 패치노트 설정 (여기만 수정하면 됩니다) ──────────────────────────────
 const PATCH_NOTES = {
   version: "v1.0.2",
-  date: "2026-10-09",
+  date: "2026-10-21",
   items: [
     { type: "notice",  text: "이걸 배포한지 벌써 3개월이 됐네요. 사용하면서 불편한게 있으시면 편하게 연락주세요!" },
     { type: "new",     text: "소방시설 탐색기 공장 용도 동별 세분화(진행중)"},
@@ -6228,7 +6228,7 @@ const yearState = {
     yEraChoice: "after2004",
     yOccupancyType: "neighborhood",
     yAutoCalcAreas: "yes",
-    yPermitdate: "2026-10-09",
+    yPermitdate: "2026-10-21",
     yTotalArea: "1500",
     yAboveGroundFloors: "4",
     yBasementFloors: "0",
