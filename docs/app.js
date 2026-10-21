@@ -13506,6 +13506,14 @@ function yearEvaluateLodging(inp) {
   }
   results.push(makeResult(categories.alarm, "자동화재탐지설비", "", autoDetReq ? "required" : "notRequired", autoDetReason, ""));
 
+  // ── 단독경보형 감지기 (2004.5.30~2022.11.30: 연면적 600㎡ 미만 숙박시설) ──
+  const singleDetReq = pd < YD.D20221201 && ta < 600;
+  results.push(makeResult(categories.alarm, "단독경보형 감지기", "",
+    singleDetReq ? "required" : "notRequired",
+    singleDetReq ? "연면적 600㎡ 미만 숙박시설은 단독경보형 감지기 설치 대상입니다." :
+    pd < YD.D20221201 ? "연면적 600㎡ 이상이라 자동화재탐지설비 대상입니다." :
+    "2022년 12월 1일 이후 숙박시설은 자동화재탐지설비 대상이어서 단독경보형 감지기 대상에서 제외됩니다.", ""));
+
   // ── 시각경보기 ──
   results.push(makeResult(categories.alarm, "시각경보기", "",
     autoDetReq ? "required" : "notRequired",
