@@ -20837,7 +20837,7 @@ function goToRgGuideSection(tab, sectionId) {
       { kind: "시행령", name: "소방법 시행령 (연혁)",
         url: "https://www.law.go.kr/lsSc.do?menuId=1&subMenuId=17&tabMenuId=93&query=%EC%86%8C%EB%B0%A9%EB%B2%95%20%EC%8B%9C%ED%96%89%EB%A0%B9" },
       { kind: "부령", name: "소방기술기준에관한 규칙 (연혁)",
-        url: "https://www.law.go.kr/lsSc.do?menuId=1&subMenuId=17&tabMenuId=93&query=%EC%9C%84%ED%97%98%EB%AC%BC" }
+        url: "https://www.law.go.kr/lsSc.do?menuId=1&subMenuId=17&tabMenuId=93&query=%EC%86%8C%EB%B0%A9%EA%B8%B0%EC%88%A0%EA%B8%B0%EC%A4%80%EC%97%90%EA%B4%80%ED%95%9C%EA%B7%9C%EC%B9%99" }
     ],
     "explorer-year-post": [
       { kind: "시행령", name: "소방시설 설치 및 관리에 관한 법률 시행령 (연혁)",
