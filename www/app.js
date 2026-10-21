@@ -6220,6 +6220,7 @@ const YD = {
   D20241201: 20241201, // 연립주택·다세대주택 별표2(특정소방대상물) 편입 시행일
   D20241231: 20241231,
   D20251201: 20251201,
+  D20260301: 20260301, // 소규모 지하 차고·주차장·기계식 주차 기준 시행일 (대통령령 제35860호 부칙 제1조 단서, 허가 신청분부터)
 };
 
 const yearState = {
@@ -6251,10 +6252,10 @@ const yearState = {
     yBefore2004LargeFloor1000: "no",
     yFirstSecondFloorArea: "750",
     yIndoorParkingArea: "",
+    yUndergroundParkingArea: "",
     yMechanicalParkingCapacity: "",
     yElectricalRoomArea: "",
     ySmokeControlArea: "0",
-    yHasSmallUndergroundParking: "no",
     // 주차장·전기실 예/아니오 게이트 + 필로티 (연도별 비아파트 공용, 한 번에 한 용도라 공용 1세트)
     yHasIndoorParking: "no",
     yHasElecRoom: "no",
@@ -6293,6 +6294,7 @@ const yearState = {
     yLodgingMultiuseHasEvacuationRoute: "no",
     yLodgingFirstSecondFloorArea: "750",
     yLodgingIndoorParkingArea: "",
+    yLodgingUndergroundParkingArea: "",
     yLodgingMechanicalParkingCapacity: "",
     yLodgingElectricalRoomArea: "",
     yLodgingBasementAreaForSmoke: "0",
@@ -6306,10 +6308,10 @@ const yearState = {
     yElderlyHas24HourStaff: "no",
     yElderlyFirstSecondFloorArea: "750",
     yElderlyIndoorParkingArea: "",
+    yElderlyUndergroundParkingArea: "",
     yElderlyMechanicalParkingCapacity: "",
     yElderlyElectricalRoomArea: "",
     yElderlyBasementAreaForSmoke: "0",
-    yElderlyHasSmallUndergroundParking: "no",
     // 의료시설 전용
     yMedicalSubtype: "hospital",
     yMedicalArea: "1500",
@@ -6319,6 +6321,7 @@ const yearState = {
     yMedicalHasFloor500Plus: "no",
     yMedicalFirstSecondFloorArea: "750",
     yMedicalIndoorParkingArea: "",
+    yMedicalUndergroundParkingArea: "",
     yMedicalMechanicalParkingCapacity: "",
     yMedicalElectricalRoomArea: "",
     yMedicalBasementAreaForSmoke: "0",
@@ -6363,6 +6366,7 @@ const yearState = {
     yReligiousHasLargeTargetFloor: "no",
     yReligiousFirstSecondFloorArea: "750",
     yReligiousIndoorParkingArea: "",
+    yReligiousUndergroundParkingArea: "",
     yReligiousMechanicalParkingCapacity: "",
     yReligiousElectricalRoomArea: "",
     yReligiousOccupancy100Plus: "no",
@@ -6376,6 +6380,7 @@ const yearState = {
     ySalesHasLargeTargetFloor: "no",
     ySalesFirstSecondFloorArea: "750",
     ySalesIndoorParkingArea: "",
+    ySalesUndergroundParkingArea: "",
     ySalesMechanicalParkingCapacity: "",
     ySalesElectricalRoomArea: "",
     ySalesOccupancy500Plus: "no",
@@ -6589,11 +6594,11 @@ const yearSteps = [
     key: "yAptUndergroundParkingArea",
     type: "ynumber",
     title: "지하 차고·주차장 바닥면적 합계(㎡)",
-    help: "2025.12.1부터 신설된 소규모 지하주차장(200㎡ 미만) 기준 판단에 사용됩니다. 없으면 0을 입력하세요.",
+    help: "2026.3.1 이후 허가분부터 적용되는 지하 차고·주차장 기준(200㎡ 미만: 단독경보형·비상경보·연결살수 / 200㎡ 이상: 자동화재탐지설비) 판단에 사용됩니다. 지상 주차장은 제외하고, 없으면 0을 입력하세요.",
     placeholder: "예: 0",
     min: 0,
     step: 0.1,
-    condition: (ya, pd) => ya.yOccupancyType === "apartment" && pd >= YD.D20251201 && ya.yAptHasParkingBuilding !== "yes",
+    condition: (ya, pd) => ya.yOccupancyType === "apartment" && pd >= YD.D20260301 && ya.yAptHasParkingBuilding !== "yes",
   },
   {
     key: "yAptHasSpecialStair",
@@ -6805,17 +6810,6 @@ const yearSteps = [
     min: 0,
     step: 0.1,
     condition: (ya) => ya.yOccupancyType === "neighborhood" && !yearIsAutoAreaMode(),
-  },
-  {
-    key: "yHasSmallUndergroundParking",
-    type: "ychoice",
-    title: "지하 차고·주차장 바닥면적 합계가 200㎡ 미만입니까?",
-    help: "2024년 5월 17일 이후부터 소규모 지하주차장도 연결살수설비 설치 대상입니다.",
-    options: [
-      { value: "yes", label: "예", description: "200㎡ 미만 지하주차장 있음" },
-      { value: "no", label: "아니오", description: "해당 없음" },
-    ],
-    condition: (ya, pd) => ya.yOccupancyType === "neighborhood" && pd >= YD.D20240517,
   },
   {
     key: "yHasMultiuseBusiness",
@@ -7263,17 +7257,6 @@ const yearSteps = [
     min: 0,
     step: 0.1,
     condition: (ya, pd) => ya.yOccupancyType === "elderly" && pd >= YD.D20150108 && !yearIsAutoAreaMode(),
-  },
-  {
-    key: "yElderlyHasSmallUndergroundParking",
-    type: "ychoice",
-    title: "지하 차고·주차장 바닥면적 합계가 200㎡ 미만입니까?",
-    help: "2025년 12월 1일 이후부터 소규모 지하주차장도 비상경보설비 설치 대상입니다.",
-    options: [
-      { value: "yes", label: "예", description: "200㎡ 미만 지하주차장 있음" },
-      { value: "no", label: "아니오", description: "해당 없음" },
-    ],
-    condition: (ya, pd) => ya.yOccupancyType === "elderly" && pd >= YD.D20251201,
   },
 
   // ── 의료시설 전용 스텝 ──
@@ -8413,7 +8396,6 @@ const yearStepOrder = new Map([
   "yLodgingBasementAreaForSmoke",
   "yElderlyBasementAreaForSmoke",
   "yMedicalBasementAreaForSmoke",
-  "yHasSmallUndergroundParking",
 
   // 공동주택 전용 질문
   "yAptParkingBuildingSet",
@@ -9209,14 +9191,29 @@ function makeYearSectionBox(titleText) {
 function appendYearParkingElecGroup(wrapper, cfg) {
   const ya = yearState.answers;
 
+  // 2026.3.1~ 허가분은 지하 차고·주차장 기준(yearApplyUndergroundParking2026)이 생겨 내부 주차장을 지상/지하로 나눠 받는다.
+  // 판정용 내부 주차장 면적은 yearNormalizeAnswers에서 지상+지하 합계로 계산한다.
+  const splitUnderground = yPermitDateInt() >= YD.D20260301;
+  const isIndoorKey = (key) => /IndoorParkingArea$/.test(key);
+  const undergroundKeyOf = (key) => key.replace("IndoorParkingArea", "UndergroundParkingArea");
+
   const parkBox = makeYearSectionBox("주차 공간");
   parkBox.appendChild(makeYearGateField("건물 내부에 주차장이 있나요?", "yHasIndoorParking", () => {
-    cfg.parkFields.forEach((f) => { ya[f.key] = ""; });
+    cfg.parkFields.forEach((f) => {
+      ya[f.key] = "";
+      if (isIndoorKey(f.key)) ya[undergroundKeyOf(f.key)] = "";
+    });
     ya.yPilotiParkingFirstFloor = "no";
   }));
   if (ya.yHasIndoorParking === "yes") {
     cfg.parkFields.forEach((f) => {
-      parkBox.appendChild(makeYearField(f.label, f.key, ya[f.key], { min: 0, step: f.step ?? 0.1, placeholder: "없으면 0" }));
+      const split = splitUnderground && isIndoorKey(f.key);
+      const label = split ? "지상 차고·주차장 바닥면적(건물 내부, ㎡)" : f.label;
+      parkBox.appendChild(makeYearField(label, f.key, ya[f.key], { min: 0, step: f.step ?? 0.1, placeholder: "없으면 0" }));
+      if (split) {
+        const ugKey = undergroundKeyOf(f.key);
+        parkBox.appendChild(makeYearField("지하 차고·주차장 바닥면적 합계(㎡)", ugKey, ya[ugKey], { min: 0, step: 0.1, placeholder: "없으면 0" }));
+      }
     });
     if (yPermitDateInt() < YD.D20190813) {
       const divider = document.createElement("p");
@@ -9611,7 +9608,6 @@ function yearRenderCompoundStep(step) {
     appendYearParkingElecGroup(wrapper, {
       parkFields: [
         { label: "건물 내부 차고·주차장 바닥면적(㎡)", key: "ySalesIndoorParkingArea", step: 0.1 },
-        { label: "지하 차고·주차장 바닥면적 합계(㎡)", key: "ySalesUndergroundParkingArea", step: 0.1 },
         { label: "기계식 주차 대수(대)", key: "ySalesMechanicalParkingCapacity", step: 1 },
       ],
       elecKey: "ySalesElectricalRoomArea",
@@ -9622,7 +9618,6 @@ function yearRenderCompoundStep(step) {
     appendYearParkingElecGroup(wrapper, {
       parkFields: [
         { label: "건물 내부 차고·주차장 바닥면적(㎡)", key: "yOfficeIndoorParkingArea", step: 0.1 },
-        { label: "지하 차고·주차장 바닥면적 합계(㎡)", key: "yOfficeUndergroundParkingArea", step: 0.1 },
         { label: "기계식 주차 대수(대)", key: "yOfficeMechanicalParkingCapacity", step: 1 },
       ],
       elecKey: "yOfficeElectricalRoomArea",
@@ -9640,7 +9635,6 @@ function yearRenderCompoundStep(step) {
     appendYearParkingElecGroup(wrapper, {
       parkFields: [
         { label: "건물 내부 차고·주차장 바닥면적(㎡)", key: "yFactoryIndoorParkingArea", step: 0.1 },
-        { label: "지하 차고·주차장 바닥면적 합계(㎡)", key: "yFactoryUndergroundParkingArea", step: 0.1 },
         { label: "기계식 주차 대수(대)", key: "yFactoryMechanicalParkingCapacity", step: 1 },
       ],
       elecKey: "yFactoryElectricalRoomArea",
@@ -9863,6 +9857,10 @@ function yearNormalizeAnswers() {
   const pkBf = parseInt(ya.yAptParkingBelow) || 0;
   const pkArea = parseFloat(ya.yAptParkingArea) || 0;
   const pkBasementArea = (pkBf > 0 && pkAg + pkBf > 0) ? Math.round((pkArea / (pkAg + pkBf)) * pkBf * 10) / 10 : 0;
+  // 2026.3.1~ 허가분은 내부 주차장을 지상/지하 칸으로 나눠 받는다(appendYearParkingElecGroup).
+  // 지하 면적은 yearApplyUndergroundParking2026 판정용, 내부 주차장 면적(물분무등 판정용)은 지상+지하 합계.
+  const ugPk = (k) => pd >= YD.D20260301 ? (parseFloat(ya[k]) || 0) : 0;
+  const indoorPk = (k) => (parseFloat(ya[k]) || 0) + ugPk(k.replace("IndoorParkingArea", "UndergroundParkingArea"));
   return {
     pd,
     permitDateInt: pd,
@@ -9889,11 +9887,11 @@ function yearNormalizeAnswers() {
     hasHemodialysis: ya.yHasHemodialysis === "yes",
     has24HourStaff: ya.yHas24HourStaff === "yes",
     firstSecondFloorArea: parseFloat(ya.yFirstSecondFloorArea) || 0,
-    indoorParkingArea: parseFloat(ya.yIndoorParkingArea) || 0,
+    indoorParkingArea: indoorPk("yIndoorParkingArea"),
+    undergroundParkingArea: ugPk("yUndergroundParkingArea"),
     mechanicalParkingCapacity: parseInt(ya.yMechanicalParkingCapacity) || 0,
     electricalRoomArea: parseFloat(ya.yElectricalRoomArea) || 0,
     smokeControlArea: parseFloat(ya.ySmokeControlArea) || 0,
-    hasSmallUndergroundParking: ya.yHasSmallUndergroundParking === "yes",
     // 근린생활시설 다중이용업소
     hasMultiuseBusiness: ya.yHasMultiuseBusiness === "yes",
     multiuseInBasement: ya.yMultiuseInBasement === "yes",
@@ -9916,7 +9914,8 @@ function yearNormalizeAnswers() {
     lodgingHasLargeFloorFor1000: ya.yLodgingHasLargeFloorFor1000 === "yes",
     lodgingHasGasFacility: ya.yLodgingHasGasFacility === "yes",
     lodgingFirstSecondFloorArea: parseFloat(ya.yLodgingFirstSecondFloorArea) || 0,
-    lodgingIndoorParkingArea: parseFloat(ya.yLodgingIndoorParkingArea) || 0,
+    lodgingIndoorParkingArea: indoorPk("yLodgingIndoorParkingArea"),
+    lodgingUndergroundParkingArea: ugPk("yLodgingUndergroundParkingArea"),
     lodgingMechanicalParkingCapacity: parseInt(ya.yLodgingMechanicalParkingCapacity) || 0,
     lodgingElectricalRoomArea: parseFloat(ya.yLodgingElectricalRoomArea) || 0,
     lodgingBasementAreaForSmoke: parseFloat(ya.yLodgingBasementAreaForSmoke) || 0,
@@ -9942,11 +9941,11 @@ function yearNormalizeAnswers() {
     elderlyHasFloor500Plus: ya.yElderlyHasFloor500Plus === "yes",
     elderlyHas24HourStaff: ya.yElderlyHas24HourStaff === "yes",
     elderlyFirstSecondFloorArea: parseFloat(ya.yElderlyFirstSecondFloorArea) || 0,
-    elderlyIndoorParkingArea: parseFloat(ya.yElderlyIndoorParkingArea) || 0,
+    elderlyIndoorParkingArea: indoorPk("yElderlyIndoorParkingArea"),
+    elderlyUndergroundParkingArea: ugPk("yElderlyUndergroundParkingArea"),
     elderlyMechanicalParkingCapacity: parseInt(ya.yElderlyMechanicalParkingCapacity) || 0,
     elderlyElectricalRoomArea: parseFloat(ya.yElderlyElectricalRoomArea) || 0,
     elderlyBasementAreaForSmoke: parseFloat(ya.yElderlyBasementAreaForSmoke) || 0,
-    elderlyHasSmallUndergroundParking: ya.yElderlyHasSmallUndergroundParking === "yes",
     // 의료시설 전용
     medicalSubtype: ya.yMedicalSubtype,
     medicalArea: usageArea("yMedicalArea"),
@@ -9955,7 +9954,8 @@ function yearNormalizeAnswers() {
     medicalHasGasFacility: ya.yMedicalHasGasFacility === "yes",
     medicalHasFloor500Plus: ya.yMedicalHasFloor500Plus === "yes",
     medicalFirstSecondFloorArea: parseFloat(ya.yMedicalFirstSecondFloorArea) || 0,
-    medicalIndoorParkingArea: parseFloat(ya.yMedicalIndoorParkingArea) || 0,
+    medicalIndoorParkingArea: indoorPk("yMedicalIndoorParkingArea"),
+    medicalUndergroundParkingArea: ugPk("yMedicalUndergroundParkingArea"),
     medicalMechanicalParkingCapacity: parseInt(ya.yMedicalMechanicalParkingCapacity) || 0,
     medicalElectricalRoomArea: parseFloat(ya.yMedicalElectricalRoomArea) || 0,
     medicalBasementAreaForSmoke: parseFloat(ya.yMedicalBasementAreaForSmoke) || 0,
@@ -9999,7 +9999,8 @@ function yearNormalizeAnswers() {
     // 종교시설 전용
     religiousHasLargeTargetFloor: ya.yReligiousHasLargeTargetFloor === "yes",
     religiousFirstSecondFloorArea: parseFloat(ya.yReligiousFirstSecondFloorArea) || 0,
-    religiousIndoorParkingArea: parseFloat(ya.yReligiousIndoorParkingArea) || 0,
+    religiousIndoorParkingArea: indoorPk("yReligiousIndoorParkingArea"),
+    religiousUndergroundParkingArea: ugPk("yReligiousUndergroundParkingArea"),
     religiousMechanicalParkingCapacity: parseInt(ya.yReligiousMechanicalParkingCapacity) || 0,
     religiousElectricalRoomArea: parseFloat(ya.yReligiousElectricalRoomArea) || 0,
     religiousOccupancy100Plus: ya.yReligiousOccupancy100Plus === "yes",
@@ -10012,8 +10013,8 @@ function yearNormalizeAnswers() {
     salesArea: usageArea("ySalesArea"),
     salesHasLargeTargetFloor: ya.ySalesHasLargeTargetFloor === "yes",
     salesFirstSecondFloorArea: parseFloat(ya.ySalesFirstSecondFloorArea) || 0,
-    salesIndoorParkingArea: parseFloat(ya.ySalesIndoorParkingArea) || 0,
-    salesUndergroundParkingArea: parseFloat(ya.ySalesUndergroundParkingArea) || 0,
+    salesIndoorParkingArea: indoorPk("ySalesIndoorParkingArea"),
+    salesUndergroundParkingArea: ugPk("ySalesUndergroundParkingArea"),
     salesMechanicalParkingCapacity: parseInt(ya.ySalesMechanicalParkingCapacity) || 0,
     salesElectricalRoomArea: parseFloat(ya.ySalesElectricalRoomArea) || 0,
     salesOccupancy500Plus: ya.ySalesOccupancy500Plus === "yes",
@@ -10036,8 +10037,8 @@ function yearNormalizeAnswers() {
     officeHasLargeTargetFloor: ya.yOfficeHasLargeTargetFloor === "yes",
     officeHasLargeFloorFor1000: ya.yOfficeHasLargeFloorFor1000 === "yes",
     officeFirstSecondFloorArea: parseFloat(ya.yOfficeFirstSecondFloorArea) || 0,
-    officeIndoorParkingArea: parseFloat(ya.yOfficeIndoorParkingArea) || 0,
-    officeUndergroundParkingArea: parseFloat(ya.yOfficeUndergroundParkingArea) || 0,
+    officeIndoorParkingArea: indoorPk("yOfficeIndoorParkingArea"),
+    officeUndergroundParkingArea: ugPk("yOfficeUndergroundParkingArea"),
     officeMechanicalParkingCapacity: parseInt(ya.yOfficeMechanicalParkingCapacity) || 0,
     officeElectricalRoomArea: parseFloat(ya.yOfficeElectricalRoomArea) || 0,
     // 분법 이전 판매시설(구 「시장」) 전용
@@ -10064,10 +10065,10 @@ function yearNormalizeAnswers() {
     factoryHas24HourStaff: ya.yFactoryHas24HourStaff === "yes",
     factoryHas50Workers: ya.yFactoryHas50Workers === "yes",
     factoryFirstSecondFloorArea: parseFloat(ya.yFactoryFirstSecondFloorArea) || 0,
-    factoryIndoorParkingArea: parseFloat(ya.yFactoryIndoorParkingArea) || 0,
+    factoryIndoorParkingArea: indoorPk("yFactoryIndoorParkingArea"),
     factoryMechanicalParkingCapacity: parseInt(ya.yFactoryMechanicalParkingCapacity) || 0,
     factoryElectricalRoomArea: parseFloat(ya.yFactoryElectricalRoomArea) || 0,
-    factoryUndergroundParkingArea: parseFloat(ya.yFactoryUndergroundParkingArea) || 0,
+    factoryUndergroundParkingArea: ugPk("yFactoryUndergroundParkingArea"),
     // 분법 이전 공장·창고시설 전용
     before2004FactoryHasLargeFloor450: ya.yBefore2004FactoryHasLargeFloor450 === "yes",
     before2004FactoryHasLargeFloor300: ya.yBefore2004FactoryHasLargeFloor300 === "yes",
@@ -13245,10 +13246,6 @@ function yearEvaluateNeighborhood(inp) {
     bsmtAvg150 ? "지하층 평균 면적이 150㎡ 이상입니다." :
     wlss150 ? "무창층 면적이 150㎡ 이상입니다." :
     "현재 입력 기준으로는 설치 대상이 아닙니다.";
-  if (pd >= YD.D20251201 && inp.hasSmallUndergroundParking) {
-    emergAlarmReq = true;
-    emergAlarmReason = "지하 차고·주차장이 200㎡ 미만으로 건물 전층에 설치 대상입니다.";
-  }
   results.push(makeResult(categories.alarm, "비상경보설비", "",
     emergAlarmReq ? "required" : "notRequired", emergAlarmReason, ""));
 
@@ -13359,10 +13356,6 @@ function yearEvaluateNeighborhood(inp) {
   let connSprayReq = inp.basementAreaSum >= 150;
   let connSprayReason = inp.basementAreaSum >= 150 ? "지하층 바닥면적 합계가 150㎡ 이상입니다." :
     "현재 입력 기준으로는 설치 대상이 아닙니다.";
-  if (pd >= YD.D20240517 && inp.hasSmallUndergroundParking && !connSprayReq) {
-    connSprayReq = true;
-    connSprayReason = "지하 차고·주차장 바닥면적이 200㎡ 미만인 소규모 주차장이 있어 설치 대상입니다.";
-  }
   results.push(makeResult(categories.fireSupport, "연결살수설비", "",
     connSprayReq ? "required" : "notRequired", connSprayReason, ""));
 
@@ -13729,10 +13722,6 @@ function yearEvaluateElderly(inp) {
     hasBasement150 ? "지하층 바닥면적이 150㎡ 이상입니다." :
     hasWindowless150 ? "무창층 바닥면적이 150㎡ 이상입니다." :
     "현재 입력 기준으로는 설치 대상이 아닙니다.";
-  if (pd >= YD.D20251201 && inp.elderlyHasSmallUndergroundParking) {
-    emergAlarmReq = true;
-    emergAlarmReason = "지하 차고·주차장이 200㎡ 미만으로 건물 전층에 설치 대상입니다.";
-  }
   results.push(makeResult(categories.alarm, "비상경보설비", "",
     emergAlarmReq ? "required" : "notRequired", emergAlarmReason, ""));
 
@@ -14365,15 +14354,13 @@ function yearEvaluateApartment(inp) {
   }
   results.push(makeResult(categories.alarm, "단독경보형감지기", "", singleReq ? "required" : "notRequired", singleReason, ""));
 
-  // 8. 비상경보설비 (용도무관: 연면적 400㎡·지하무창 150㎡, 2025.12.1~ 소규모 지하주차장)
-  const smallUgParking = pd >= YD.D20251201 && inp.aptUndergroundParkingArea > 0 && inp.aptUndergroundParkingArea < 200;
-  const alarmReq = ta >= 400 || hasBasement150 || hasWindowless150 || smallUgParking;
+  // 8. 비상경보설비 (용도무관: 연면적 400㎡·지하무창 150㎡ / 소규모 지하주차장은 yearApplyUndergroundParking2026)
+  const alarmReq = ta >= 400 || hasBasement150 || hasWindowless150;
   results.push(makeResult(categories.alarm, "비상경보설비", "",
     alarmReq ? "required" : "notRequired",
     ta >= 400 ? "연면적 400㎡ 이상입니다. (모든 층)"
       : hasBasement150 ? "지하층 바닥면적 150㎡ 이상입니다."
       : hasWindowless150 ? "무창층 바닥면적 150㎡ 이상입니다."
-      : smallUgParking ? "지하 차고·주차장 면적이 200㎡ 미만입니다. (2025.12.1~ 신설 기준)"
       : "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
 
   // 12. 비상방송설비 (용도무관: 연면적 3500㎡·11층·지하 3층)
@@ -14449,16 +14436,14 @@ function yearEvaluateApartment(inp) {
       : (bf >= 3 && ba >= 1000) ? "지하 3층 이상이고 지하층 바닥면적 합계 1,000㎡ 이상입니다. (모든 층)"
       : "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
 
-  // 25. 연결살수설비 (용도무관: 지하 150㎡, 국민주택규모 대피시설 700㎡ 특례, 2025.12.1~ 소규모 지하주차장)
+  // 25. 연결살수설비 (용도무관: 지하 150㎡, 국민주택규모 대피시설 700㎡ 특례 / 소규모 지하주차장·기계식은 yearApplyUndergroundParking2026)
   const sprayThreshold = (isApt && inp.aptIsNationalHousing) ? 700 : 150;
   const sprayMain = bf > 0 && ba >= sprayThreshold;
-  const sprayUgPark = pd >= YD.D20251201 && inp.aptUndergroundParkingArea > 0 && inp.aptUndergroundParkingArea < 200;
   results.push(makeResult(categories.fireSupport, "연결살수설비", "",
-    (sprayMain || sprayUgPark) ? "required" : "notRequired",
+    sprayMain ? "required" : "notRequired",
     sprayMain ? (sprayThreshold === 700
         ? "국민주택규모 이하 아파트등의 대피용 지하층 바닥면적 합계가 700㎡ 이상입니다. (지하층 모든 층)"
         : "지하층 바닥면적 합계가 150㎡ 이상입니다. (지하층 모든 층)")
-      : sprayUgPark ? "지하 차고·주차장 면적이 200㎡ 미만입니다. (2025.12.1~ 신설 기준)"
       : "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
 
   // 26. 비상콘센트설비 (용도무관: 11층, 지하 3층+1000㎡)
@@ -14746,9 +14731,6 @@ function yearEvaluateSales(inp) {
     ta >= 33 ? "required" : "notRequired",
     ta >= 33 ? "연면적이 33㎡ 이상입니다." : "연면적이 33㎡ 미만입니다.", ""));
 
-  const smallUndergroundParking = pd >= YD.D20251201 && inp.salesUndergroundParkingArea > 0 && inp.salesUndergroundParkingArea < 200;
-  const largeUndergroundParking = pd >= YD.D20251201 && inp.salesUndergroundParkingArea >= 200;
-
   // ── 상업용 주방자동소화장치 (2023년 12월 1일 시행: 대규모점포 입점 일반음식점 주방) ──
   let kitchenReq = false;
   let kitchenReason = "";
@@ -14772,13 +14754,6 @@ function yearEvaluateSales(inp) {
     hasWindowless300 ? "무창층 바닥면적이 300㎡ 이상입니다." :
     inp.salesHasLargeTargetFloor ? "지하층·무창층·4층 이상 층 중 바닥면적 300㎡ 이상인 층이 있습니다." :
     "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
-
-  // ── 단독경보형 감지기 (2025.12.1 소규모 지하 차고·주차장 공통 기준 신설) ──
-  results.push(makeResult(categories.alarm, "단독경보형 감지기", "",
-    smallUndergroundParking ? "required" : "notRequired",
-    smallUndergroundParking ? "2025년 12월 1일 이후 지하 차고·주차장 면적 합계가 200㎡ 미만인 경우 해당 주차장 부분에 설치해야 합니다." :
-    pd < YD.D20251201 ? "2025년 12월 1일 이전에는 판매시설에 적용되는 단독경보형 감지기 의무 기준이 없습니다." :
-    "지하 차고·주차장 면적 합계가 200㎡ 미만인 경우에 해당하지 않습니다.", ""));
 
   // ── 스프링클러설비 (2014.7.8 면적 잣대 통합) ──
   let sprinklerReq = false;
@@ -14812,25 +14787,23 @@ function yearEvaluateSales(inp) {
     "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
 
   // ── 비상경보설비 ──
-  const emergAlarmReq = ta >= 400 || hasBasement150 || hasWindowless150 || smallUndergroundParking;
+  const emergAlarmReq = ta >= 400 || hasBasement150 || hasWindowless150;
   results.push(makeResult(categories.alarm, "비상경보설비", "",
     emergAlarmReq ? "required" : "notRequired",
     ta >= 400 ? "연면적이 400㎡ 이상입니다." :
     hasBasement150 ? "지하층 바닥면적이 150㎡ 이상입니다." :
     hasWindowless150 ? "무창층 바닥면적이 150㎡ 이상입니다." :
-    smallUndergroundParking ? "2025년 12월 1일 이후 지하 차고·주차장 면적 합계가 200㎡ 미만인 경우 건물의 모든 층에 설치해야 합니다." :
     "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
 
-  // ── 자동화재탐지설비 (판매시설 1,000㎡ + 전통시장(2019.8.6~) + 6층 이상(2022.12.1~) + 지하 주차장 200㎡ 이상(2025.12.1~)) ──
+  // ── 자동화재탐지설비 (판매시설 1,000㎡ + 전통시장(2019.8.6~) + 6층 이상(2022.12.1~) / 지하주차장 기준은 yearApplyUndergroundParking2026) ──
   const autoDetByMarket = pd >= YD.D20190806 && inp.salesIsTraditionalMarket;
   const autoDetBy6F = pd >= YD.D20221201 && ag >= 6;
-  const autoDetReq = ta >= 1000 || autoDetByMarket || autoDetBy6F || largeUndergroundParking;
+  const autoDetReq = ta >= 1000 || autoDetByMarket || autoDetBy6F;
   results.push(makeResult(categories.alarm, "자동화재탐지설비", "",
     autoDetReq ? "required" : "notRequired",
     ta >= 1000 ? "연면적이 1,000㎡ 이상인 판매시설입니다." :
     autoDetByMarket ? "전통시장은 면적과 무관하게 설치 대상입니다." :
     autoDetBy6F ? "2022년 12월 1일 이후 층수가 6층 이상인 건축물입니다." :
-    largeUndergroundParking ? "2025년 12월 1일 이후 지하 차고·주차장 면적 합계가 200㎡ 이상입니다." :
     "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
 
   // ── 시각경보기 (자동화재탐지설비 대상 판매시설에 함께 설치) ──
@@ -14965,12 +14938,11 @@ function yearEvaluateSales(inp) {
     "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
 
   // ── 연결살수설비 (판매시설: 해당 용도 1,000㎡ 또는 지하층 150㎡) ──
-  const drencherReq = sa >= 1000 || ba >= 150 || smallUndergroundParking;
+  const drencherReq = sa >= 1000 || ba >= 150;
   results.push(makeResult(categories.fireSupport, "연결살수설비", "",
     drencherReq ? "required" : "notRequired",
     sa >= 1000 ? "판매시설 해당 용도 바닥면적 합계가 1,000㎡ 이상입니다." :
     ba >= 150 ? "지하층 바닥면적 합계가 150㎡ 이상입니다." :
-    smallUndergroundParking ? "2025년 12월 1일 이후 지하 차고·주차장 면적 합계가 200㎡ 미만인 경우 해당 부분에 설치해야 합니다." :
     "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
 
   // ── 비상콘센트설비 (2022.12.1 '지하층 포함' 삭제 → 지상층수 11층) ──
@@ -15014,14 +14986,6 @@ function yearEvaluateOffice(inp) {
   const hasWindowless300 = inp.hasWindowlessFloor && wl >= 300;
   const hasWindowless450 = inp.hasWindowlessFloor && wl >= 450;
   const hasWindowless1000 = inp.hasWindowlessFloor && wl >= 1000;
-
-  const ua = inp.officeUndergroundParkingArea || 0;
-  const smallUP = ua > 0 && ua < 200;
-  const largeUP = ua >= 200;
-  const singleDetSmallUP = pd >= YD.D20241231 && smallUP;
-  const emergAlarmSmallUP = pd >= YD.D20251201 && smallUP;
-  const drencherSmallUP = pd >= YD.D20251201 && smallUP;
-  const autoDetLargeUP = pd >= YD.D20251201 && largeUP;
 
   // ── 소화기구 ──
   results.push(makeResult(categories.extinguishing, "소화기구", "",
@@ -15098,7 +15062,7 @@ function yearEvaluateOffice(inp) {
     simpleSprinklerReq ? "required" : "notRequired", simpleSprinklerReason, ""));
 
   // ── 물분무등소화설비 ──
-  const officeParkingForWaterSpray = Math.max(inp.officeIndoorParkingArea, ua);
+  const officeParkingForWaterSpray = inp.officeIndoorParkingArea; // 2026.3.1~ 지상+지하 합계 (yearNormalizeAnswers)
   const waterSprayReq = officeParkingForWaterSpray >= 200 || inp.officeMechanicalParkingCapacity >= 20 || inp.officeElectricalRoomArea >= 300;
   results.push(makeResult(categories.extinguishing, "물분무등소화설비", "",
     waterSprayReq ? "required" : "notRequired",
@@ -15110,31 +15074,22 @@ function yearEvaluateOffice(inp) {
     inp.officeFirstSecondFloorArea >= 9000 ? "지상 1층과 2층의 바닥면적 합계가 9,000㎡ 이상입니다." :
     "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
 
-  // ── 단독경보형 감지기 (2024.12.31~ 소규모 지하 차고·주차장) ──
-  results.push(makeResult(categories.alarm, "단독경보형 감지기", "",
-    singleDetSmallUP ? "required" : "notRequired",
-    singleDetSmallUP ? "2024년 12월 31일 이후 지하 차고·주차장 면적 합계가 200㎡ 미만인 경우 해당 주차장 부분에 설치해야 합니다." :
-    pd < YD.D20241231 ? "2024년 12월 31일 이전에는 업무시설에 적용되는 단독경보형 감지기 의무 기준이 없습니다." :
-    "지하 차고·주차장 면적 합계가 200㎡ 미만인 경우에 해당하지 않습니다.", ""));
-
   // ── 비상경보설비 ──
-  const emergAlarmReq = ta >= 400 || hasBasement150 || hasWindowless150 || emergAlarmSmallUP;
+  const emergAlarmReq = ta >= 400 || hasBasement150 || hasWindowless150;
   results.push(makeResult(categories.alarm, "비상경보설비", "",
     emergAlarmReq ? "required" : "notRequired",
     ta >= 400 ? "연면적이 400㎡ 이상입니다." :
     hasBasement150 ? "지하층 바닥면적이 150㎡ 이상입니다." :
     hasWindowless150 ? "무창층 바닥면적이 150㎡ 이상입니다." :
-    emergAlarmSmallUP ? "2025년 12월 1일 이후 지하 차고·주차장 면적 합계가 200㎡ 미만인 경우 건물의 모든 층에 설치해야 합니다." :
     "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
 
-  // ── 자동화재탐지설비 (연면적 1,000㎡ + 6층(2022.12.1~) + 지하주차장 200㎡↑(2025.12.1~)) ──
+  // ── 자동화재탐지설비 (연면적 1,000㎡ + 6층(2022.12.1~) / 지하주차장 기준은 yearApplyUndergroundParking2026) ──
   const autoDetBy6F = pd >= YD.D20221201 && ag >= 6;
-  const autoDetReq = ta >= 1000 || autoDetBy6F || autoDetLargeUP;
+  const autoDetReq = ta >= 1000 || autoDetBy6F;
   results.push(makeResult(categories.alarm, "자동화재탐지설비", "",
     autoDetReq ? "required" : "notRequired",
     ta >= 1000 ? "연면적이 1,000㎡ 이상인 업무시설입니다." :
     autoDetBy6F ? "2022년 12월 1일 이후 층수가 6층 이상인 건축물입니다." :
-    autoDetLargeUP ? "2025년 12월 1일 이후 지하 차고·주차장 면적 합계가 200㎡ 이상입니다." :
     "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
 
   // ── 시각경보기 (자동화재탐지설비 대상 업무시설에 함께 설치) ──
@@ -15241,12 +15196,11 @@ function yearEvaluateOffice(inp) {
     bf >= 3 && ba >= 1000 ? "지하층이 3층 이상이고 지하층 바닥면적 합계가 1,000㎡ 이상입니다." :
     "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
 
-  // ── 연결살수설비 (지하층 150㎡ + 소규모 지하주차장 2025.12.1~) ──
-  const drencherReq = ba >= 150 || drencherSmallUP;
+  // ── 연결살수설비 (지하층 150㎡ / 지하주차장·기계식 기준은 yearApplyUndergroundParking2026) ──
+  const drencherReq = ba >= 150;
   results.push(makeResult(categories.fireSupport, "연결살수설비", "",
     drencherReq ? "required" : "notRequired",
     ba >= 150 ? "지하층 바닥면적 합계가 150㎡ 이상입니다." :
-    drencherSmallUP ? "2025년 12월 1일 이후 지하 차고·주차장 면적 합계가 200㎡ 미만인 경우 해당 부분에 설치해야 합니다." :
     "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
 
   // ── 비상콘센트설비 (2022.12.1 '지하층 포함' 삭제 → 지상층수 11층) ──
@@ -15298,12 +15252,6 @@ function yearEvaluateFactory(inp) {
   const sc750  = sc >= 750;
   const sc1000 = sc >= 1000;
 
-  const ua = inp.factoryUndergroundParkingArea || 0;
-  const smallUP = ua > 0 && ua < 200;
-  const largeUP = ua >= 200;
-  const singleDetSmallUP = pd >= YD.D20251201 && smallUP;
-  const drencherSmallUP = pd >= YD.D20251201 && smallUP;
-  const autoDetLargeUP = pd >= YD.D20251201 && largeUP;
 
   // ── 소화기구 ──
   results.push(makeResult(categories.extinguishing, "소화기구", "",
@@ -15361,7 +15309,7 @@ function yearEvaluateFactory(inp) {
     "공장 용도는 간이스프링클러설비 의무 설치 대상이 아닙니다.", ""));
 
   // ── 물분무등소화설비 ──
-  const factoryParkingArea = Math.max(inp.factoryIndoorParkingArea, ua);
+  const factoryParkingArea = inp.factoryIndoorParkingArea; // 2026.3.1~ 지상+지하 합계 (yearNormalizeAnswers)
   const waterSprayReq = factoryParkingArea >= 200 || inp.factoryMechanicalParkingCapacity >= 20 || inp.factoryElectricalRoomArea >= 300;
   results.push(makeResult(categories.extinguishing, "물분무등소화설비", "",
     waterSprayReq ? "required" : "notRequired",
@@ -15375,13 +15323,6 @@ function yearEvaluateFactory(inp) {
     sc750 ? "특수가연물 지정수량 750배 이상을 저장·취급하는 공장입니다." :
     "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
 
-  // ── 단독경보형 감지기 (2025.12.1~ 소규모 지하 차고·주차장) ──
-  results.push(makeResult(categories.alarm, "단독경보형 감지기", "",
-    singleDetSmallUP ? "required" : "notRequired",
-    singleDetSmallUP ? "2025년 12월 1일 이후 지하 차고·주차장 면적 합계가 200㎡ 미만인 경우 해당 주차장 부분에 설치해야 합니다." :
-    pd < YD.D20251201 ? "현재까지 공장 용도에 대한 단독경보형 감지기 의무 기준은 없습니다." :
-    "지하 차고·주차장이 없거나 200㎡ 이상이어서 해당 없습니다.", ""));
-
   // ── 비상경보설비 ──
   const emergAlarmReq = ta >= 400 || hasBasement150 || hasWindowless150 || inp.factoryHas50Workers;
   results.push(makeResult(categories.alarm, "비상경보설비", "",
@@ -15394,13 +15335,12 @@ function yearEvaluateFactory(inp) {
 
   // ── 자동화재탐지설비 ──
   const autoDetBy6F = pd >= YD.D20221201 && tf >= 6;
-  const autoDetReq = ta >= 1000 || sc500 || autoDetBy6F || autoDetLargeUP;
+  const autoDetReq = ta >= 1000 || sc500 || autoDetBy6F;
   results.push(makeResult(categories.alarm, "자동화재탐지설비", "",
     autoDetReq ? "required" : "notRequired",
     ta >= 1000 ? "공장으로서 연면적 1,000㎡ 이상입니다." :
     sc500 ? "특수가연물 지정수량 500배 이상을 저장·취급합니다." :
     autoDetBy6F ? "2022년 12월 1일 이후 층수가 6층 이상인 건축물입니다." :
-    autoDetLargeUP ? "2025년 12월 1일 이후 지하 차고·주차장 면적 합계가 200㎡ 이상입니다." :
     "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
 
   // ── 시각경보기 (자동화재탐지설비 설치 대상 공장) ──
@@ -15494,12 +15434,11 @@ function yearEvaluateFactory(inp) {
     (bf >= 3 && ba >= 1000) ? "지하층이 3층 이상이고 지하층 바닥면적 합계가 1,000㎡ 이상입니다." :
     "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
 
-  // ── 연결살수설비 ──
-  const drencherReq = ba >= 150 || drencherSmallUP;
+  // ── 연결살수설비 (지하층 150㎡ / 지하주차장·기계식 기준은 yearApplyUndergroundParking2026) ──
+  const drencherReq = ba >= 150;
   results.push(makeResult(categories.fireSupport, "연결살수설비", "",
     drencherReq ? "required" : "notRequired",
     ba >= 150 ? "지하층 바닥면적 합계가 150㎡ 이상입니다." :
-    drencherSmallUP ? "2025년 12월 1일 이후 지하 차고·주차장 면적 합계가 200㎡ 미만인 경우 해당 부분에 설치해야 합니다." :
     "현재 입력 기준으로는 설치 대상이 아닙니다.", ""));
 
   // ── 비상콘센트설비 ──
@@ -15525,6 +15464,79 @@ function yearEvaluateFactory(inp) {
 }
 
 // ── 연도별 탐색기: 제외·대체 항목 계산 ──
+
+// 용도별 [지하 차고·주차장 면적 합계, 기계식 주차 대수] 입력 키 (yearNormalizeAnswers 결과 기준)
+const YEAR_UNDERGROUND_PARKING_KEYS = {
+  neighborhood: ["undergroundParkingArea", "mechanicalParkingCapacity"],
+  lodging: ["lodgingUndergroundParkingArea", "lodgingMechanicalParkingCapacity"],
+  elderly: ["elderlyUndergroundParkingArea", "elderlyMechanicalParkingCapacity"],
+  medical: ["medicalUndergroundParkingArea", "medicalMechanicalParkingCapacity"],
+  religious: ["religiousUndergroundParkingArea", "religiousMechanicalParkingCapacity"],
+  sales: ["salesUndergroundParkingArea", "salesMechanicalParkingCapacity"],
+  office: ["officeUndergroundParkingArea", "officeMechanicalParkingCapacity"],
+  factory: ["factoryUndergroundParkingArea", "factoryMechanicalParkingCapacity"],
+  apartment: ["aptUndergroundParkingArea", "aptMechanicalParkingCapacity"],
+};
+
+// 2026.3.1~ 허가분 공통(용도 무관): 지하 차고·주차장·기계식 주차 기준
+// (소방시설법 시행령 별표4 제2호가목6)·나목5)·다목15), 제5호다목5)·6) / 대통령령 제35860호 부칙 제1조 단서·제5조)
+// - 지하 차고·주차장 합계 200㎡ 미만: 단독경보형 감지기(해당 부분)·비상경보설비(모든 층)·연결살수설비(해당 부분)
+// - 지하 차고·주차장 합계 200㎡ 이상: 자동화재탐지설비(모든 층)
+// - 기계식 주차 20대 미만(지붕·외벽 있는 것): 연결살수설비
+// 다른 기준으로 이미 설치 대상인 설비는 기존 사유를 그대로 두고(중복 표기 안 함),
+// 자동화재탐지설비 대상이면 단독경보형 감지기는 면제(별표5 제8호)로 표시한다.
+function yearApplyUndergroundParking2026(results, inp) {
+  if (inp.pd < YD.D20260301) return;
+  const keys = YEAR_UNDERGROUND_PARKING_KEYS[inp.occupancyType] || YEAR_UNDERGROUND_PARKING_KEYS.neighborhood;
+  const ua = inp[keys[0]] || 0;
+  const mech = inp[keys[1]] || 0;
+  const smallUnderground = ua > 0 && ua < 200;
+  const largeUnderground = ua >= 200;
+  const smallMechanical = mech >= 1 && mech < 20;
+  const find = (name) => results.find((r) => r.name === name);
+  const promote = (r, reason) => {
+    if (r && r.status !== "required") { r.status = "required"; r.reason = reason; }
+  };
+
+  const autoDet = find("자동화재탐지설비");
+  if (largeUnderground && autoDet && autoDet.status !== "required") {
+    promote(autoDet, "지하 차고·주차장 면적 합계가 200㎡ 이상이어서 건축물의 모든 층에 설치해야 합니다. (2026.3.1 이후 허가분)");
+    promote(find("시각경보기"), "자동화재탐지설비 설치 대상이므로 함께 설치해야 합니다.");
+  }
+
+  if (smallUnderground) {
+    promote(find("비상경보설비"), "지하 차고·주차장 면적 합계가 200㎡ 미만이어서 건축물의 모든 층에 설치해야 합니다. (2026.3.1 이후 허가분)");
+  }
+
+  if (smallUnderground) {
+    promote(find("연결살수설비"), "지하 차고·주차장 면적 합계가 200㎡ 미만이어서 해당 차고·주차장 부분에 설치해야 합니다. (2026.3.1 이후 허가분)");
+  } else if (smallMechanical) {
+    promote(find("연결살수설비"), "기계식 주차시설로 20대 미만을 주차할 수 있어 설치해야 합니다. (2026.3.1 이후 허가분, 지붕과 외벽이 없는 개방형 기계식 주차시설은 제외)");
+  }
+
+  let single = find("단독경보형 감지기") || find("단독경보형감지기");
+  if (!single) {
+    single = makeResult(categories.alarm, "단독경보형 감지기", "", "notRequired", "", "");
+    const alarmIdx = results.findIndex((r) => r.name === "비상경보설비");
+    if (alarmIdx >= 0) results.splice(alarmIdx, 0, single);
+    else results.push(single);
+  }
+  if (single.status === "required") {
+    // 다른 기준(연립·다세대 등)으로 이미 대상인데 지하주차장 200㎡ 이상으로 자탐이 새로 생긴 경우 → 별표5 제8호 면제
+    if (largeUnderground && autoDet && autoDet.status === "required") {
+      single.status = "notRequired";
+      single.reason = "자동화재탐지설비 설치 대상(지하 차고·주차장 200㎡ 이상)이어서 단독경보형 감지기는 면제됩니다.";
+    }
+    return;
+  }
+  if (!smallUnderground) {
+    single.reason = single.reason || "지하 차고·주차장 면적 합계가 200㎡ 미만인 경우에 해당하지 않습니다.";
+  } else if (autoDet && autoDet.status === "required") {
+    single.reason = "지하 차고·주차장 면적 합계가 200㎡ 미만이지만, 자동화재탐지설비 설치 대상이어서 단독경보형 감지기는 면제됩니다.";
+  } else {
+    promote(single, "지하 차고·주차장 면적 합계가 200㎡ 미만이어서 해당 차고·주차장 부분에 설치해야 합니다. (2026.3.1 이후 허가분)");
+  }
+}
 
 function yearBuildLodgingExceptionItems(results, inp) {
   const exceptionItems = [];
@@ -16201,6 +16213,7 @@ function yearShowResults() {
   };
   if (inp.occupancyType === "lodging") {
     results = yearEvaluateLodging(inp);
+    yearApplyUndergroundParking2026(results, inp);
     exceptionItems = yearBuildLodgingExceptionItems(results, inp);
     summaryHtml = ibSummary([
       ibChip("🏨", "용도", "숙박시설"),
@@ -16211,6 +16224,7 @@ function yearShowResults() {
     ], autoNoteParts("lodging"));
   } else if (inp.occupancyType === "elderly") {
     results = yearEvaluateElderly(inp);
+    yearApplyUndergroundParking2026(results, inp);
     exceptionItems = yearBuildElderlyExceptionItems(results, inp);
     const subtypeLabel = inp.elderlySubtype === "living" ? "노유자 생활시설" : "일반 노유자시설";
     summaryHtml = ibSummary([
@@ -16222,6 +16236,7 @@ function yearShowResults() {
     ], autoNoteParts("elderly"));
   } else if (inp.occupancyType === "medical") {
     results = yearEvaluateMedical(inp);
+    yearApplyUndergroundParking2026(results, inp);
     exceptionItems = yearBuildMedicalExceptionItems(results, inp);
     const medicalSubtypeLabels = {
       generalHospital: "종합병원",
@@ -16240,6 +16255,7 @@ function yearShowResults() {
     ], autoNoteParts("medical"));
   } else if (inp.occupancyType === "religious") {
     results = yearEvaluateReligious(inp);
+    yearApplyUndergroundParking2026(results, inp);
     exceptionItems = yearBuildReligiousExceptionItems(results, inp);
     summaryHtml = ibSummary([
       ibChip("⛪", "용도", "종교시설"),
@@ -16249,6 +16265,7 @@ function yearShowResults() {
     ], autoNoteParts("religious"));
   } else if (inp.occupancyType === "sales") {
     results = yearEvaluateSales(inp);
+    yearApplyUndergroundParking2026(results, inp);
     exceptionItems = yearBuildSalesExceptionItems(results, inp);
     const salesTags = [];
     if (inp.salesIsTraditionalMarket) salesTags.push("전통시장");
@@ -16263,6 +16280,7 @@ function yearShowResults() {
     ], autoNoteParts("sales"));
   } else if (inp.occupancyType === "office") {
     results = yearEvaluateOffice(inp);
+    yearApplyUndergroundParking2026(results, inp);
     exceptionItems = yearBuildOfficeExceptionItems(results, inp);
     const officeTag = inp.officeIsOfficetel ? "(오피스텔)" : "";
     summaryHtml = ibSummary([
@@ -16273,6 +16291,7 @@ function yearShowResults() {
     ], autoNoteParts("office"));
   } else if (inp.occupancyType === "factory") {
     results = yearEvaluateFactory(inp);
+    yearApplyUndergroundParking2026(results, inp);
     exceptionItems = yearBuildFactoryExceptionItems(results, inp);
     const factoryScTag = inp.factoryHasSpecialCombustible ? ` (특수가연물 ${nf(inp.factorySpecialCombustibleMultiple)}배)` : "";
     summaryHtml = ibSummary([
@@ -16283,6 +16302,7 @@ function yearShowResults() {
     ], autoNoteParts("factory"));
   } else if (inp.occupancyType === "apartment") {
     results = yearEvaluateApartment(inp);
+    yearApplyUndergroundParking2026(results, inp);
     exceptionItems = yearBuildApartmentExceptionItems(results, inp);
     const aptSubtypeLabels = { apt: "아파트등", row: "연립주택·다세대주택", dorm: "기숙사" };
     const subtypeLabel = aptSubtypeLabels[inp.apartmentSubtype] || "공동주택";
@@ -16307,6 +16327,7 @@ function yearShowResults() {
       : `<div class="ib-note">※ 대표동 기준: 입력한 대표동 1개를 그대로 판정했습니다(면적 나눔 없음). 지하는 통합 지하 기준. 다른 동이 대표동보다 크면 그 동으로 다시 확인하세요.</div>`) + autoNoteParts("apartment"));
   } else {
     results = yearEvaluateNeighborhood(inp);
+    yearApplyUndergroundParking2026(results, inp);
     exceptionItems = yearBuildNeighborhoodExceptionItems(results, inp);
     summaryHtml = ibSummary([
       ibChip("🏪", "용도", "근린생활시설"),
@@ -16404,10 +16425,10 @@ function yearWizardRestart() {
   ya.yBefore2004LargeFloor1000 = "no";
   ya.yFirstSecondFloorArea = "750";
   ya.yIndoorParkingArea = "";
+  ya.yUndergroundParkingArea = "";
   ya.yMechanicalParkingCapacity = "";
   ya.yElectricalRoomArea = "";
   ya.ySmokeControlArea = "0";
-  ya.yHasSmallUndergroundParking = "no";
   ya.yHasIndoorParking = "no";
   ya.yHasElecRoom = "no";
   ya.yPilotiParkingFirstFloor = "no";
@@ -16431,6 +16452,7 @@ function yearWizardRestart() {
   ya.yLodgingHasGasFacility = "no";
   ya.yLodgingFirstSecondFloorArea = "750";
   ya.yLodgingIndoorParkingArea = "";
+  ya.yLodgingUndergroundParkingArea = "";
   ya.yLodgingMechanicalParkingCapacity = "";
   ya.yLodgingElectricalRoomArea = "";
   ya.yLodgingBasementAreaForSmoke = "0";
@@ -16457,10 +16479,10 @@ function yearWizardRestart() {
   ya.yElderlyHas24HourStaff = "no";
   ya.yElderlyFirstSecondFloorArea = "750";
   ya.yElderlyIndoorParkingArea = "";
+  ya.yElderlyUndergroundParkingArea = "";
   ya.yElderlyMechanicalParkingCapacity = "";
   ya.yElderlyElectricalRoomArea = "";
   ya.yElderlyBasementAreaForSmoke = "0";
-  ya.yElderlyHasSmallUndergroundParking = "no";
   // 의료시설 전용
   ya.yMedicalSubtype = "hospital";
   ya.yMedicalArea = "1500";
@@ -16470,6 +16492,7 @@ function yearWizardRestart() {
   ya.yMedicalHasFloor500Plus = "no";
   ya.yMedicalFirstSecondFloorArea = "750";
   ya.yMedicalIndoorParkingArea = "";
+  ya.yMedicalUndergroundParkingArea = "";
   ya.yMedicalMechanicalParkingCapacity = "";
   ya.yMedicalElectricalRoomArea = "";
   ya.yMedicalBasementAreaForSmoke = "0";
@@ -16488,6 +16511,7 @@ function yearWizardRestart() {
   ya.yReligiousHasLargeTargetFloor = "no";
   ya.yReligiousFirstSecondFloorArea = "750";
   ya.yReligiousIndoorParkingArea = "";
+  ya.yReligiousUndergroundParkingArea = "";
   ya.yReligiousMechanicalParkingCapacity = "";
   ya.yReligiousElectricalRoomArea = "";
   ya.yReligiousOccupancy100Plus = "no";
