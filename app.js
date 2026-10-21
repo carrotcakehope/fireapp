@@ -6195,7 +6195,6 @@ const YD = {
   D20080229: 20080229,
   D20110707: 20110707,
   D20120205: 20120205, // 제23272호(공포 2011.10.28)·제23571호 시행일: 노유자 생활시설·간이SP, 정신의료기관 간이SP, 아파트 옥외소화전 면제, 30층 속보설비·무선통신, 주방용자동소화장치 명칭
-  D20170726: 20170726, // 스프링클러 용도무관 의무층수 11층→6층 강화 (공동주택)
   D20120914: 20120914,
   D20130210: 20130210, // 제24304호 시행일 (공포 2013.1.9, 공포 후 1개월): 노유자·정신의료기관 SP 해당 용도 600㎡
   D20140708: 20140708, // 요양병원 스프링클러·간이스프링클러·FACP·속보 추가 (2014년 7월)
@@ -6565,7 +6564,7 @@ const yearSteps = [
       { value: "yes", label: "예", description: "해당 층이 있음" },
       { value: "no", label: "아니오", description: "해당 층이 없음" },
     ],
-    condition: (ya, pd) => ya.yOccupancyType === "apartment" && (parseInt(ya.yAboveGroundFloors) || 0) >= 4 && (parseInt(ya.yAboveGroundFloors) || 0) < (pd >= YD.D20170726 ? 6 : 11) && !yearIsAutoAreaMode(),
+    condition: (ya, pd) => ya.yOccupancyType === "apartment" && (parseInt(ya.yAboveGroundFloors) || 0) >= 4 && (parseInt(ya.yAboveGroundFloors) || 0) < (pd >= YD.D20180127 ? 6 : 11) && !yearIsAutoAreaMode(),
   },
   {
     key: "yAptFirstSecondFloorArea",
@@ -14298,11 +14297,11 @@ function yearEvaluateApartment(inp) {
   }
 
   // 3. 스프링클러설비 (용도무관: 6층/11층, 4층·지하·무창 1000㎡)
-  const spThreshold = pd >= YD.D20170726 ? 6 : 11;
+  const spThreshold = pd >= YD.D20180127 ? 6 : 11;
   let spReq = false, spReason = "";
   if (ag >= spThreshold) {
     spReq = true;
-    spReason = "지상 층수가 " + spThreshold + "층 이상이어서 모든 층에 설치해야 합니다. (" + (spThreshold === 6 ? "2017.7.26~ 6층 이상" : "11층 이상") + " 용도무관 기준)";
+    spReason = "지상 층수가 " + spThreshold + "층 이상이어서 모든 층에 설치해야 합니다. (" + (spThreshold === 6 ? "2018.1.27~ 6층 이상" : "11층 이상") + " 용도무관 기준)";
   } else if (hasBasement1000 || hasWindowless1000 || has4FFloor1000) {
     spReq = true;
     spReason = hasBasement1000 ? "지하층 바닥면적 1,000㎡ 이상인 층이 있어 해당 층에 설치해야 합니다."
