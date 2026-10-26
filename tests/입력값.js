@@ -17,6 +17,10 @@ const nb = (d, ag, ta, extra) => A({
   yAboveGroundFloors: String(ag), ...extra,
 });
 const postpartum = { yIsPostpartum: "yes", yPostpartumAreaRange: "under600" };
+// 분법 이전 근린생활시설 (업종 기본값: 기타 근린생활시설)
+const pnb = (d, o) => P({ yOccupancyType: "neighborhood", yPermitDate: d, yBefore2004FacilitySubtype: "general", ...o });
+// 분법 이전 그 밖의 용도
+const pocc = (occ, d, o) => P({ yOccupancyType: occ, yPermitDate: d, ...o });
 const ugParking = (d, area) => A({
   yOccupancyType: "neighborhood", yPermitDate: d, yTotalArea: "300", yAboveGroundFloors: "2",
   yBasementFloors: "1", yBasementAreaSum: String(area), yHasIndoorParking: "yes",
@@ -92,4 +96,37 @@ module.exports = {
   공5: A({ yOccupancyType: "factory", yPermitDate: "2019-06-01", yTotalArea: "5500", yAboveGroundFloors: "5" }),
   판1: A({ yOccupancyType: "sales", yPermitDate: "2019-06-01", yTotalArea: "3500", ySalesArea: "3500", yAboveGroundFloors: "7" }),
   종1: A({ yOccupancyType: "religious", yPermitDate: "2019-06-01", yTotalArea: "3500", yAboveGroundFloors: "7" }),
+
+  이근1: pnb("1983-06-01", { yTotalArea: "800", yAboveGroundFloors: "2", yBasementFloors: "1", yBasementAreaSum: "800" }),
+  이근2: pnb("1983-06-01", { yTotalArea: "7000", yAboveGroundFloors: "7" }),
+  이근3: pnb("1984-06-30", { yTotalArea: "5500", yAboveGroundFloors: "5" }),
+  이근4: pnb("1984-07-01", { yTotalArea: "5500", yAboveGroundFloors: "5" }),
+  이근5: pnb("1982-06-01", { yBefore2004FacilitySubtype: "restaurant", yTotalArea: "1500", yAboveGroundFloors: "3", yBasementFloors: "1", yBasementAreaSum: "1100", ySmokeControlArea: "1100" }),
+  이근6: pnb("1990-07-01", { yTotalArea: "9000", yAboveGroundFloors: "12" }),
+  이근7: pnb("1986-06-01", { yTotalArea: "1500", yAboveGroundFloors: "3", yBasementFloors: "1", yBasementAreaSum: "1100" }),
+  이근8: pnb("1996-06-01", { yTotalArea: "3000", yAboveGroundFloors: "6", yBasementFloors: "1", yBasementAreaSum: "500" }),
+  이근9: pnb("1996-06-01", { yTotalArea: "3000", yAboveGroundFloors: "10", yBasementFloors: "1", yBasementAreaSum: "300" }),
+  이근10: pnb("1996-06-01", { yTotalArea: "3500", yAboveGroundFloors: "4", yBasementFloors: "1", yBasementAreaSum: "300" }),
+  이근11: pnb("1986-06-01", { yBefore2004FacilitySubtype: "marketBathhouse", yTotalArea: "900", yAboveGroundFloors: "3" }),
+  이근12: pnb("1986-06-01", { yTotalArea: "900", yAboveGroundFloors: "3" }),
+  이근13: pnb("1990-06-30", { yTotalArea: "9000", yAboveGroundFloors: "12" }),
+  이근14: pnb("1991-03-01", { yTotalArea: "300", yAboveGroundFloors: "1", yBasementFloors: "2", yBasementAreaSum: "200" }),
+  이근15: pnb("1993-03-01", { yTotalArea: "300", yAboveGroundFloors: "1", yBasementFloors: "2", yBasementAreaSum: "200" }),
+
+  이숙1: pocc("lodging", "1996-06-01", { yTotalArea: "3000", yAboveGroundFloors: "6", yBasementFloors: "1", yBasementAreaSum: "500" }),
+  이숙2: pocc("lodging", "1993-06-01", { yTotalArea: "9000", yAboveGroundFloors: "12" }),
+  이숙3: pocc("lodging", "2002-06-01", { yTotalArea: "9000", yAboveGroundFloors: "12" }),
+  이숙4: pocc("lodging", "1993-06-01", { yTotalArea: "7000", yAboveGroundFloors: "7", yBefore2004LodgingIsTouristHotel: "yes" }),
+  이의1: pocc("medical", "1986-06-01", { yTotalArea: "9000", yAboveGroundFloors: "12" }),
+  이노1: pocc("elderly", "1986-06-01", { yTotalArea: "5500", yAboveGroundFloors: "5" }),
+  이판1: pocc("sales", "1993-06-01", { yTotalArea: "8000", yBefore2004SalesArea: "8000", yAboveGroundFloors: "2" }),
+  이판2: pocc("sales", "1996-06-01", { yTotalArea: "8000", yBefore2004SalesArea: "8000", yAboveGroundFloors: "2" }),
+  이종1: pocc("religious", "1996-06-01", { yTotalArea: "1500", yAboveGroundFloors: "3" }),
+  이종2: pocc("religious", "1996-06-01", { yTotalArea: "5500", yAboveGroundFloors: "5" }),
+  이업1: pocc("office", "1986-06-01", { yTotalArea: "1500", yAboveGroundFloors: "3" }),
+  이업2: pocc("office", "1986-06-01", { yTotalArea: "9000", yAboveGroundFloors: "12" }),
+  이공1: pocc("factory", "1986-06-01", { yTotalArea: "5500", yAboveGroundFloors: "5" }),
+  이공2: pocc("factory", "1983-06-01", { yTotalArea: "5500", yAboveGroundFloors: "5" }),
+  이아1: pocc("apartment", "1983-06-01", { yTotalArea: "800", yAboveGroundFloors: "2", yBasementFloors: "1", yBasementAreaSum: "800" }),
+  이아2: pocc("apartment", "1986-06-01", { yTotalArea: "5500", yAboveGroundFloors: "5" }),
 };

@@ -351,7 +351,7 @@ const FACILITIES_DATA = [
         id: 'standalone-detector',
         name: '단독경보형 감지기',
         category: '경보설비',
-        level: 'compact',
+        level: 'standard',
         definition: '배선·수신기 없이 기기 자체에서 화재를 감지하고 경보를 울리는 독립형 감지기',
         description: '복잡한 배선이나 수신기가 필요 없어 일반 주택, 소규모 숙박시설 등에 유용합니다. 천장에 나사로 고정하는 것만으로 설치가 완료됩니다. 연립·다세대주택에는 반드시 연동형으로 설치해야 합니다.',
         components: [
@@ -573,7 +573,7 @@ const FACILITIES_DATA = [
         id: 'gas-alarm',
         name: '가스누설경보기',
         category: '경보설비',
-        level: 'compact',
+        level: 'standard',
         definition: '가연성 가스가 누설되거나 발생된 경우 이를 탐지하여 경보하는 장치',
         description: '건물 내 가스 누출을 조기에 감지하여 폭발 및 화재 등 대형 사고를 미연에 방지하는 경보설비입니다. 가스 종류(LNG·LPG)에 따라 설치 위치가 다릅니다.',
         types: [
