@@ -9242,10 +9242,11 @@ html[data-theme="dark"] .devletter-divider { color: var(--text-dim); }
 .nf-sec-title::after { content: ""; flex: 1; height: 1px; background: var(--border); }
 .nf-place { font-size: 12.5px; font-weight: 800; color: var(--text-muted); margin: 14px 0 2px; word-break: keep-all; }
 .nf-lead { margin: 0 0 10px; font-size: 14px; line-height: 1.7; color: var(--text); word-break: keep-all; padding: 10px 12px; border-radius: 10px; background: var(--surface2); }
-.nf-field { display: flex; gap: 12px; padding: 10px 0; border-top: 1px solid var(--border); }
+.nf-field { display: flex; flex-direction: column; gap: 8px; padding: 10px 0; border-top: 1px solid var(--border); }
 .nf-fields > .nf-field:first-child { border-top: none; padding-top: 2px; }
-.nf-field-photo { flex-shrink: 0; width: 88px; height: 88px; border-radius: 10px; overflow: hidden; background: var(--surface2); position: relative; }
-.nf-field-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+/* 현장 사진은 장면 전체가 보여야 해서 자르지 않고(contain) 글 위에 크게 */
+.nf-field-photo { width: 100%; border-radius: 10px; overflow: hidden; background: var(--surface2); position: relative; }
+.nf-field-photo img { width: 100%; height: auto; max-height: 260px; object-fit: contain; display: block; }
 .nf-field-photo .src { position: absolute; left: 0; right: 0; bottom: 0; font-size: 9px; padding: 2px 4px; background: rgba(0, 0, 0, 0.6); color: #ddd; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .nf-field-text { font-size: 14px; line-height: 1.7; word-break: keep-all; color: var(--text); min-width: 0; }
 .nf-field-text > b:first-child { display: block; margin-bottom: 2px; }
@@ -9276,7 +9277,6 @@ html[data-theme="dark"] .devletter-divider { color: var(--text-dim); }
 /* 검토 모드(도감 제목 5번 탭)에서만 원문 미확인 문장에 밑줄 */
 html.fac-review .nf-unv { background: rgba(255, 196, 0, 0.18); border-bottom: 2px dotted #e0a800; }
 @media (max-width: 420px) {
-  .nf-field-photo { width: 72px; height: 72px; }
   .nf-type { flex-direction: column; gap: 2px; }
   .nf-type b { width: auto; }
 }
