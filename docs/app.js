@@ -49,7 +49,7 @@ const PATCH_NOTES = {
   items: [
     { type: "notice",  text: "이걸 배포한지 벌써 3개월이 됐네요. 사용하면서 불편한게 있으시면 편하게 연락주세요!" },
     { type: "new",     text: "소방시설 탐색기 공장 용도 동별 세분화(진행중)"},
-    { type: "improve", text: "소방시설 도감 리뉴얼중" },
+    { type: "improve", text: "소방시설 도감 리뉴얼중. 내용 수정중이니 오류가 있으면 연락주세요!" },
     { type: "fix",     text: "법정기한 계산기 자체점검, 부적합 주말 표시 버그 수정" },
   ],
 };

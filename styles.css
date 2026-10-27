@@ -9247,6 +9247,13 @@ html[data-theme="dark"] .devletter-divider { color: var(--text-dim); }
 /* 현장 사진은 장면 전체가 보여야 해서 자르지 않고(contain) 글 위에 크게 */
 .nf-field-photo { width: 100%; border-radius: 10px; overflow: hidden; background: var(--surface2); position: relative; }
 .nf-field-photo img { width: 100%; height: auto; max-height: 260px; object-fit: contain; display: block; }
+/* PC 등 넓은 화면: 사진은 왼쪽 고정 폭, 글은 오른쪽 (모바일은 위 세로 배치 그대로) */
+@media (min-width: 600px) {
+  .nf-field { flex-direction: row; align-items: flex-start; gap: 16px; }
+  .nf-field-photo { width: 220px; flex-shrink: 0; }
+  .nf-field-photo img { max-height: 200px; }
+  .nf-main-photo img { max-height: 260px; }
+}
 .nf-field-photo .src { position: absolute; left: 0; right: 0; bottom: 0; font-size: 9px; padding: 2px 4px; background: rgba(0, 0, 0, 0.6); color: #ddd; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .nf-field-text { font-size: 14px; line-height: 1.7; word-break: keep-all; color: var(--text); min-width: 0; }
 .nf-field-text > b:first-child { display: block; margin-bottom: 2px; }
