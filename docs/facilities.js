@@ -1,6 +1,9 @@
 (function () {
   'use strict';
 
+  // 데이터: facilities-data-v2.js (FACILITIES_V2). 항목 구조는 그 파일 맨 위 주석 참고.
+  const DATA = FACILITIES_V2;
+
   const openBtn = document.getElementById('open-facilities');
   const backBtn = document.getElementById('back-from-facilities');
   const contentEl = document.getElementById('facilities-content');
@@ -24,8 +27,32 @@
 
   backBtn.addEventListener('click', () => showScreen('screen-home'));
 
-  // 도감 '핵심 설치기준'이 어느 시점 법령 기준인지 표시 (법령 대조 시 갱신)
+  // 도감 '설치기준'이 어느 시점 법령 기준인지 표시 (법령 대조 시 갱신)
   const CRITERIA_BASIS_DATE = '2026.10';
+
+  // ── 검토 모드: 상단 "소방시설 도감" 제목을 5번 연속 누르면 켜고 끔 ──
+  // 켜면 원문 미확인 문장({?…?})이 노란 밑줄로 보임. 일반 사용자 화면에는 표시 없음.
+  const REVIEW_KEY = 'fac-review-mode';
+  function setReviewMode(on) {
+    document.documentElement.classList.toggle('fac-review', on);
+    try { localStorage.setItem(REVIEW_KEY, on ? '1' : '0'); } catch (e) {}
+  }
+  try { if (localStorage.getItem(REVIEW_KEY) === '1') document.documentElement.classList.add('fac-review'); } catch (e) {}
+  (function bindReviewTap() {
+    const title = document.querySelector('#screen-facilities .tb-title');
+    if (!title) return;
+    let count = 0, timer = null;
+    title.addEventListener('click', () => {
+      count++;
+      clearTimeout(timer);
+      timer = setTimeout(() => { count = 0; }, 1500);
+      if (count < 5) return;
+      count = 0;
+      const on = !document.documentElement.classList.contains('fac-review');
+      setReviewMode(on);
+      if (typeof showToast === 'function') showToast(on ? '도감 검토 모드 켜짐 (노란 밑줄 = 원문 미확인)' : '도감 검토 모드 꺼짐');
+    });
+  })();
 
   let initialized = false;
   let activeTabIndex = 0;
@@ -40,7 +67,7 @@
     const contentArea = document.createElement('div');
     contentArea.className = 'rg-content';
 
-    FACILITIES_DATA.forEach((tab, i) => {
+    DATA.forEach((tab, i) => {
       const btn = document.createElement('button');
       btn.type = 'button';
       btn.className = 'rg-tab-btn' + (i === 0 ? ' active' : '');
@@ -51,7 +78,7 @@
       const panel = document.createElement('div');
       panel.className = 'fac-panel' + (i !== 0 ? ' hidden' : '');
       panel.dataset.idx = i;
-      if (tab.intro && tab.showIntro !== false) panel.appendChild(buildIntroCard(tab.intro));
+      if (tab.intro) panel.appendChild(buildIntroCard(tab.intro));
       tab.items.forEach(item => panel.appendChild(buildAccordion(item)));
       contentArea.appendChild(panel);
     });
@@ -75,7 +102,7 @@
 
     if (typeof attachHorizontalSwipeNavigation === 'function') {
       attachHorizontalSwipeNavigation(contentEl, () => ({
-        keys: FACILITIES_DATA.map((_, i) => String(i)),
+        keys: DATA.map((_, i) => String(i)),
         current: String(activeTabIndex),
         onChange: activateTab,
       }));
@@ -117,7 +144,7 @@
     setTimeout(() => { acc.scrollIntoView({ behavior: 'auto', block: 'start' }); facFlash(acc); }, 60);
   }
 
-  // 탭 상단 intro 카드로 이동(독립 카드형: 비교표 등)
+  // 탭 상단 intro 카드로 이동(펼친 상태로)
   function openFacilityIntro(tabIdx) {
     trackMenuClick('소방시설 도감');
     showScreen('screen-facilities');
@@ -126,43 +153,26 @@
     setTimeout(() => {
       const panel = contentEl.querySelector('.fac-panel[data-idx="' + tabIdx + '"]');
       const card = panel ? panel.querySelector('.fac-intro-card') : null;
-      if (card) { card.scrollIntoView({ behavior: 'auto', block: 'start' }); facFlash(card); }
-      else { const sc = contentEl.querySelector('.rg-content'); if (sc) sc.scrollTop = 0; }
-    }, 60);
-  }
-
-  // 항목 내 "수계 공통 구성요소" 접힘 패널을 펼쳐서 이동
-  function openFacilityWaterComp(tabIdx, itemId) {
-    trackMenuClick('소방시설 도감');
-    showScreen('screen-facilities');
-    init();
-    activateFacTab(tabIdx);
-    const acc = document.getElementById('facacc-' + itemId);
-    if (!acc) return;
-    openAccordion(acc);
-    const btn = acc.querySelector('.fac-water-comp-btn');
-    const panel = acc.querySelector('.fac-water-comp-panel');
-    if (btn && panel && panel.classList.contains('hidden')) {
-      panel.classList.remove('hidden');
-      btn.classList.add('open');
-      const chev = btn.querySelector('.fac-water-comp-chevron');
-      if (chev) chev.textContent = '▲';
-    }
-    setTimeout(() => {
-      const target = panel || acc;
-      target.scrollIntoView({ behavior: 'auto', block: 'start' });
-      facFlash(target);
+      if (card) {
+        const body = card.querySelector('.fac-intro-body');
+        const toggle = card.querySelector('.fac-intro-toggle');
+        if (body && body.classList.contains('hidden')) {
+          body.classList.remove('hidden');
+          if (toggle) toggle.classList.add('open');
+        }
+        card.scrollIntoView({ behavior: 'auto', block: 'start' });
+        facFlash(card);
+      } else { const sc = contentEl.querySelector('.rg-content'); if (sc) sc.scrollTop = 0; }
     }, 60);
   }
 
   window.openFacilityItem = openFacilityItem;
   window.openFacilityIntro = openFacilityIntro;
-  window.openFacilityWaterComp = openFacilityWaterComp;
 
   // 결과 화면 등에서 특정 도감 항목만 모달(팝업)로 보기 — 화면 이동 없이 그 항목만
   function openFacilityModal(itemId) {
     let found = null;
-    FACILITIES_DATA.forEach(tab => (tab.items || []).forEach(it => { if (it.id === itemId) found = it; }));
+    DATA.forEach(tab => (tab.items || []).forEach(it => { if (it.id === itemId) found = it; }));
     if (!found) return;
     const overlay = document.getElementById('fac-modal-overlay');
     const host = document.getElementById('fac-modal-body');
@@ -172,7 +182,8 @@
     if (catEl) catEl.textContent = found.category || '';
     if (titleEl) titleEl.textContent = found.name || '';
     host.innerHTML = '';
-    const acc = buildAccordion(found);
+    // 모달은 탐색기 결과 화면에서 열리므로 "탐색기에서 확인" 안내는 뺌
+    const acc = buildAccordion(found, { inModal: true });
     const accBody = acc.querySelector('.rg-accordion-body');
     if (accBody) { accBody.classList.remove('hidden'); host.appendChild(accBody); }
     else { host.appendChild(acc); }
@@ -202,47 +213,102 @@
     return path.split('/').map((seg, i) => (i === 0 && (seg === '.' || seg === '..')) ? seg : encodeURIComponent(seg)).join('/');
   }
 
-  function makePhotoGallery(photos) {
-    const wrap = document.createElement('div');
-    wrap.className = 'fac-photo-gallery' + (photos.length > 1 ? ' fac-photo-gallery-multi' : '');
-
-    photos.forEach(p => {
-      const fig = document.createElement('figure');
-      fig.className = 'fac-photo-fig';
-
-      const imgWrap = document.createElement('div');
-      imgWrap.className = 'fac-photo-img-wrap';
-
-      const img = document.createElement('img');
-      img.src = encodePath(p.src);
-      img.className = 'fac-photo-img';
-      img.alt = p.caption || '';
-      img.loading = 'lazy';
-      imgWrap.appendChild(img);
-
-      if (p.source) {
-        const badge = document.createElement('span');
-        badge.className = 'fac-photo-source-badge';
-        badge.textContent = '출처: ' + p.source;
-        imgWrap.appendChild(badge);
-      }
-
-      fig.appendChild(imgWrap);
-
-      if (p.caption) {
-        const cap = document.createElement('figcaption');
-        cap.className = 'fac-photo-cap';
-        cap.textContent = p.caption;
-        fig.appendChild(cap);
-      }
-
-      wrap.appendChild(fig);
-    });
-
-    return wrap;
+  function esc(s) {
+    return String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  }
+  // **굵게**, {?원문 미확인?} 표시를 HTML로. 미확인 표시는 검토 모드에서만 밑줄이 보임(CSS)
+  function md(s) {
+    return esc(s)
+      .replace(/\{\?(.+?)\?\}/g, '<span class="nf-unv">$1</span>')
+      .replace(/\*\*(.+?)\*\*/g, '<b>$1</b>');
   }
 
-  function buildAccordion(item) {
+  function img(src, alt) {
+    return `<img src="${esc(encodePath(src))}" alt="${esc(alt || '')}" loading="lazy">`;
+  }
+
+  function fieldRows(rows) {
+    let cards = '', bullets = '';
+    rows.forEach(r => {
+      if (r.title || r.photo) {
+        cards += '<div class="nf-field">' +
+          (r.photo ? `<div class="nf-field-photo">${img(r.photo, r.title)}${r.source ? `<span class="src">출처: ${esc(r.source)}</span>` : ''}</div>` : '') +
+          `<div class="nf-field-text">${r.title ? `<b>${esc(r.title)}</b>` : ''}${md(r.text)}</div></div>`;
+      } else {
+        bullets += `<li>${md(r.text)}</li>`;
+      }
+    });
+    return (cards ? `<div class="nf-fields">${cards}</div>` : '') + (bullets ? `<ul class="nf-list">${bullets}</ul>` : '');
+  }
+  function sec(title, inner) {
+    return `<div class="nf-sec"><div class="nf-sec-title">${esc(title)}</div>${inner}</div>`;
+  }
+  function ul(list, ordered) {
+    const t = ordered ? 'ol' : 'ul';
+    return `<${t} class="nf-list">${list.map(x => `<li>${md(x)}</li>`).join('')}</${t}>`;
+  }
+
+  function itemBodyHtml(it, opts) {
+    let h = `<p class="nf-summary">${md(it.summary)}</p>`;
+    if (it.photo) {
+      h += `<div class="nf-main-photo">${img(it.photo, it.name)}${it.photoLabel ? `<span class="fac-photo-source-badge">${esc(it.photoLabel)}</span>` : ''}</div>`;
+    }
+    if (it.field) {
+      h += sec('현장에서 알아보는 법', (it.field.lead ? `<p class="nf-lead">${md(it.field.lead)}</p>` : '') + fieldRows(it.field.rows || []));
+    }
+    (it.sections || []).forEach(s => {
+      h += sec(s.title, ul(s.list) + (s.note ? `<div class="nf-note">${md(s.note)}</div>` : ''));
+    });
+    if (it.types && it.types.length) {
+      let t = '', lastGroup = null, open = false;
+      it.types.forEach(ty => {
+        if (ty.group !== lastGroup) {
+          if (open) t += '</div>';
+          if (ty.group) t += `<div class="nf-type-group">${esc(ty.group)}</div>`;
+          t += '<div class="nf-types">'; open = true; lastGroup = ty.group;
+        }
+        t += `<div class="nf-type"><b>${esc(ty.name)}${ty.rare ? '<span class="rare">드묾</span>' : ''}</b><span>${md(ty.desc)}</span></div>`;
+      });
+      if (open) t += '</div>';
+      h += sec('종류', t);
+    }
+    if (it.checks && it.checks.length) h += sec('점검할 때 보는 것', ul(it.checks));
+    if (!opts.inModal) {
+      h += '<button type="button" class="nf-explorer"><b>이 건물에 필요한가요?</b> 설치 대상은 건축허가 시기에 따라 달라서 <b>소방시설 탐색기</b>에서 확인합니다. →</button>';
+    }
+    const m = it.more;
+    if (m) {
+      const parts = [];
+      let b = '';
+      if (m.components && m.components.length) {
+        parts.push('구성요소');
+        b += sec('구성요소', m.components.map(c => `<div class="nf-comp"><b>${esc(c.name)}</b>${md(c.desc)}</div>`).join(''));
+      }
+      if (m.criteria && m.criteria.length) {
+        parts.push('설치기준');
+        b += sec('설치기준', `<div class="fac-criteria-basis">현행 기준(${CRITERIA_BASIS_DATE}) · 기존 건물은 설치 당시 기준이 적용됩니다.</div>` + ul(m.criteria));
+      }
+      if (m.usage && m.usage.length) {
+        const ut = m.usageTitle || '사용법';
+        parts.push(ut);
+        b += sec(ut, ul(m.usage, !m.usageTitle) + (m.note ? `<div class="nf-note">${md(m.note)}</div>` : ''));
+      } else if (m.note) {
+        b += `<div class="nf-note">${md(m.note)}</div>`;
+      }
+      (m.extra || []).forEach(x => { parts.push(x.title); b += sec(x.title, ul(x.list)); });
+      h += `<details class="nf-more"><summary>더 자세히 (${esc(parts.join(' · '))})</summary><div class="nf-more-body">${b}</div></details>`;
+    }
+    return h;
+  }
+
+  // 탐색기 열기 — 홈의 소방시설 탐색기 카드와 같은 동작
+  function openExplorer() {
+    const btn = document.getElementById('open-explorer');
+    if (btn) btn.click();
+  }
+
+  function buildAccordion(item, opts) {
+    opts = opts || {};
     const wrap = document.createElement('div');
     wrap.className = 'rg-accordion';
     if (item.id) wrap.id = 'facacc-' + item.id;
@@ -252,238 +318,16 @@
     header.className = 'rg-accordion-header';
     header.innerHTML = `
       <div>
-        <div class="fac-item-category">${item.category}</div>
-        <div class="rg-acc-label">${item.name}</div>
+        <div class="fac-item-category">${esc(item.category)}</div>
+        <div class="rg-acc-label">${esc(item.name)}</div>
       </div>
       <span class="rg-acc-chevron">▼</span>`;
 
     const body = document.createElement('div');
-    body.className = 'rg-accordion-body hidden';
-
-    if (item.definition) {
-      const el = document.createElement('div');
-      el.className = 'fac-definition';
-      el.textContent = item.definition;
-      body.appendChild(el);
-    }
-
-    // 사진 + 설명: compact가 아니면 갤러리(위) + 설명(아래) 또는 2열 나란히, compact는 설명만
-    if (item.level !== 'compact') {
-      if (item.photos?.length) {
-        body.appendChild(makePhotoGallery(item.photos));
-        if (item.description) {
-          const el = document.createElement('p');
-          el.className = 'fac-description';
-          el.textContent = item.description;
-          body.appendChild(el);
-        }
-      } else if (item.photoWithComponents && item.components?.length) {
-        const row = document.createElement('div');
-        row.className = 'fac-photo-comp-row';
-
-        const photoCol = document.createElement('div');
-        photoCol.className = 'fac-photo-col';
-        photoCol.appendChild(makeMainPhoto(item));
-        row.appendChild(photoCol);
-
-        const rightCol = document.createElement('div');
-        rightCol.className = 'fac-desc-col';
-
-        if (item.description) {
-          const p = document.createElement('p');
-          p.className = 'fac-description fac-description-top';
-          p.textContent = item.description;
-          rightCol.appendChild(p);
-        }
-
-        const compLabel = document.createElement('div');
-        compLabel.className = 'fac-sidebar-comp-label';
-        compLabel.textContent = '주요 구성요소';
-        rightCol.appendChild(compLabel);
-
-        const compList = document.createElement('div');
-        compList.className = 'fac-sidebar-comp-list';
-        item.components.forEach(c => {
-          const compRow = document.createElement('div');
-          compRow.className = 'fac-sidebar-comp-row';
-          compRow.innerHTML = `<div class="fac-sidebar-comp-name">${c.name}</div><div class="fac-sidebar-comp-desc">${c.desc}</div>`;
-          compList.appendChild(compRow);
-        });
-        rightCol.appendChild(compList);
-
-        row.appendChild(rightCol);
-        body.appendChild(row);
-      } else {
-        const row = document.createElement('div');
-        row.className = 'fac-photo-desc-row';
-
-        const photoCol = document.createElement('div');
-        photoCol.className = 'fac-photo-col';
-        photoCol.appendChild(makeMainPhoto(item));
-        row.appendChild(photoCol);
-
-        if (item.description) {
-          const descCol = document.createElement('div');
-          descCol.className = 'fac-desc-col';
-          const el = document.createElement('p');
-          el.className = 'fac-description';
-          el.textContent = item.description;
-          descCol.appendChild(el);
-          row.appendChild(descCol);
-        }
-
-        body.appendChild(row);
-      }
-    } else if (item.description) {
-      const el = document.createElement('p');
-      el.className = 'fac-description';
-      el.textContent = item.description;
-      body.appendChild(el);
-    }
-
-    if (item.types?.length) {
-      body.appendChild(makeSectionLabel('종류'));
-      const grid = document.createElement('div');
-      grid.className = 'fac-type-grid';
-      item.types.forEach(t => {
-        const card = document.createElement('div');
-        card.className = 'fac-type-card';
-
-        if (t.photo) {
-          const photoWrap = document.createElement('div');
-          photoWrap.className = 'fac-mini-photo';
-          if (typeof t.photo === 'string') {
-            const img = document.createElement('img');
-            img.src = encodePath(t.photo);
-            img.alt = t.name;
-            img.loading = 'lazy';
-            img.style.cssText = 'width:100%;height:100%;object-fit:cover;display:block;';
-            photoWrap.appendChild(img);
-          } else {
-            photoWrap.textContent = '📷';
-          }
-          card.appendChild(photoWrap);
-        }
-
-        const name = document.createElement('div');
-        name.className = 'fac-type-name';
-        name.textContent = t.name;
-        const desc = document.createElement('div');
-        desc.className = 'fac-type-desc';
-        desc.textContent = t.desc;
-        card.appendChild(name);
-        card.appendChild(desc);
-        grid.appendChild(card);
-      });
-      body.appendChild(grid);
-    }
-
-    if (item.components?.length && !item.photoWithComponents) {
-      body.appendChild(makeSectionLabel('주요 구성요소'));
-      const list = document.createElement('div');
-      list.className = 'fac-comp-list';
-      item.components.forEach(c => {
-        const row = document.createElement('div');
-        row.className = 'fac-comp-row';
-        if (c.photo) row.appendChild(makeMiniPhoto('sm'));
-        const text = document.createElement('div');
-        text.className = 'fac-comp-text';
-        text.innerHTML = `<div class="fac-comp-name">${c.name}</div><div class="fac-comp-desc">${c.desc}</div>`;
-        row.appendChild(text);
-        list.appendChild(row);
-      });
-      body.appendChild(list);
-    }
-
-    if (item.showWaterSystemComponents) {
-      const introData = FACILITIES_DATA[0]?.intro;
-      if (introData) {
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'fac-water-comp-btn';
-        btn.innerHTML = `<span>🔧 수계소화설비 공통 구성요소</span><span class="fac-water-comp-chevron">▼</span>`;
-
-        const panel = document.createElement('div');
-        panel.className = 'fac-water-comp-panel hidden';
-        const introCard = buildIntroCard(introData);
-        introCard.querySelector('.fac-intro-header')?.remove();
-        panel.appendChild(introCard);
-
-        btn.addEventListener('click', () => {
-          const isHidden = panel.classList.toggle('hidden');
-          btn.querySelector('.fac-water-comp-chevron').textContent = isHidden ? '▼' : '▲';
-          btn.classList.toggle('open', !isHidden);
-        });
-
-        body.appendChild(btn);
-        body.appendChild(panel);
-      }
-    }
-
-    if (item.criteria?.length) {
-      body.appendChild(makeSectionLabel('핵심 설치기준'));
-      const basis = document.createElement('div');
-      basis.className = 'fac-criteria-basis';
-      basis.textContent = `현행 기준(${CRITERIA_BASIS_DATE}) · 기존 건물은 설치 당시 기준이 적용되니 연도별 기준은 소방시설 탐색기에서 확인하세요.`;
-      body.appendChild(basis);
-      const ul = document.createElement('ul');
-      ul.className = 'rg-acc-desc';
-      item.criteria.forEach(c => {
-        const li = document.createElement('li');
-        li.textContent = c;
-        ul.appendChild(li);
-      });
-      body.appendChild(ul);
-    }
-
-    if (item.usage?.length) {
-      body.appendChild(makeSectionLabel('사용법'));
-      const ol = document.createElement('ol');
-      ol.className = 'fac-usage-list';
-      item.usage.forEach(u => {
-        const li = document.createElement('li');
-        li.textContent = u;
-        ol.appendChild(li);
-      });
-      body.appendChild(ol);
-    }
-
-    if (item.storage?.length) {
-      body.appendChild(makeSectionLabel('보관법'));
-      const ul = document.createElement('ul');
-      ul.className = 'rg-acc-desc';
-      item.storage.forEach(s => {
-        const li = document.createElement('li');
-        li.textContent = s;
-        ul.appendChild(li);
-      });
-      body.appendChild(ul);
-    }
-
-    if (item.inspection?.length) {
-      body.appendChild(makeSectionLabel('점검방법'));
-      const ul = document.createElement('ul');
-      ul.className = 'rg-acc-desc';
-      item.inspection.forEach(ins => {
-        const li = document.createElement('li');
-        li.textContent = ins;
-        ul.appendChild(li);
-      });
-      body.appendChild(ul);
-    }
-
-    if (item.tips?.length) {
-      body.appendChild(makeSectionLabel('주의사항'));
-      const box = document.createElement('div');
-      box.className = 'info-box amber';
-      item.tips.forEach((tip, i) => {
-        const p = document.createElement('p');
-        p.style.margin = i === 0 ? '0' : '6px 0 0';
-        p.textContent = tip;
-        box.appendChild(p);
-      });
-      body.appendChild(box);
-    }
+    body.className = 'rg-accordion-body nf-body hidden';
+    body.innerHTML = itemBodyHtml(item, opts);
+    const exp = body.querySelector('.nf-explorer');
+    if (exp) exp.addEventListener('click', openExplorer);
 
     header.addEventListener('click', () => {
       const open = header.classList.toggle('open');
@@ -495,227 +339,37 @@
     return wrap;
   }
 
-  function makeMainPhoto(item) {
-    const fig = document.createElement('figure');
-    fig.className = 'fac-photo-fig';
-
-    const imgWrap = document.createElement('div');
-    imgWrap.className = 'fac-photo-img-wrap';
-
-    const candidates = [
-      `./image/facilities/${item.name}/${item.name}_main.jpg`,
-      `./image/facilities/${item.name}/${item.name}_main.webp`,
-    ];
-    let idx = 0;
-
-    const img = document.createElement('img');
-    img.className = 'fac-photo-img';
-    img.alt = item.name;
-    img.loading = 'lazy';
-    img.src = encodePath(candidates[idx]);
-    img.onerror = () => {
-      idx++;
-      if (idx < candidates.length) {
-        img.src = encodePath(candidates[idx]);
-      } else {
-        fig.replaceWith(makePlaceholder(`${item.name} 대표 사진`));
-      }
-    };
-
-    if (item.mainLabel) {
-      const badge = document.createElement('span');
-      badge.className = 'fac-photo-source-badge';
-      badge.textContent = item.mainLabel;
-      imgWrap.appendChild(badge);
-    } else if (item.mainSource) {
-      const badge = document.createElement('span');
-      badge.className = 'fac-photo-source-badge';
-      badge.textContent = '출처: ' + item.mainSource;
-      imgWrap.appendChild(badge);
-    }
-
-    imgWrap.appendChild(img);
-    fig.appendChild(imgWrap);
-    return fig;
-  }
-
-  function makePlaceholder(label) {
-    const el = document.createElement('div');
-    el.className = 'fac-photo-placeholder';
-    el.innerHTML = `<span>📷</span><span>${label} 준비중</span>`;
-    return el;
-  }
-
-  function makeMiniPhoto(size) {
-    const el = document.createElement('div');
-    el.className = 'fac-mini-photo' + (size === 'sm' ? ' fac-mini-photo-sm' : '');
-    el.textContent = '📷';
-    return el;
-  }
-
-  function makeSectionLabel(text) {
-    const el = document.createElement('div');
-    el.className = 'rg-section-label';
-    el.textContent = text;
-    return el;
-  }
-
-  function levelLabel(level) {
-    return { full: 'FULL', standard: 'STD', compact: 'COMPACT' }[level] || '';
-  }
-
   function buildIntroCard(intro) {
     const card = document.createElement('div');
     card.className = 'fac-intro-card';
 
-    // 헤더 (클릭으로 접기/펼치기)
+    // 헤더 (클릭으로 접기/펼치기). 처음엔 접어 둠 — 항목 목록이 바로 보이게
     const header = document.createElement('div');
     header.className = 'fac-intro-header';
-
-    const left = document.createElement('div');
-    left.className = 'fac-intro-header-left';
-    left.innerHTML = `<span class="fac-intro-icon">${intro.type === 'comparison' ? '📊' : '🔧'}</span>
-                      <span class="fac-intro-title">${intro.title}</span>
-                      <span class="fac-intro-badge">${intro.type === 'comparison' ? '비교' : '공통'}</span>`;
-
-    const toggle = document.createElement('span');
-    toggle.className = 'fac-intro-toggle open';
-    toggle.textContent = '▲';
-
-    header.appendChild(left);
-    header.appendChild(toggle);
+    header.innerHTML = `<div class="fac-intro-header-left">
+        <span class="fac-intro-title">${esc(intro.title)}</span>
+        ${intro.badge ? `<span class="fac-intro-badge">${esc(intro.badge)}</span>` : ''}
+      </div>
+      <span class="fac-intro-toggle">▼</span>`;
     card.appendChild(header);
 
-    // 바디
     const body = document.createElement('div');
-    body.className = 'fac-intro-body';
-
-    if (intro.description) {
-      const desc = document.createElement('p');
-      desc.className = 'fac-intro-desc';
-      desc.textContent = intro.description;
-      body.appendChild(desc);
-    }
-
-    if (intro.type === 'components' && intro.components) {
-      const grid = document.createElement('div');
-      grid.className = 'fac-intro-comp-grid';
-      intro.components.forEach(comp => {
-        const compCard = document.createElement('div');
-        compCard.className = 'fac-intro-comp-card' + (comp.note ? ' has-note' : '');
-
-        if (comp.photo) {
-          const photoWrap = document.createElement('div');
-          photoWrap.className = 'fac-intro-comp-photo';
-          const img = document.createElement('img');
-          img.src = encodePath(comp.photo);
-          img.alt = comp.name;
-          img.loading = 'lazy';
-          photoWrap.appendChild(img);
-          compCard.appendChild(photoWrap);
-        }
-
-        const info = document.createElement('div');
-        info.className = 'fac-intro-comp-info';
-
-        const nameRow = document.createElement('div');
-        nameRow.className = 'fac-intro-comp-name-row';
-        const name = document.createElement('div');
-        name.className = 'fac-intro-comp-name';
-        name.textContent = comp.name;
-        nameRow.appendChild(name);
-        if (comp.analogy) {
-          const badge = document.createElement('span');
-          badge.className = 'fac-intro-comp-analogy';
-          badge.textContent = comp.analogy;
-          nameRow.appendChild(badge);
-        }
-        info.appendChild(nameRow);
-
-        const descEl = document.createElement('div');
-        descEl.className = 'fac-intro-comp-desc';
-        descEl.textContent = comp.desc;
-        info.appendChild(descEl);
-
-        if (comp.note) {
-          const note = document.createElement('div');
-          note.className = 'fac-intro-comp-note';
-          note.textContent = '⚠️ ' + comp.note;
-          info.appendChild(note);
-        }
-
-        compCard.appendChild(info);
-        grid.appendChild(compCard);
-      });
-      body.appendChild(grid);
-
-    } else if (intro.type === 'comparison' && intro.headers && intro.rows) {
-      // 데스크탑: 테이블
-      const tableWrap = document.createElement('div');
-      tableWrap.className = 'fac-intro-table-wrap fac-comp-table-view';
-      const table = document.createElement('table');
-      table.className = 'fac-intro-table';
-
-      const thead = document.createElement('thead');
-      const headerRow = document.createElement('tr');
-      intro.headers.forEach(h => {
-        const th = document.createElement('th');
-        th.textContent = h;
-        headerRow.appendChild(th);
-      });
-      thead.appendChild(headerRow);
-      table.appendChild(thead);
-
-      const tbody = document.createElement('tbody');
-      intro.rows.forEach(row => {
-        const tr = document.createElement('tr');
-        row.forEach((cell) => {
-          const td = document.createElement('td');
-          td.textContent = cell;
-          tr.appendChild(td);
-        });
-        tbody.appendChild(tr);
-      });
-      table.appendChild(tbody);
-      tableWrap.appendChild(table);
-      body.appendChild(tableWrap);
-
-      // 모바일: 컬럼별 카드
-      const cardView = document.createElement('div');
-      cardView.className = 'fac-comp-card-view';
-      for (let col = 1; col < intro.headers.length; col++) {
-        const colCard = document.createElement('div');
-        colCard.className = 'fac-comp-col-card';
-        const colTitle = document.createElement('div');
-        colTitle.className = 'fac-comp-col-title';
-        colTitle.textContent = intro.headers[col];
-        colCard.appendChild(colTitle);
-        intro.rows.forEach(row => {
-          const rowEl = document.createElement('div');
-          rowEl.className = 'fac-comp-col-row';
-          const label = document.createElement('span');
-          label.className = 'fac-comp-col-label';
-          label.textContent = row[0];
-          const val = document.createElement('span');
-          val.className = 'fac-comp-col-val';
-          val.textContent = row[col];
-          rowEl.appendChild(label);
-          rowEl.appendChild(val);
-          colCard.appendChild(rowEl);
-        });
-        cardView.appendChild(colCard);
-      }
-      body.appendChild(cardView);
-    }
-
+    body.className = 'fac-intro-body nf-body hidden';
+    let h = `<p class="nf-summary">${md(intro.summary)}</p>`;
+    const icon = intro.groupsTitle ? '' : '📍 ';
+    let g = '';
+    (intro.groups || []).forEach(gr => { g += `<div class="nf-place">${icon}${esc(gr.place)}</div>` + fieldRows(gr.rows || []); });
+    h += sec(intro.groupsTitle || '장소별 장비', g);
+    if (intro.note) h += `<div class="nf-note">${md(intro.note)}</div>`;
+    if (intro.checks && intro.checks.length) h += sec('점검할 때 보는 것', ul(intro.checks));
+    body.innerHTML = h;
     card.appendChild(body);
 
-    // 접기/펼치기
+    const toggle = header.querySelector('.fac-intro-toggle');
     header.addEventListener('click', () => {
-      const isOpen = !body.classList.contains('hidden');
-      body.classList.toggle('hidden', isOpen);
-      toggle.textContent = isOpen ? '▼' : '▲';
-      toggle.classList.toggle('open', !isOpen);
+      const willOpen = body.classList.contains('hidden');
+      body.classList.toggle('hidden', !willOpen);
+      toggle.classList.toggle('open', willOpen);
     });
 
     return card;

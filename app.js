@@ -45,7 +45,7 @@ function trackMenuClick(menuName) {
 // ── 패치노트 설정 (여기만 수정하면 됩니다) ──────────────────────────────
 const PATCH_NOTES = {
   version: "v1.0.2",
-  date: "2026-10-26",
+  date: "2026-10-27",
   items: [
     { type: "notice",  text: "이걸 배포한지 벌써 3개월이 됐네요. 사용하면서 불편한게 있으시면 편하게 연락주세요!" },
     { type: "new",     text: "소방시설 탐색기 공장 용도 동별 세분화(진행중)"},
@@ -2235,8 +2235,8 @@ let _facGuideIndex = null;
 function getFacGuideIndex() {
   if (_facGuideIndex) return _facGuideIndex;
   const idx = {};
-  if (typeof FACILITIES_DATA !== "undefined") {
-    FACILITIES_DATA.forEach((tab, tabIdx) => {
+  if (typeof FACILITIES_V2 !== "undefined") {
+    FACILITIES_V2.forEach((tab, tabIdx) => {
       (tab.items || []).forEach((it) => {
         if (it && it.name) idx[normFacName(it.name)] = { tabIdx, itemId: it.id };
       });
@@ -5368,7 +5368,7 @@ const yearState = {
     yEraChoice: "after2004",
     yOccupancyType: "neighborhood",
     yAutoCalcAreas: "yes",
-    yPermitdate: "2026-10-26",
+    yPermitdate: "2026-10-27",
     yTotalArea: "1500",
     yAboveGroundFloors: "4",
     yBasementFloors: "0",
@@ -18686,18 +18686,23 @@ function goToRgGuideSection(tab, sectionId) {
   }
 
   function buildFacilityEntries() {
-    if (typeof FACILITIES_DATA === "undefined") return [];
+    if (typeof FACILITIES_V2 === "undefined") return [];
+    // 도감 글의 **굵게**·{?원문 미확인?} 표시는 검색어에서 뺌
+    const plain = (s) => stripTags(s == null ? "" : String(s).replace(/\{\?|\?\}|\*\*/g, ""));
     const entries = [];
-    FACILITIES_DATA.forEach((tab, idx) => {
+    FACILITIES_V2.forEach((tab, idx) => {
       (tab.items || []).forEach((item) => {
-        const kw = [item.name, item.category, stripTags(item.definition), stripTags(item.description), tab.tabLabel];
-        (item.types || []).forEach((t) => { kw.push(t.name); kw.push(stripTags(t.desc)); });
-        (item.components || []).forEach((c) => { kw.push(c.name); kw.push(stripTags(c.desc)); });
-        (item.criteria || []).forEach((s) => kw.push(stripTags(s)));
-        (item.usage || []).forEach((s) => kw.push(stripTags(s)));
-        (item.storage || []).forEach((s) => kw.push(stripTags(s)));
-        (item.inspection || []).forEach((s) => kw.push(stripTags(s)));
-        (item.tips || []).forEach((s) => kw.push(stripTags(s)));
+        const kw = [item.name, item.category, plain(item.summary), tab.tabLabel];
+        const field = item.field || {};
+        kw.push(plain(field.lead));
+        (field.rows || []).forEach((r) => { kw.push(r.title); kw.push(plain(r.text)); });
+        (item.sections || []).forEach((s) => { kw.push(s.title); (s.list || []).forEach((x) => kw.push(plain(x))); });
+        (item.types || []).forEach((t) => { kw.push(t.name); kw.push(plain(t.desc)); });
+        (item.checks || []).forEach((s) => kw.push(plain(s)));
+        const more = item.more || {};
+        (more.components || []).forEach((c) => { kw.push(c.name); kw.push(plain(c.desc)); });
+        (more.criteria || []).forEach((s) => kw.push(plain(s)));
+        (more.usage || []).forEach((s) => kw.push(plain(s)));
         entries.push({
           icon: "📖", title: item.name, desc: (item.category ? item.category + " · " : "") + "소방시설 도감",
           keywords: kw.filter(Boolean),
@@ -18705,38 +18710,25 @@ function goToRgGuideSection(tab, sectionId) {
         });
       });
 
-      // 탭 상단 intro(수계 공통 구성요소 / 비교표 등)도 색인
+      // 탭 상단 intro 카드(수계 소화설비 주요 장비 / 경보설비 구분하는 법)도 색인 — 카드 안 장비 이름으로도 찾게
       const intro = tab.intro;
       if (intro) {
-        if (intro.type === "components" && (intro.components || []).length) {
-          // 수계 공통 구성요소: 항목 내 접힘 패널로 이동(없으면 intro 카드로)
-          const waterItem = (tab.items || []).find((it) => it.showWaterSystemComponents);
-          const nav = waterItem
-            ? () => { if (typeof window.openFacilityWaterComp === "function") window.openFacilityWaterComp(idx, waterItem.id); }
-            : () => { if (typeof window.openFacilityIntro === "function") window.openFacilityIntro(idx); };
-          intro.components.forEach((c) => {
-            entries.push({
-              icon: "📖", title: c.name, desc: intro.title + " · 소방시설 도감",
-              keywords: [c.name, stripTags(c.desc), c.analogy, intro.title, tab.tabLabel].filter(Boolean),
-              action: nav,
-            });
+        const nav = () => { if (typeof window.openFacilityIntro === "function") window.openFacilityIntro(idx); };
+        const kw = [intro.title, plain(intro.summary), tab.tabLabel];
+        (intro.groups || []).forEach((g) => {
+          kw.push(g.place);
+          (g.rows || []).forEach((r) => {
+            kw.push(r.title); kw.push(plain(r.text));
+            if (r.title) {
+              entries.push({
+                icon: "📖", title: r.title, desc: intro.title + " · 소방시설 도감",
+                keywords: [r.title, plain(r.text), intro.title, tab.tabLabel].filter(Boolean),
+                action: nav,
+              });
+            }
           });
-          entries.push({
-            icon: "📖", title: intro.title, desc: "소방시설 도감",
-            keywords: [intro.title, stripTags(intro.description), tab.tabLabel].filter(Boolean),
-            action: nav,
-          });
-        } else {
-          // 비교표 등: 탭 상단 intro 카드로 이동
-          const kw = [intro.title, stripTags(intro.description), tab.tabLabel];
-          (intro.headers || []).forEach((h) => kw.push(h));
-          (intro.rows || []).forEach((r) => r.forEach((cell) => kw.push(stripTags(cell))));
-          entries.push({
-            icon: "📖", title: intro.title, desc: "소방시설 도감",
-            keywords: kw.filter(Boolean),
-            action: () => { if (typeof window.openFacilityIntro === "function") window.openFacilityIntro(idx); },
-          });
-        }
+        });
+        entries.push({ icon: "📖", title: intro.title, desc: "소방시설 도감", keywords: kw.filter(Boolean), action: nav });
       }
     });
     return entries;

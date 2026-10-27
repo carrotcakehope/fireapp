@@ -1,4 +1,4 @@
-const CACHE = 'fireapp-v437';
+const CACHE = 'fireapp-v438';
 
 const PRECACHE_FILES = [
   './index.html',
@@ -21,7 +21,7 @@ const PRECACHE_FILES = [
   './assets/pets/mailpup/summon-face.png',
 ];
 
-const NETWORK_FIRST = ['index.html', 'app.js', 'styles.css', 'manifest.json', 'facilities-data.js', 'facilities.js', 'holidays.json', 'chat streaming.html', 'intro.html', 'intro-mobile.html'];
+const NETWORK_FIRST = ['index.html', 'app.js', 'styles.css', 'manifest.json', 'facilities-data-v2.js', 'facilities.js', 'holidays.json', 'chat streaming.html', 'intro.html', 'intro-mobile.html'];
 
 self.addEventListener('install', e => {
   e.waitUntil(

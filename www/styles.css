@@ -9232,3 +9232,51 @@ html[data-theme="dark"] .devletter-divider { color: var(--text-dim); }
   15%  { box-shadow: 0 0 0 4px var(--red, #d93025); }
   100% { box-shadow: 0 0 0 0 rgba(255, 107, 157, 0); }
 }
+
+/* ── 소방시설 도감 (facilities-data-v2.js / facilities.js) ── */
+.nf-summary { margin: 0; font-size: 14.5px; line-height: 1.75; color: var(--text); word-break: keep-all; }
+.nf-main-photo { margin: 12px 0 0; border-radius: 10px; overflow: hidden; position: relative; background: var(--surface2); }
+.nf-main-photo img { width: 100%; max-height: 300px; object-fit: contain; display: block; }
+.nf-sec { margin-top: 18px; }
+.nf-sec-title { font-size: 13px; font-weight: 800; color: var(--red-soft); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+.nf-sec-title::after { content: ""; flex: 1; height: 1px; background: var(--border); }
+.nf-place { font-size: 12.5px; font-weight: 800; color: var(--text-muted); margin: 14px 0 2px; word-break: keep-all; }
+.nf-lead { margin: 0 0 10px; font-size: 14px; line-height: 1.7; color: var(--text); word-break: keep-all; padding: 10px 12px; border-radius: 10px; background: var(--surface2); }
+.nf-field { display: flex; gap: 12px; padding: 10px 0; border-top: 1px solid var(--border); }
+.nf-fields > .nf-field:first-child { border-top: none; padding-top: 2px; }
+.nf-field-photo { flex-shrink: 0; width: 88px; height: 88px; border-radius: 10px; overflow: hidden; background: var(--surface2); position: relative; }
+.nf-field-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.nf-field-photo .src { position: absolute; left: 0; right: 0; bottom: 0; font-size: 9px; padding: 2px 4px; background: rgba(0, 0, 0, 0.6); color: #ddd; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.nf-field-text { font-size: 14px; line-height: 1.7; word-break: keep-all; color: var(--text); min-width: 0; }
+.nf-field-text > b:first-child { display: block; margin-bottom: 2px; }
+.nf-list { margin: 0; padding-left: 18px; font-size: 14px; line-height: 1.75; word-break: keep-all; color: var(--text); }
+.nf-list li + li { margin-top: 4px; }
+.nf-fields + .nf-list { margin-top: 8px; }
+.nf-types { display: grid; gap: 6px; }
+.nf-type { display: flex; gap: 10px; font-size: 13.5px; line-height: 1.6; padding: 8px 10px; border-radius: 9px; background: var(--surface2); word-break: keep-all; color: var(--text); }
+.nf-type b { flex-shrink: 0; width: 92px; }
+.nf-type .rare { display: inline-block; margin-left: 6px; font-size: 10px; padding: 1px 6px; border-radius: 999px; border: 1px solid var(--border2); color: var(--text-dim); vertical-align: 1px; font-weight: 600; }
+.nf-type-group { font-size: 12px; color: var(--text-dim); margin: 10px 0 4px; }
+.nf-type-group:first-child { margin-top: 0; }
+.nf-note { margin-top: 8px; font-size: 12.5px; line-height: 1.65; color: var(--text-muted); word-break: keep-all; }
+.nf-explorer { display: block; width: 100%; text-align: left; margin-top: 18px; padding: 12px 14px; border-radius: 10px; border: 1px solid var(--blue); background: var(--blue-dim); color: var(--text); font: inherit; font-size: 13.5px; line-height: 1.6; word-break: keep-all; cursor: pointer; }
+.nf-explorer b { color: var(--blue); }
+.nf-more { margin-top: 14px; border: 1px solid var(--border); border-radius: 10px; }
+.nf-more > summary { cursor: pointer; padding: 12px 14px; font-weight: 700; font-size: 14px; color: var(--text-muted); list-style: none; }
+.nf-more > summary::-webkit-details-marker { display: none; }
+.nf-more > summary::before { content: "▸ "; }
+.nf-more[open] > summary::before { content: "▾ "; }
+.nf-more-body { padding: 0 14px 14px; }
+.nf-more-body .nf-sec:first-child { margin-top: 4px; }
+.nf-more-body .nf-sec-title { color: var(--text-muted); }
+.nf-comp { font-size: 13.5px; line-height: 1.65; padding: 6px 0; border-top: 1px solid var(--border); word-break: keep-all; color: var(--text); }
+.nf-comp:first-child { border-top: none; }
+.nf-comp b { margin-right: 6px; }
+.fac-intro-body.nf-body .nf-sec:first-of-type { margin-top: 14px; }
+/* 검토 모드(도감 제목 5번 탭)에서만 원문 미확인 문장에 밑줄 */
+html.fac-review .nf-unv { background: rgba(255, 196, 0, 0.18); border-bottom: 2px dotted #e0a800; }
+@media (max-width: 420px) {
+  .nf-field-photo { width: 72px; height: 72px; }
+  .nf-type { flex-direction: column; gap: 2px; }
+  .nf-type b { width: auto; }
+}
