@@ -5435,17 +5435,16 @@ function renderBuildingRecent(list, confirming) {
 }
 
 const BUILDING_INTRO_HTML = `<div class="br-intro">
-    <h3>주소만 넣으면 바로 볼 수 있어요</h3>
-    <p>세움터 로그인 없이 건축물대장 표제부의 주요 내용을 한 장으로 보여줍니다.</p>
-    <div class="br-intro-grid">
-      <div><b>📐</b>면적</div>
-      <div><b>🏢</b>층수·구조</div>
-      <div><b>📅</b>사용승인일</div>
-      <div><b>🛗</b>승강기</div>
-      <div><b>🚗</b>주차장</div>
-      <div><b>📑</b>층별 용도</div>
-    </div>
-    <small>국토교통부 공개 데이터라 참고용입니다. 변동사항·소유자는 세움터에서 확인하세요.</small>
+    <div class="br-intro-lbl">조회되는 항목</div>
+    <ul>
+      <li><b>면적</b><span>연면적, 건축면적, 대지면적, 건폐율·용적률</span></li>
+      <li><b>규모</b><span>지상·지하 층수, 높이, 구조, 지붕</span></li>
+      <li><b>일자</b><span>허가일, 착공일, 사용승인일</span></li>
+      <li><b>설비</b><span>승강기(승용·비상용), 주차장 대수·면적</span></li>
+      <li><b>세대</b><span>세대수, 가구수, 호수</span></li>
+      <li><b>층별</b><span>층마다 용도와 면적</span></li>
+    </ul>
+    <p class="br-intro-note">국토교통부 공개 데이터로, 참고용입니다. 변동사항과 소유자는 나오지 않으니 세움터에서 확인하세요.</p>
   </div>`;
 
 // 층별개요는 순서가 섞여 오고 한 층이 여러 줄로 올 수 있다 → 층별로 묶고 위층부터 정렬
