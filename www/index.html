@@ -209,6 +209,123 @@
         <rect x="32.5" y="34" width="5" height="8" fill="var(--acc)" stroke-width="2"/>
         <path d="M25 42h20"/>
       </symbol>
+
+      <!-- ── 하위 메뉴·이용 안내 ── -->
+      <!-- 다중이용업소 해당 여부 판독기 (가게 + 체크) -->
+      <symbol id="i-shopcheck" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path fill="var(--surface)" d="M8 20v19h24V20"/>
+        <rect fill="var(--surface)" x="12" y="27" width="7" height="12"/>
+        <path d="M9 10h22l3 8H6z" fill="var(--acc)"/>
+        <path d="M6 18a3.5 3.5 0 0 0 7 0a3.5 3.5 0 0 0 7 0a3.5 3.5 0 0 0 7 0a3.5 3.5 0 0 0 7 0" fill="var(--acc)"/>
+        <path d="M15 10l-1 8M20 10v8M25 10l1 8" stroke="var(--surface)"/>
+        <path d="M4 39h24"/>
+        <circle cx="36" cy="34" r="8" fill="var(--acc)"/>
+        <path d="M32.5 34l2.5 2.5 4.5-5" stroke="var(--surface)" stroke-width="2.4"/>
+      </symbol>
+      <!-- 작동·종합 대상 판독기 (건물 + 체크) -->
+      <symbol id="i-bldcheck" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path fill="var(--surface)" d="M9 42V8h20v34"/>
+        <g fill="var(--acc)" stroke="none"><rect x="13" y="12" width="4" height="4"/><rect x="21" y="12" width="4" height="4"/><rect x="13" y="19" width="4" height="4"/><rect x="21" y="19" width="4" height="4"/><rect x="13" y="26" width="4" height="4"/></g>
+        <path d="M5 42h24"/>
+        <circle cx="35" cy="34" r="8" fill="var(--acc)"/>
+        <path d="M31.5 34l2.5 2.5 4.5-5" stroke="var(--surface)" stroke-width="2.4"/>
+      </symbol>
+      <!-- 보고서 읽는법 (문서 + 형광펜) -->
+      <symbol id="i-highlight" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect fill="var(--surface)" x="8" y="5" width="25" height="35" rx="2"/>
+        <rect x="12" y="16.5" width="17" height="6" rx="1" fill="var(--acc)" fill-opacity=".45" stroke="none"/>
+        <path d="M13 12h15M13 19.5h15M13 27h15M13 33h9"/>
+        <path d="M31 36l11-11 3.5 3.5-11 11z" fill="var(--acc)"/>
+        <path d="M31 36l-2 5.5 5.5-2"/>
+      </symbol>
+      <!-- 바로가기 추가 (휴대폰 + 받기) -->
+      <symbol id="i-install" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect fill="var(--surface)" x="13" y="4" width="22" height="40" rx="3.5"/>
+        <path d="M21 8h6"/>
+        <path d="M24 15v14M18 23l6 6 6-6" stroke="var(--acc)" stroke-width="2.6"/>
+        <path d="M18 35h12" stroke="var(--acc)" stroke-width="2.6"/>
+      </symbol>
+      <!-- 테마 전환 (낮·밤 반반) -->
+      <symbol id="i-daynight" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M24 5v4M24 39v4M10.5 10.5l2.8 2.8M10.5 37.5l2.8-2.8M5 24h4"/>
+        <circle fill="var(--surface)" cx="24" cy="24" r="11"/>
+        <path d="M24 13a11 11 0 0 1 0 22z" fill="var(--acc)"/>
+      </symbol>
+      <!-- 결과 저장·D-day 알림 (알림 종) -->
+      <symbol id="i-bell" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M24 5v3"/>
+        <path fill="var(--surface)" d="M24 8c-7 0-11 5-11 12v8l-4 6h30l-4-6v-8c0-7-4-12-11-12z"/>
+        <path d="M20 38a4 4 0 0 0 8 0"/>
+        <circle cx="35" cy="11" r="5.5" fill="var(--acc)"/>
+      </symbol>
+      <!-- 참고용 안내 (i) -->
+      <symbol id="i-info" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <circle fill="var(--surface)" cx="24" cy="24" r="18"/>
+        <path d="M24 21v13" stroke="var(--acc)" stroke-width="3.2"/>
+        <circle cx="24" cy="14.5" r="2.2" fill="var(--acc)" stroke="none"/>
+      </symbol>
+      <!-- 글자 옆 작은 종 (알림판 제목·메인화면에 표시 버튼): 선만, 점은 --acc 없으면 글자색 -->
+      <symbol id="i-bell-sm" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M24 5v3"/>
+        <path d="M24 8c-7 0-11 5-11 12v8l-4 6h30l-4-6v-8c0-7-4-12-11-12z"/>
+        <path d="M20 39a4 4 0 0 0 8 0"/>
+        <circle cx="35" cy="11" r="6" fill="var(--acc, currentColor)" stroke="none"/>
+      </symbol>
+      <!-- 글자 옆 작은 복사 (결과 복사 버튼): 겹친 종이 두 장 -->
+      <symbol id="i-copy-sm" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M17 13V9a3 3 0 0 1 3-3h17a3 3 0 0 1 3 3v21a3 3 0 0 1-3 3h-4"/>
+        <rect x="8" y="15" width="25" height="27" rx="3"/>
+      </symbol>
+      <!-- 근거 법령 칩의 바깥 링크 화살표 -->
+      <symbol id="i-link-sm" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="5" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14 34L34 14M19 14h15v15"/>
+      </symbol>
+      <!-- 상단 홈 버튼: 집 윤곽 -->
+      <symbol id="i-home-sm" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M6 23L24 8l18 15"/>
+        <path d="M11 19v20a2 2 0 0 0 2 2h22a2 2 0 0 0 2-2V19"/>
+        <path d="M20 41V30h8v11"/>
+      </symbol>
+      <!-- 메인 화면 테마 버튼: 낮·밤 반반 (작은 크기용) -->
+      <symbol id="i-daynight-sm" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M24 4v4M24 40v4M9.9 9.9l2.8 2.8M9.9 38.1l2.8-2.8M4 24h4"/>
+        <circle cx="24" cy="24" r="11"/>
+        <path d="M24 13a11 11 0 0 1 0 22z" fill="currentColor"/>
+      </symbol>
+      <!-- 기산일 선택: 날짜 하나를 찍은 달력 -->
+      <symbol id="i-pickday-sm" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="7" y="10" width="34" height="31" rx="4"/>
+        <path d="M7 19h34M16 6v7M32 6v7"/>
+        <rect x="14" y="25" width="9" height="9" rx="1.5" fill="currentColor" stroke="none"/>
+      </symbol>
+      <!-- ── 글자 옆 작은 아이콘들 ── -->
+      <symbol id="i-search-sm" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="3.6">
+        <circle cx="21" cy="21" r="12"/>
+        <path d="M30 30l11 11"/>
+      </symbol>
+      <symbol id="i-phone-sm" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="3.2">
+        <rect x="13" y="4" width="22" height="40" rx="4"/>
+        <path d="M24 14v14M18 22l6 6 6-6"/>
+      </symbol>
+      <symbol id="i-book-sm" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="3.2">
+        <path d="M24 13c-4-3-10-4-17-3v28c7-1 13 0 17 3M24 13c4-3 10-4 17-3v28c-7-1-13 0-17 3M24 13v28"/>
+      </symbol>
+      <symbol id="i-mail-sm" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="3.2">
+        <rect x="5" y="10" width="38" height="28" rx="3"/>
+        <path d="M7 13l17 13 17-13"/>
+      </symbol>
+      <symbol id="i-info-sm" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="3.2">
+        <circle cx="24" cy="24" r="18"/>
+        <path d="M24 22v11"/>
+        <circle cx="24" cy="15" r="2.4" fill="currentColor" stroke="none"/>
+      </symbol>
+      <!-- 일구가 드나드는 집 (애니메이션 소품) -->
+      <symbol id="i-doghouse" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2">
+        <path fill="var(--surface)" d="M9 21v21h30V21"/>
+        <path d="M4 24L24 6l20 18z" fill="var(--acc)"/>
+        <path d="M18 42v-8a6 6 0 0 1 12 0v8z" fill="currentColor"/>
+        <path d="M4 42h40"/>
+      </symbol>
     </defs>
   </svg>
   <canvas id="sakuraCanvas" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none; display: none;"></canvas>
@@ -241,7 +358,7 @@
 
     <div class="home-search-wrap">
       <div class="home-search-inner">
-        <span class="home-search-icon">🔍</span>
+        <span class="home-search-icon"><svg class="ic-inline" aria-hidden="true"><use href="#i-search-sm"/></svg></span>
         <input id="home-search-input" class="home-search-input" type="search" placeholder="기능 검색... (예: 보조자, 부적합, 점검)" autocomplete="off" spellcheck="false">
         <button id="home-search-clear" class="home-search-clear hidden" type="button" aria-label="지우기">✕</button>
       </div>
@@ -251,7 +368,7 @@
     <div class="menu-grid">
       <div class="menu-left">
         <button id="open-explorer" class="menu-card" type="button">
-          <div class="menu-icon ic-art"><svg class="ic a-red" aria-hidden="true"><use href="#i-ext"/></svg></div>
+          <div class="menu-icon ic-art"><svg class="ic a-fire" aria-hidden="true"><use href="#i-ext"/></svg></div>
           <div class="menu-text">
             <div class="mt-num">01</div>
             <div class="mt-title">소방시설 탐색기</div>
@@ -322,13 +439,13 @@
 
     <div class="home-bottom-btns">
       <button id="open-install-guide" class="shortcut-add-btn" type="button">
-        📲 <span id="install-card-desc">바로가기 추가</span>
+        <svg class="ic-inline" aria-hidden="true"><use href="#i-phone-sm"/></svg> <span id="install-card-desc">바로가기 추가</span>
       </button>
       <button id="open-guide" class="shortcut-add-btn" type="button">
-        📖 이용 안내
+        <svg class="ic-inline" aria-hidden="true"><use href="#i-book-sm"/></svg> 이용 안내
       </button>
       <button id="open-contact" class="shortcut-add-btn" type="button">
-        ✉️ 문의하기
+        <svg class="ic-inline" aria-hidden="true"><use href="#i-mail-sm"/></svg> 문의하기
       </button>
     </div>
   </section>
@@ -337,7 +454,7 @@
     <div class="topbar">
       <button id="back-from-explorer-year" class="back-btn" type="button">←</button>
       <span class="tb-title">소방시설 탐색기 (연도별)</span>
-      <button id="explorer-year-law-chip" type="button" class="law-link-chip" data-law-key="explorer-year-post" title="근거 법령 안내">⚖️ 근거 법령<span class="lk-arr">↗</span></button>
+      <button id="explorer-year-law-chip" type="button" class="law-link-chip" data-law-key="explorer-year-post" title="근거 법령 안내">근거 법령<svg class="lk-arr" aria-hidden="true"><use href="#i-link-sm"/></svg></button>
     </div>
 
     <div id="year-prog-wrap" class="wiz-prog-wrap">
@@ -385,7 +502,7 @@
             <div id="year-exception-list"></div>
           </div>
         </div>
-        <button id="year-explorer-copy-result-btn" class="btn btn-ghost explorer-copy-btn" type="button">📋 <span>결과 복사</span></button>
+        <button id="year-explorer-copy-result-btn" class="btn btn-ghost explorer-copy-btn" type="button"><svg class="ic-inline" aria-hidden="true"><use href="#i-copy-sm"/></svg> <span>결과 복사</span></button>
         <div style="display:flex;gap:8px;margin-top:8px;">
           <button id="year-open-multiuse-safety" class="btn btn-primary hidden" type="button" style="flex:1;">안전시설 확인</button>
           <button id="year-result-prev-btn" class="btn btn-ghost" type="button" style="flex:1;">이전</button>
@@ -415,7 +532,7 @@
 
         <div id="year-multiuse-transitional-notes"></div>
 
-        <button id="year-multiuse-copy-result-btn" class="btn btn-ghost explorer-copy-btn" type="button">📋 <span>결과 복사</span></button>
+        <button id="year-multiuse-copy-result-btn" class="btn btn-ghost explorer-copy-btn" type="button"><svg class="ic-inline" aria-hidden="true"><use href="#i-copy-sm"/></svg> <span>결과 복사</span></button>
         <div class="w-nav">
           <button id="year-back-to-main-result" class="btn btn-primary" type="button">기본 결과로</button>
           <button id="year-restart-from-multiuse" class="btn btn-ghost" type="button">다시 입력</button>
@@ -429,7 +546,7 @@
       <button id="back-from-explorer" class="back-btn" type="button">←</button>
       <span id="explorer-title" class="tb-title">소방시설 탐색기</span>
       <span id="explorer-mode-badge" class="hidden" style="margin-left:8px;"></span>
-      <button id="explorer-law-chip" type="button" class="law-link-chip hidden" title="근거 법령 안내">⚖️ 근거 법령<span class="lk-arr">↗</span></button>
+      <button id="explorer-law-chip" type="button" class="law-link-chip hidden" title="근거 법령 안내">근거 법령<svg class="lk-arr" aria-hidden="true"><use href="#i-link-sm"/></svg></button>
     </div>
 
     <div id="explorer-prog-wrap" class="wiz-prog-wrap">
@@ -480,7 +597,7 @@
           </div>
         </div>
 
-        <button id="explorer-copy-result-btn" class="btn btn-ghost explorer-copy-btn" type="button">📋 <span>결과 복사</span></button>
+        <button id="explorer-copy-result-btn" class="btn btn-ghost explorer-copy-btn" type="button"><svg class="ic-inline" aria-hidden="true"><use href="#i-copy-sm"/></svg> <span>결과 복사</span></button>
         <div style="display:flex;gap:8px;margin-top:8px;">
           <button id="open-multiuse-safety" class="btn btn-primary hidden" type="button" style="flex:1;">안전시설 확인</button>
           <button id="result-back-to-select" class="btn btn-ghost" type="button" style="flex:1;">이전</button>
@@ -510,7 +627,7 @@
 
         <div id="multiuse-transitional-notes"></div>
 
-        <button id="multiuse-copy-result-btn" class="btn btn-ghost explorer-copy-btn" type="button">📋 <span>결과 복사</span></button>
+        <button id="multiuse-copy-result-btn" class="btn btn-ghost explorer-copy-btn" type="button"><svg class="ic-inline" aria-hidden="true"><use href="#i-copy-sm"/></svg> <span>결과 복사</span></button>
         <div class="w-nav">
           <button id="back-to-main-result" class="btn btn-primary" type="button">기본 결과로</button>
           <button id="restart-explorer-from-multiuse" class="btn btn-ghost" type="button">다시 입력</button>
@@ -523,7 +640,7 @@
     <div class="topbar">
       <button id="back-from-report-guide" class="back-btn" type="button">←</button>
       <span id="report-guide-title" class="tb-title">자체점검 가이드</span>
-      <button id="report-guide-law-chip" type="button" class="law-link-chip hidden" data-law-key="report-guide" title="근거 법령 안내">⚖️ 근거 법령<span class="lk-arr">↗</span></button>
+      <button id="report-guide-law-chip" type="button" class="law-link-chip hidden" data-law-key="report-guide" title="근거 법령 안내">근거 법령<svg class="lk-arr" aria-hidden="true"><use href="#i-link-sm"/></svg></button>
     </div>
     <div id="report-guide-content" class="rg-outer"></div>
   </section>
@@ -554,7 +671,7 @@
         <!-- 01 소방시설 탐색기 -->
         <details class="guide-tool-card">
           <summary class="guide-tool-summary">
-            <div class="guide-tool-icon mc-red">🧯</div>
+            <div class="guide-tool-icon ic-art"><svg class="ic a-fire" aria-hidden="true"><use href="#i-ext"/></svg></div>
             <div class="guide-tool-meta">
               <span class="guide-tool-num">01</span>
               <span class="guide-tool-title">소방시설 탐색기</span>
@@ -568,14 +685,14 @@
               <div class="guide-step"><span class="gs-num">2</span><span>연면적·층수·지하층 등 세부 조건 질문에 차례로 답하기</span></div>
               <div class="guide-step"><span class="gs-num">3</span><span>결과에서 <strong>설치 필요 시설</strong>, <strong>제외·검토 시설</strong>, <strong>판정 이유</strong>를 확인하고 시설명을 눌러 상세 설명 보기</span></div>
             </div>
-            <div class="guide-tip">💡 결과 목록은 보고서의 소방시설 현황과 비교할 기준을 잡는 데 쓰고, 낯선 시설은 항목을 눌러 어떤 시설인지 먼저 확인하면 좋습니다. 결과 아래 <span class="tip-btn">📋 결과 복사</span> 버튼으로 판정 내용을 메모·보고서에 바로 붙여넣을 수 있습니다.</div>
+            <div class="guide-tip">결과 목록은 보고서의 소방시설 현황과 비교할 기준을 잡는 데 쓰고, 낯선 시설은 항목을 눌러 어떤 시설인지 먼저 확인하면 좋습니다. 결과 아래 <span class="tip-btn"><svg class="ic-inline" aria-hidden="true"><use href="#i-copy-sm"/></svg> 결과 복사</span> 버튼으로 판정 내용을 메모·보고서에 바로 붙여넣을 수 있습니다.</div>
           </div>
         </details>
 
         <!-- 02 다중이용업소 탐색기 -->
         <details class="guide-tool-card">
           <summary class="guide-tool-summary">
-            <div class="guide-tool-icon mc-green">👥</div>
+            <div class="guide-tool-icon ic-art"><svg class="ic a-green" aria-hidden="true"><use href="#i-exit"/></svg></div>
             <div class="guide-tool-meta">
               <span class="guide-tool-num">02</span>
               <span class="guide-tool-title">다중이용업소 탐색기</span>
@@ -589,14 +706,14 @@
               <div class="guide-step"><span class="gs-num">2</span><span>면적·층수·영업 형태·구획 여부 등 조건 질문에 답하기</span></div>
               <div class="guide-step"><span class="gs-num">3</span><span>판정 결과, 근거, <strong>설치해야 할 안전시설 목록</strong> 확인</span></div>
             </div>
-            <div class="guide-tip">💡 동일 업종이라도 영업장 면적·층·복층 여부에 따라 결과가 달라질 수 있습니다. 결과 아래 <span class="tip-btn">📋 결과 복사</span> 버튼으로 판정 내용을 메모·보고서에 바로 붙여넣을 수 있습니다.</div>
+            <div class="guide-tip">동일 업종이라도 영업장 면적·층·복층 여부에 따라 결과가 달라질 수 있습니다. 결과 아래 <span class="tip-btn"><svg class="ic-inline" aria-hidden="true"><use href="#i-copy-sm"/></svg> 결과 복사</span> 버튼으로 판정 내용을 메모·보고서에 바로 붙여넣을 수 있습니다.</div>
           </div>
         </details>
 
         <!-- 03 법정기한 계산기 -->
         <details class="guide-tool-card">
           <summary class="guide-tool-summary">
-            <div class="guide-tool-icon mc-blue">📅</div>
+            <div class="guide-tool-icon ic-art"><svg class="ic a-blue" aria-hidden="true"><use href="#i-alarm"/></svg></div>
             <div class="guide-tool-meta">
               <span class="guide-tool-num">03</span>
               <span class="guide-tool-title">법정기한 계산기</span>
@@ -610,14 +727,14 @@
               <div class="guide-step"><span class="gs-num">2</span><span>점검일·해임일·사용승인일·보고일 등 필요한 기준일 입력</span></div>
               <div class="guide-step"><span class="gs-num">3</span><span>결과 확인 후 <strong>"메인화면에 표시"</strong>로 알림판에 저장</span></div>
             </div>
-            <div class="guide-tip">💡 알림판에 저장하면 D-7 이내 기한이 빨간색으로 강조됩니다. 결과 아래 <span class="tip-btn">📋 결과 복사</span> 버튼으로 계산 내용을 메모·보고서에 바로 붙여넣을 수 있습니다.</div>
+            <div class="guide-tip">알림판에 저장하면 D-7 이내 기한이 빨간색으로 강조됩니다. 결과 아래 <span class="tip-btn"><svg class="ic-inline" aria-hidden="true"><use href="#i-copy-sm"/></svg> 결과 복사</span> 버튼으로 계산 내용을 메모·보고서에 바로 붙여넣을 수 있습니다.</div>
           </div>
         </details>
 
         <!-- 04 자체점검 가이드 -->
         <details class="guide-tool-card">
           <summary class="guide-tool-summary">
-            <div class="guide-tool-icon mc-amber">📋</div>
+            <div class="guide-tool-icon ic-art"><svg class="ic a-amber" aria-hidden="true"><use href="#i-clip"/></svg></div>
             <div class="guide-tool-meta">
               <span class="guide-tool-num">04</span>
               <span class="guide-tool-title">자체점검 가이드</span>
@@ -631,14 +748,14 @@
               <div class="guide-step"><span class="gs-num">2</span><span>보고서 읽는법은 표지(1p)·대상물정보(2p)·소방시설선택(3p)·점검표(4~8p)를 탭으로 이동</span></div>
               <div class="guide-step"><span class="gs-num">3</span><span>보고서 화면은 모바일에서 두 손가락 확대가 가능하고, 항목 탭 시 작성 방법과 읽는 요령 표시</span></div>
             </div>
-            <div class="guide-tip">💡 작은 글씨가 많은 보고서 이미지는 확대해서 보고, 3p에서 등급·시설을 선택하면 관련 점검표 항목만 좁혀 볼 수 있습니다.</div>
+            <div class="guide-tip">작은 글씨가 많은 보고서 이미지는 확대해서 보고, 3p에서 등급·시설을 선택하면 관련 점검표 항목만 좁혀 볼 수 있습니다.</div>
           </div>
         </details>
 
         <!-- 05 소방시설 도감 -->
         <details class="guide-tool-card">
           <summary class="guide-tool-summary">
-            <div class="guide-tool-icon mc-purple">📖</div>
+            <div class="guide-tool-icon ic-art"><svg class="ic a-purple" aria-hidden="true"><use href="#i-index"/></svg></div>
             <div class="guide-tool-meta">
               <span class="guide-tool-num">05</span>
               <span class="guide-tool-title">소방시설 도감</span>
@@ -652,14 +769,14 @@
               <div class="guide-step"><span class="gs-num">2</span><span>개요·종류·구성요소 확인</span></div>
               <div class="guide-step"><span class="gs-num">3</span><span>설치기준 탭에서 <strong>면적·층수별 설치 조건</strong> 확인</span></div>
             </div>
-            <div class="guide-tip">💡 탐색기 결과나 자체점검 보고서 3페이지 시설명 확인용으로 같이 쓰면 좋습니다.</div>
+            <div class="guide-tip">탐색기 결과나 자체점검 보고서 3페이지 시설명 확인용으로 같이 쓰면 좋습니다.</div>
           </div>
         </details>
 
         <!-- 06 유틸리티 도구함 -->
         <details class="guide-tool-card">
           <summary class="guide-tool-summary">
-            <div class="guide-tool-icon mc-amber">🧮</div>
+            <div class="guide-tool-icon ic-art"><svg class="ic a-amber" aria-hidden="true"><use href="#i-toolbox"/></svg></div>
             <div class="guide-tool-meta">
               <span class="guide-tool-num">06</span>
               <span class="guide-tool-title">유틸리티 도구함</span>
@@ -679,7 +796,7 @@
         <!-- 07 건축물대장 조회 -->
         <details class="guide-tool-card">
           <summary class="guide-tool-summary">
-            <div class="guide-tool-icon mc-blue">🏢</div>
+            <div class="guide-tool-icon ic-art"><svg class="ic a-blue" aria-hidden="true"><use href="#i-plan"/></svg></div>
             <div class="guide-tool-meta">
               <span class="guide-tool-num">07</span>
               <span class="guide-tool-title">건축물대장 조회</span>
@@ -693,7 +810,7 @@
               <div class="guide-step"><span class="gs-num">2</span><span>연면적·건축면적·층수·구조·높이·세대수·승강기·주차장과 <strong>허가·착공·사용승인일</strong> 확인</span></div>
               <div class="guide-step"><span class="gs-num">3</span><span><strong>층별 개요</strong>로 층마다 용도·면적을, <strong>추가 정보</strong>로 대지면적·건폐율·용적률·내진설계 등을 확인</span></div>
             </div>
-            <div class="guide-tip">💡 국토교통부 공개 데이터를 불러오므로 참고용이며 법적 효력은 없습니다. 한 대지에 건물이 여러 동이면 첫 번째 동만 보여줍니다. 변동사항·소유자는 제공되지 않고, 신축 중이거나 사용승인 전인 건물은 조회되지 않을 수 있으니 <span class="tip-btn">세움터 바로가기</span>로 원본을 확인하세요.</div>
+            <div class="guide-tip">국토교통부 공개 데이터를 불러오므로 참고용이며 법적 효력은 없습니다. 한 대지에 건물이 여러 동이면 첫 번째 동만 보여줍니다. 변동사항·소유자는 제공되지 않고, 신축 중이거나 사용승인 전인 건물은 조회되지 않을 수 있으니 <span class="tip-btn">세움터 바로가기</span>로 원본을 확인하세요.</div>
           </div>
         </details>
 
@@ -703,7 +820,7 @@
       <p class="section-label" style="margin-top:24px;">앱처럼 설치하기</p>
       <div class="guide-info-card">
         <div class="guide-info-head">
-          <div class="guide-tool-icon mc-blue">📲</div>
+          <div class="guide-tool-icon ic-art"><svg class="ic a-blue" aria-hidden="true"><use href="#i-install"/></svg></div>
           <div class="guide-info-meta">
             <span class="guide-info-kicker">INSTALL</span>
             <span class="guide-info-title">바탕화면·홈 화면에 바로가기 추가</span>
@@ -725,7 +842,7 @@
               <span class="guide-info-row-text">Safari 공유 버튼 → <strong>홈 화면에 추가</strong></span>
             </div>
           </div>
-          <p class="guide-info-note">✅ 어플 설치시 보안관련 경고창이 뜰 수도 있습니다. 어플을 한번 설치하면, 인터넷 없이도 기본 기능을 사용할 수 있습니다.</p>
+          <p class="guide-info-note">어플 설치시 보안관련 경고창이 뜰 수도 있습니다. 어플을 한번 설치하면, 인터넷 없이도 기본 기능을 사용할 수 있습니다.</p>
         </div>
       </div>
 
@@ -733,7 +850,7 @@
       <p class="section-label" style="margin-top:24px;">일구 어시스턴트</p>
       <div class="guide-info-card">
         <div class="guide-info-head">
-          <div class="guide-tool-icon mc-amber">🐾</div>
+          <div class="guide-tool-icon ic-art"><img class="ic-img" src="./assets/pets/mailpup/summon-face.png" alt="" aria-hidden="true"></div>
           <div class="guide-info-meta">
             <span class="guide-info-kicker">PC ONLY</span>
             <span class="guide-info-title">일구 — 화면 위를 돌아다니는 도우미</span>
@@ -765,7 +882,7 @@
       <p class="section-label">화면 설정</p>
       <div class="guide-info-card">
         <div class="guide-info-head">
-          <div class="guide-tool-icon mc-purple">🎨</div>
+          <div class="guide-tool-icon ic-art"><svg class="ic a-purple" aria-hidden="true"><use href="#i-daynight"/></svg></div>
           <div class="guide-info-meta">
             <span class="guide-info-kicker">THEME</span>
             <span class="guide-info-title">테마 전환</span>
@@ -775,42 +892,42 @@
           <p>버튼을 누를 때마다 <strong>계절 → 낮 → 밤</strong> 순으로 순환됩니다. 계절 테마는 현재 계절에 맞게 자동으로 적용되며, 여름(6~8월)에는 여름밤 테마가 적용됩니다.</p>
           <div class="guide-theme-chips">
             <div class="guide-theme-chip">
-              <div class="guide-theme-chip-swatch theme-swatch-blossom">🌸</div>
+              <div class="guide-theme-chip-swatch theme-swatch-blossom"></div>
               <div class="guide-theme-chip-meta">
                 <span class="guide-theme-chip-name">봄 (3~5월)</span>
                 <span class="guide-theme-chip-desc">연분홍 + 꽃잎 애니메이션</span>
               </div>
             </div>
             <div class="guide-theme-chip">
-              <div class="guide-theme-chip-swatch theme-swatch-summer-night">🌌</div>
+              <div class="guide-theme-chip-swatch theme-swatch-summer-night"></div>
               <div class="guide-theme-chip-meta">
                 <span class="guide-theme-chip-name">여름 (6~8월)</span>
                 <span class="guide-theme-chip-desc">짙은 인디고 + 시안 + 반딧불 애니메이션</span>
               </div>
             </div>
             <div class="guide-theme-chip">
-              <div class="guide-theme-chip-swatch theme-swatch-autumn">🍂</div>
+              <div class="guide-theme-chip-swatch theme-swatch-autumn"></div>
               <div class="guide-theme-chip-meta">
                 <span class="guide-theme-chip-name">가을 (9~11월)</span>
                 <span class="guide-theme-chip-desc">따뜻한 베이지 + 낙엽 애니메이션</span>
               </div>
             </div>
             <div class="guide-theme-chip">
-              <div class="guide-theme-chip-swatch theme-swatch-winter">❄️</div>
+              <div class="guide-theme-chip-swatch theme-swatch-winter"></div>
               <div class="guide-theme-chip-meta">
                 <span class="guide-theme-chip-name">겨울 (12~2월)</span>
                 <span class="guide-theme-chip-desc">차가운 회청색 + 눈송이 애니메이션</span>
               </div>
             </div>
             <div class="guide-theme-chip">
-              <div class="guide-theme-chip-swatch theme-swatch-official">☀️</div>
+              <div class="guide-theme-chip-swatch theme-swatch-official"></div>
               <div class="guide-theme-chip-meta">
                 <span class="guide-theme-chip-name">낮 모드</span>
                 <span class="guide-theme-chip-desc">흰 배경 + 네이비 포인트의 밝은 모드</span>
               </div>
             </div>
             <div class="guide-theme-chip">
-              <div class="guide-theme-chip-swatch theme-swatch-dark">🌙</div>
+              <div class="guide-theme-chip-swatch theme-swatch-dark"></div>
               <div class="guide-theme-chip-meta">
                 <span class="guide-theme-chip-name">밤 모드</span>
                 <span class="guide-theme-chip-desc">어두운 배경 + 빨간 포인트 (봄·가을·겨울 밤)</span>
@@ -824,7 +941,7 @@
       <p class="section-label">메인화면 알림판</p>
       <div class="guide-info-card">
         <div class="guide-info-head">
-          <div class="guide-tool-icon mc-amber">📌</div>
+          <div class="guide-tool-icon ic-art"><svg class="ic a-amber" aria-hidden="true"><use href="#i-bell"/></svg></div>
           <div class="guide-info-meta">
             <span class="guide-info-kicker">DASHBOARD</span>
             <span class="guide-info-title">계산 결과 저장 · D-day 알림</span>
@@ -849,7 +966,7 @@
       <p class="section-label">참고사항</p>
       <div class="guide-info-card warn">
         <div class="guide-info-head">
-          <div class="guide-tool-icon mc-red">⚠️</div>
+          <div class="guide-tool-icon ic-art"><svg class="ic a-red" aria-hidden="true"><use href="#i-info"/></svg></div>
           <div class="guide-info-meta">
             <span class="guide-info-kicker">DISCLAIMER</span>
             <span class="guide-info-title">이 앱은 참고용입니다</span>
@@ -898,7 +1015,7 @@
     <div class="topbar">
       <button id="back-from-date" class="back-btn" type="button">←</button>
       <span class="tb-title">법정기한 계산기</span>
-      <button id="date-law-chip" type="button" class="law-link-chip" data-law-key="date-inspect_report" title="근거 법령 안내">⚖️ 근거 법령<span class="lk-arr">↗</span></button>
+      <button id="date-law-chip" type="button" class="law-link-chip" data-law-key="date-inspect_report" title="근거 법령 안내">근거 법령<svg class="lk-arr" aria-hidden="true"><use href="#i-link-sm"/></svg></button>
     </div>
     <div class="scroll-content" id="date-content"></div>
   </section>
@@ -907,7 +1024,7 @@
     <div class="topbar">
       <button id="back-from-inspection" class="back-btn" type="button">←</button>
       <span class="tb-title">작동·종합 대상 판독기</span>
-      <button type="button" class="law-link-chip" data-law-key="inspection-reader" title="근거 법령 안내">⚖️ 근거 법령<span class="lk-arr">↗</span></button>
+      <button type="button" class="law-link-chip" data-law-key="inspection-reader" title="근거 법령 안내">근거 법령<svg class="lk-arr" aria-hidden="true"><use href="#i-link-sm"/></svg></button>
     </div>
     <div class="scroll-content" id="inspection-content"></div>
   </section>
@@ -924,7 +1041,7 @@
         <p class="wq-sub">목적에 맞는 항목을 선택하세요.</p>
         <div class="choice-list" style="margin-top:16px;">
           <button id="multiuse-select-decoder" class="choice-button choice-card" type="button">
-            <span class="cc-icon mc-blue">🏬</span>
+            <span class="cc-icon ic-art"><svg class="ic a-blue" aria-hidden="true"><use href="#i-shopcheck"/></svg></span>
             <span class="cc-body">
               <span class="cc-num">01</span>
               <strong>다중이용업소 해당 여부 판독기</strong>
@@ -933,7 +1050,7 @@
             <span class="cc-arrow">›</span>
           </button>
           <button id="multiuse-select-safety" class="choice-button choice-card" type="button">
-            <span class="cc-icon mc-green">🧯</span>
+            <span class="cc-icon ic-art"><svg class="ic a-green" aria-hidden="true"><use href="#i-exit"/></svg></span>
             <span class="cc-body">
               <span class="cc-num">02</span>
               <strong>다중이용업소에 설치할 안전시설 탐색</strong>
@@ -950,7 +1067,7 @@
     <div class="topbar">
       <button id="back-from-multiuse" class="back-btn" type="button">←</button>
       <span class="tb-title">다중이용업소 해당 여부 판독기</span>
-      <button type="button" class="law-link-chip" data-law-key="multiuse-reader" title="근거 법령 안내">⚖️ 근거 법령<span class="lk-arr">↗</span></button>
+      <button type="button" class="law-link-chip" data-law-key="multiuse-reader" title="근거 법령 안내">근거 법령<svg class="lk-arr" aria-hidden="true"><use href="#i-link-sm"/></svg></button>
     </div>
     <div class="scroll-content" id="multiuse-content"></div>
   </section>
@@ -959,7 +1076,7 @@
     <div class="topbar">
       <button id="back-from-occupancy" class="back-btn" type="button">←</button>
       <span class="tb-title">유틸리티 도구함</span>
-      <button id="occupancy-law-chip" type="button" class="law-link-chip" data-law-key="occupancy-occupancy" title="근거 법령 안내">⚖️ 근거 법령<span class="lk-arr">↗</span></button>
+      <button id="occupancy-law-chip" type="button" class="law-link-chip" data-law-key="occupancy-occupancy" title="근거 법령 안내">근거 법령<svg class="lk-arr" aria-hidden="true"><use href="#i-link-sm"/></svg></button>
     </div>
     <div class="scroll-content" id="occupancy-content"></div>
   </section>
@@ -1047,7 +1164,7 @@
     <div class="topbar">
       <button id="back-from-facilities" class="back-btn" type="button">←</button>
       <span class="tb-title">소방시설 도감</span>
-      <button type="button" class="law-link-chip" data-law-key="facilities" title="근거 법령 안내">⚖️ 근거 법령<span class="lk-arr">↗</span></button>
+      <button type="button" class="law-link-chip" data-law-key="facilities" title="근거 법령 안내">근거 법령<svg class="lk-arr" aria-hidden="true"><use href="#i-link-sm"/></svg></button>
     </div>
     <div id="facilities-content" class="rg-outer"></div>
   </section>
@@ -1055,11 +1172,11 @@
   <!-- 개발자 연락 확인 모달 -->
   <div id="contact-confirm-modal" class="reminder-modal-overlay hidden">
     <div class="reminder-modal-box">
-      <h3 class="reminder-modal-title">✉️ 문의하기</h3>
+      <h3 class="reminder-modal-title">문의하기</h3>
       <p class="reminder-modal-desc">'메일 보내러 가기' 버튼을 누르면 개발자에게 <br>G-mail을 통해 메일을 보냅니다. G-mail이 제대로<br> 열리지 않으면 아래의 주소를 복사해서 직접 보낼 수 있습니다.</p>
       <div class="contact-confirm-email">
         <span id="contact-email-text">carrotcakehope@gmail.com</span>
-        <button id="contact-copy-btn" class="contact-copy-btn" type="button" title="복사">📋</button>
+        <button id="contact-copy-btn" class="contact-copy-btn" type="button" title="복사"><svg class="ic-inline" aria-hidden="true"><use href="#i-copy-sm"/></svg></button>
       </div>
       <p class="contact-intranet-note">소방서 PC는 보안상 Gmail이 열리지 않을 수 있습니다. 그럴 땐 <strong>내부메일로 소방장 김규범</strong>에게 보내주시면 감사드리겠습니다.</p>
       <div class="w-nav" style="margin-top:16px;">
@@ -1072,7 +1189,7 @@
   <!-- 개발자 이야기 배경음악 안내 모달 -->
   <div id="devletter-music-modal" class="reminder-modal-overlay hidden">
     <div class="reminder-modal-box">
-      <h3 class="reminder-modal-title">🎵 배경음악 안내</h3>
+      <h3 class="reminder-modal-title">배경음악 안내</h3>
       <p class="reminder-modal-desc">잔잔한 음악을 한 곡 준비했습니다.<br>음악과 함께 글을 읽어보시겠어요?</p>
       <div class="w-nav" style="margin-top:16px;">
         <button id="devletter-music-no" class="btn btn-ghost" type="button">괜찮아요</button>
@@ -1084,7 +1201,7 @@
   <!-- 근거 법령 안내 모달 -->
   <div id="law-link-modal" class="reminder-modal-overlay hidden">
     <div class="reminder-modal-box">
-      <h3 class="reminder-modal-title">⚖️ 근거 법령</h3>
+      <h3 class="reminder-modal-title">근거 법령</h3>
       <p class="reminder-modal-desc">해당 메뉴에서 사용하는 근거 법령입니다. 아래 항목을 선택하면 법제처에서 해당 법령 또는 법령 목록 페이지가 새 탭으로 열립니다.</p>
       <p id="law-link-note" class="law-link-note hidden"></p>
       <ul id="law-link-list" class="law-link-list"></ul>

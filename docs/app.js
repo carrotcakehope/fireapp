@@ -2549,8 +2549,8 @@ function renderResults(results, input) {
   explorerViewState.lastRequiredItems = requiredItems.map((i) => i.name);
   explorerViewState.lastMultiuseItems = null;
   document.getElementById("result-summary").innerHTML = ibSummaryHtml([
-    ibChipHtml("🏢", "용도", getSubtypeLabel(input.facilitySubtype)),
-    ibChipHtml("📐", "연면적", `${ibNumFmt(input.totalArea)}㎡`),
+    ibChipHtml("", "용도", getSubtypeLabel(input.facilitySubtype)),
+    ibChipHtml("", "연면적", `${ibNumFmt(input.totalArea)}㎡`),
     ibFloorsChip(input.aboveGroundFloors, input.basementFloors),
   ]);
   renderSimpleRequiredList(requiredItems);
@@ -2565,9 +2565,9 @@ function renderThirdClassPre1992Results(results, input) {
   explorerViewState.lastRequiredItems = requiredItems.map((i) => i.name);
   explorerViewState.lastMultiuseItems = null;
   document.getElementById("result-summary").innerHTML = ibSummaryHtml([
-    ibChipHtml("📅", "허가시기", getThirdClassPeriodLabel(input.pre1992PermitRange)),
-    ibChipHtml("🏪", "세부용도", getThirdClassDetailLabel(input.thirdClassDetailUse)),
-    ibChipHtml("📐", "연면적", `${ibNumFmt(input.totalArea)}㎡`),
+    ibChipHtml("", "허가시기", getThirdClassPeriodLabel(input.pre1992PermitRange)),
+    ibChipHtml("", "세부용도", getThirdClassDetailLabel(input.thirdClassDetailUse)),
+    ibChipHtml("", "연면적", `${ibNumFmt(input.totalArea)}㎡`),
     ibFloorsChip(input.aboveGroundFloors, input.basementFloors),
   ], null, "3급 근린생활시설 기준");
   renderSimpleRequiredList(requiredItems);
@@ -2688,7 +2688,7 @@ function copyResultText(text, btn) {
       if (areaLine) lines.push(areaLine);
       lines.push("");
     }
-    lines.push("▶ 설치 필요한 소방시설");
+    lines.push("■ 설치 필요한 소방시설");
     items.forEach((name) => lines.push("• " + name));
     lines.push("");
     lines.push("※ 본 결과는 입력값 기준의 실무 참고용입니다. (앱 " + PATCH_NOTES.version + " · " + PATCH_NOTES.date + " 기준)");
@@ -2736,7 +2736,7 @@ function copyResultText(text, btn) {
     lines.push("");
     if (summaryLines.length) lines.push(...summaryLines);
     lines.push("");
-    lines.push("▶ 설치 필요한 소방시설");
+    lines.push("■ 설치 필요한 소방시설");
     items.forEach((name) => lines.push("• " + name));
     lines.push("");
     lines.push("※ 본 결과는 입력값 기준의 실무 참고용입니다. (앱 " + PATCH_NOTES.version + " · " + PATCH_NOTES.date + " 기준)");
@@ -2761,7 +2761,7 @@ function copyResultText(text, btn) {
     const lines = [];
     lines.push("[예방업무 어시스턴트] 다중이용업소 안전시설 탐색 결과 (연도별)");
     lines.push("");
-    lines.push("▶ 설치해야 하는 안전시설");
+    lines.push("■ 설치해야 하는 안전시설");
     items.forEach((name) => lines.push("• " + name));
     lines.push("");
     lines.push("※ 본 결과는 입력값 기준의 실무 참고용입니다. (앱 " + PATCH_NOTES.version + " · " + PATCH_NOTES.date + " 기준)");
@@ -2782,7 +2782,7 @@ function copyResultText(text, btn) {
     const lines = [];
     lines.push("[예방업무 어시스턴트] 다중이용업소 안전시설 탐색 결과");
     lines.push("");
-    lines.push("▶ 설치해야 하는 안전시설");
+    lines.push("■ 설치해야 하는 안전시설");
     items.forEach((name) => lines.push("• " + name));
     lines.push("");
     lines.push("※ 본 결과는 입력값 기준의 실무 참고용입니다. (앱 " + PATCH_NOTES.version + " · " + PATCH_NOTES.date + " 기준)");
@@ -3661,10 +3661,10 @@ function renderDateCalculator() {
       </div>
       <div class="dc-hero-actions">
         <button id="add-to-home-btn" class="dc-hero-save-btn" type="button">
-          📌 <span class="dc-hero-save-label">메인화면에 표시</span>
+          <svg class="ic-inline" aria-hidden="true"><use href="#i-bell-sm"/></svg> <span class="dc-hero-save-label">메인화면에 표시</span>
         </button>
         <button id="dc-copy-result-btn" class="dc-hero-save-btn dc-copy-result-btn" type="button">
-          📋 <span class="dc-hero-save-label">결과 복사</span>
+          <svg class="ic-inline" aria-hidden="true"><use href="#i-copy-sm"/></svg> <span class="dc-hero-save-label">결과 복사</span>
         </button>
       </div>
     </section>
@@ -3704,16 +3704,16 @@ function renderDateCalculator() {
         </div>
         ${mode.supportsHolidaySelection ? `
           <div class="dc-cal-mode-toggle">
-            <button class="dc-cal-mode-toggle-btn${state.dateCalc.selectMode === "base" ? " active" : ""}" type="button" data-select-mode="base">📌 기산일 선택</button>
+            <button class="dc-cal-mode-toggle-btn${state.dateCalc.selectMode === "base" ? " active" : ""}" type="button" data-select-mode="base"><svg class="ic-inline" aria-hidden="true"><use href="#i-pickday-sm"/></svg> 기산일 선택</button>
             ${state.dateCalc.selectMode === "holiday" && state.dateCalc.holidays.length > 0
               ? `<button class="dc-cal-mode-toggle-btn active holiday-clear" type="button" data-action="clear-holidays">공휴일 ${state.dateCalc.holidays.length}개 지우기</button>`
-              : `<button class="dc-cal-mode-toggle-btn${state.dateCalc.selectMode === "holiday" ? " active" : ""}" type="button" data-select-mode="holiday">🟣 공휴일 추가</button>`}
+              : `<button class="dc-cal-mode-toggle-btn${state.dateCalc.selectMode === "holiday" ? " active" : ""}" type="button" data-select-mode="holiday"><span class="dc-holiday-dot" aria-hidden="true"></span> 공휴일 추가</button>`}
           </div>
           ${holidayHint ? `<p class="dc-cal-hint">${holidayHint}</p>` : ""}
         ` : ""}
         ${isMultiMonth ? `
           <p class="dc-cal-multi-note">
-            <span class="cmn-icon" aria-hidden="true">📅</span>
+            <span class="cmn-icon" aria-hidden="true"><svg class="ic-inline" aria-hidden="true"><use href="#i-pickday-sm"/></svg></span>
             <span>기한이 달을 넘어가 <strong>${monthCount}개월</strong>을 이어서 표시합니다.</span>
           </p>
         ` : ""}
@@ -3725,7 +3725,7 @@ function renderDateCalculator() {
       <div class="dc-split-right">
     <section class="dc-ref-section">
       <details class="dc-ref-accordion" open>
-        <summary>⚠️ ${mode.infoTitle}</summary>
+        <summary>${mode.infoTitle}</summary>
         <div class="dc-ref-body" style="padding-top:14px;">
           <div class="info-box ${mode.infoTone}" style="border:none;padding:0;margin:0;background:transparent;">
             ${modeInfoBody}
@@ -3733,7 +3733,7 @@ function renderDateCalculator() {
         </div>
       </details>
       <details class="dc-ref-accordion" open>
-        <summary>📋 ${mode.tableTitle}</summary>
+        <summary>${mode.tableTitle}</summary>
         <div class="dc-ref-body">
           <table class="${tableClassName}">
             <thead><tr>${mode.tableHead.map((h) => `<th>${h}</th>`).join("")}</tr></thead>
@@ -4131,7 +4131,7 @@ function buildInspectionHistoryPanel() {
     const empty = document.createElement("div");
     empty.className = "insp-history-empty";
     empty.innerHTML = `
-      <div class="insp-history-empty-icon">🧯</div>
+      <div class="insp-history-empty-icon"><svg class="ic a-red" aria-hidden="true"><use href="#i-bldcheck"/></svg></div>
       <div class="insp-history-empty-title">자체점검 종류 판정</div>
       <div class="insp-history-empty-desc">우측 질문에 답하면<br>여기에 진행 내역이 쌓입니다.</div>
     `;
@@ -4632,7 +4632,7 @@ function buildMultiuseHistoryPanel() {
     const empty = document.createElement("div");
     empty.className = "insp-history-empty";
     empty.innerHTML = `
-      <div class="insp-history-empty-icon">👥</div>
+      <div class="insp-history-empty-icon"><svg class="ic a-blue" aria-hidden="true"><use href="#i-shopcheck"/></svg></div>
       <div class="insp-history-empty-title">다중이용업소 해당 여부</div>
       <div class="insp-history-empty-desc">우측 질문에 답하면<br>여기에 진행 내역이 쌓입니다.</div>
     `;
@@ -5430,7 +5430,7 @@ function renderBuildingRecent(list, confirming) {
       // 건물명이 없으면 도로명주소를 굵게, 지번을 아래에
       const title = r.name || r.roadAddr;
       const sub = r.name ? r.roadAddr : r.jibunAddr;
-      return `<li><button type="button" data-bld-recent="${i}"><span class="ic">🏢</span><span class="tx"><div class="nm">${escapeHtml(title)}</div><div class="ad">${escapeHtml(sub || "")}</div></span><span class="ar">›</span></button></li>`;
+      return `<li><button type="button" data-bld-recent="${i}"><span class="ic"><svg class="ic-inline a-blue" aria-hidden="true"><use href="#i-plan"/></svg></span><span class="tx"><div class="nm">${escapeHtml(title)}</div><div class="ad">${escapeHtml(sub || "")}</div></span><span class="ar">›</span></button></li>`;
     }).join("")}</ul>`;
 }
 
@@ -8993,9 +8993,9 @@ function yearRenderDateStep() {
         wrapper.insertAdjacentElement("afterend", warn);
       }
       if (isBefore2004Era) {
-        warn.innerHTML = "<div class=\"ib-title\">⚠️ 범위 외 날짜</div>소방법 분법 이전 구간은 <strong>1981년 11월 6일 ~ 2004년 5월 29일</strong>입니다. 허가일을 다시 확인해 주세요.";
+        warn.innerHTML = "<div class=\"ib-title\">범위 외 날짜</div>소방법 분법 이전 구간은 <strong>1981년 11월 6일 ~ 2004년 5월 29일</strong>입니다. 허가일을 다시 확인해 주세요.";
       } else {
-        warn.innerHTML = "<div class=\"ib-title\">⚠️ 분석 불가 날짜</div>이 도구는 <strong>2004년 5월 30일 이후</strong> 건축허가 건물만 분석할 수 있습니다. 허가일을 다시 확인해 주세요.";
+        warn.innerHTML = "<div class=\"ib-title\">분석 불가 날짜</div>이 도구는 <strong>2004년 5월 30일 이후</strong> 건축허가 건물만 분석할 수 있습니다. 허가일을 다시 확인해 주세요.";
       }
     } else {
       if (warn) warn.remove();
@@ -15674,9 +15674,9 @@ function yearShowResults() {
     ensureEmergencyElevatorSmokeControl(results, inp, { allowRefugeElevator: true, requirePermitDateForRefugeElevator: true, usePermitBasedLodgingFlameproof: true });
     suppressBefore2004LowRiseEscapeItems(results, inp);
     const summaryHtml = ibSummaryHtml([
-      ibChipHtml("🏪", "용도", `근린생활시설(${subtypeLabel})`),
-      ibChipHtml("📅", "건축허가일", permitStr),
-      ibChipHtml("📐", "연면적", `${ibNumFmt(inp.totalArea)}㎡`),
+      ibChipHtml("", "용도", `근린생활시설(${subtypeLabel})`),
+      ibChipHtml("", "건축허가일", permitStr),
+      ibChipHtml("", "연면적", `${ibNumFmt(inp.totalArea)}㎡`),
       ibFloorsChip(inp.aboveGroundFloors, inp.basementFloors),
     ]);
     const exceptionItems = buildBefore2004ExceptionItems(results, pd);
@@ -15707,9 +15707,9 @@ function yearShowResults() {
     ensureEmergencyElevatorSmokeControl(results, inp, { allowRefugeElevator: true, requirePermitDateForRefugeElevator: true, usePermitBasedLodgingFlameproof: true });
     suppressBefore2004LowRiseEscapeItems(results, inp);
     const summaryHtml = ibSummaryHtml([
-      ibChipHtml("🏨", "용도", "숙박시설"),
-      ibChipHtml("📅", "건축허가일", permitStr),
-      ibChipHtml("📐", "연면적", `${ibNumFmt(inp.totalArea)}㎡`),
+      ibChipHtml("", "용도", "숙박시설"),
+      ibChipHtml("", "건축허가일", permitStr),
+      ibChipHtml("", "연면적", `${ibNumFmt(inp.totalArea)}㎡`),
       ibFloorsChip(inp.aboveGroundFloors, inp.basementFloors),
     ]);
     const exceptionItems = buildBefore2004ExceptionItems(results, pd);
@@ -15740,9 +15740,9 @@ function yearShowResults() {
     ensureEmergencyElevatorSmokeControl(results, inp, { allowRefugeElevator: true, requirePermitDateForRefugeElevator: true, usePermitBasedLodgingFlameproof: true });
     suppressBefore2004LowRiseEscapeItems(results, inp);
     const summaryHtml = ibSummaryHtml([
-      ibChipHtml("🧓", "용도", "노유자시설"),
-      ibChipHtml("📅", "건축허가일", permitStr),
-      ibChipHtml("📐", "연면적", `${ibNumFmt(inp.totalArea)}㎡`),
+      ibChipHtml("", "용도", "노유자시설"),
+      ibChipHtml("", "건축허가일", permitStr),
+      ibChipHtml("", "연면적", `${ibNumFmt(inp.totalArea)}㎡`),
       ibFloorsChip(inp.aboveGroundFloors, inp.basementFloors),
     ]);
     const exceptionItems = buildBefore2004ExceptionItems(results, pd);
@@ -15774,9 +15774,9 @@ function yearShowResults() {
     ensureEmergencyElevatorSmokeControl(results, inp, { allowRefugeElevator: true, requirePermitDateForRefugeElevator: true, usePermitBasedLodgingFlameproof: true });
     suppressBefore2004LowRiseEscapeItems(results, inp);
     const summaryHtml = ibSummaryHtml([
-      ibChipHtml("🏥", "용도", `의료시설(${subtypeLabel})`),
-      ibChipHtml("📅", "건축허가일", permitStr),
-      ibChipHtml("📐", "연면적", `${ibNumFmt(inp.totalArea)}㎡`),
+      ibChipHtml("", "용도", `의료시설(${subtypeLabel})`),
+      ibChipHtml("", "건축허가일", permitStr),
+      ibChipHtml("", "연면적", `${ibNumFmt(inp.totalArea)}㎡`),
       ibFloorsChip(inp.aboveGroundFloors, inp.basementFloors),
     ]);
     const exceptionItems = buildBefore2004ExceptionItems(results, pd);
@@ -15807,9 +15807,9 @@ function yearShowResults() {
     ensureEmergencyElevatorSmokeControl(results, inp, { allowRefugeElevator: true, requirePermitDateForRefugeElevator: true, usePermitBasedLodgingFlameproof: true });
     suppressBefore2004LowRiseEscapeItems(results, inp);
     const summaryHtml = ibSummaryHtml([
-      ibChipHtml("⛪", "용도", "종교시설"),
-      ibChipHtml("📅", "건축허가일", permitStr),
-      ibChipHtml("📐", "연면적", `${ibNumFmt(inp.totalArea)}㎡`),
+      ibChipHtml("", "용도", "종교시설"),
+      ibChipHtml("", "건축허가일", permitStr),
+      ibChipHtml("", "연면적", `${ibNumFmt(inp.totalArea)}㎡`),
       ibFloorsChip(inp.aboveGroundFloors, inp.basementFloors),
     ]);
     const exceptionItems = buildBefore2004ExceptionItems(results, pd);
@@ -15840,10 +15840,10 @@ function yearShowResults() {
     ensureEmergencyElevatorSmokeControl(results, inp, { allowRefugeElevator: true, requirePermitDateForRefugeElevator: true, usePermitBasedLodgingFlameproof: true });
     suppressBefore2004LowRiseEscapeItems(results, inp);
     const summaryHtml = ibSummaryHtml([
-      ibChipHtml("🛒", "용도", `판매시설${eraNote}`),
-      ibChipHtml("📅", "건축허가일", permitStr),
-      ibChipHtml("📐", "연면적", `${ibNumFmt(inp.totalArea)}㎡`),
-      ibChipHtml("📏", "판매 사용면적", `${ibNumFmt(inp.before2004SalesArea)}㎡`),
+      ibChipHtml("", "용도", `판매시설${eraNote}`),
+      ibChipHtml("", "건축허가일", permitStr),
+      ibChipHtml("", "연면적", `${ibNumFmt(inp.totalArea)}㎡`),
+      ibChipHtml("", "판매 사용면적", `${ibNumFmt(inp.before2004SalesArea)}㎡`),
       ibFloorsChip(inp.aboveGroundFloors, inp.basementFloors),
     ]);
     const exceptionItems = buildBefore2004ExceptionItems(results, pd);
@@ -15874,9 +15874,9 @@ function yearShowResults() {
     ensureEmergencyElevatorSmokeControl(results, inp, { allowRefugeElevator: true, requirePermitDateForRefugeElevator: true, usePermitBasedLodgingFlameproof: true });
     suppressBefore2004LowRiseEscapeItems(results, inp);
     const summaryHtml = ibSummaryHtml([
-      ibChipHtml("🏢", "용도", "업무시설"),
-      ibChipHtml("📅", "건축허가일", permitStr),
-      ibChipHtml("📐", "연면적", `${ibNumFmt(inp.totalArea)}㎡`),
+      ibChipHtml("", "용도", "업무시설"),
+      ibChipHtml("", "건축허가일", permitStr),
+      ibChipHtml("", "연면적", `${ibNumFmt(inp.totalArea)}㎡`),
       ibFloorsChip(inp.aboveGroundFloors, inp.basementFloors),
     ]);
     const exceptionItems = buildBefore2004ExceptionItems(results, pd);
@@ -15915,19 +15915,19 @@ function yearShowResults() {
     const perDong = Math.round(inp.totalArea / dongCount);
     const isAvgMode = yearState.answers.yAptAreaMode === "average";
     const aptChips = [
-      ibChipHtml("🏢", "용도", "공동주택(아파트)"),
-      ibChipHtml("📅", "건축허가일", permitStr),
+      ibChipHtml("", "용도", "공동주택(아파트)"),
+      ibChipHtml("", "건축허가일", permitStr),
       isAvgMode
-        ? ibChipHtml("📐", "연면적", `${ibNumFmt(inp.totalArea)}㎡ (보고서 기준)`)
-        : ibChipHtml("📐", "연면적", `${ibNumFmt(inp.totalArea)}㎡ (대표동)`),
+        ? ibChipHtml("", "연면적", `${ibNumFmt(inp.totalArea)}㎡ (보고서 기준)`)
+        : ibChipHtml("", "연면적", `${ibNumFmt(inp.totalArea)}㎡ (대표동)`),
       isAvgMode
-        ? ibChipHtml("🏘️", "동 수", `${dongCount}개 (동당 약 ${ibNumFmt(perDong)}㎡)`)
-        : ibChipHtml("🏘️", "판정 기준", "대표동 1개 기준"),
-      ibChipHtml("🚪", "세대수", `${ibNumFmt(inp.before2004AptHouseholds)}세대`),
+        ? ibChipHtml("", "동 수", `${dongCount}개 (동당 약 ${ibNumFmt(perDong)}㎡)`)
+        : ibChipHtml("", "판정 기준", "대표동 1개 기준"),
+      ibChipHtml("", "세대수", `${ibNumFmt(inp.before2004AptHouseholds)}세대`),
       ibFloorsChip(inp.aboveGroundFloors, inp.basementFloors),
     ];
     if (hasParkingBuilding) {
-      aptChips.push(ibChipHtml("🅿️", "별동 주차장", `${ibNumFmt(inp.aptParkingArea)}㎡ (지상 ${inp.aptParkingAbove} · 지하 ${inp.aptParkingBelow})`));
+      aptChips.push(ibChipHtml("", "별동 주차장", `${ibNumFmt(inp.aptParkingArea)}㎡ (지상 ${inp.aptParkingAbove} · 지하 ${inp.aptParkingBelow})`));
     }
     const summaryHtml = ibSummaryHtml(aptChips, isAvgMode
       ? `<div class="ib-note">※ 보고서 기준(간이) 방식: 지상 연면적만 동당 평균(÷동수), 지하 바닥면적(통합 주차장 포함)·층수·세대수는 단지 통합/최고 기준. 별동 주차장은 따로 판정해 합산. 연면적에 부속동이 섞여 있으면 동당 평균이 실제 주거동보다 작게 나옵니다. 정확히 보려면 대표동 기준으로 다시 확인하세요.</div>`
@@ -15962,13 +15962,13 @@ function yearShowResults() {
     ensureEmergencyElevatorSmokeControl(results, inp, { allowRefugeElevator: true, requirePermitDateForRefugeElevator: true, usePermitBasedLodgingFlameproof: true });
     suppressBefore2004LowRiseEscapeItems(results, inp);
     const chips = [
-      ibChipHtml("🏭", "용도", "공장"),
-      ibChipHtml("📅", "건축허가일", permitStr),
-      ibChipHtml("📐", "연면적", `${ibNumFmt(inp.totalArea)}㎡`),
+      ibChipHtml("", "용도", "공장"),
+      ibChipHtml("", "건축허가일", permitStr),
+      ibChipHtml("", "연면적", `${ibNumFmt(inp.totalArea)}㎡`),
       ibFloorsChip(inp.aboveGroundFloors, inp.basementFloors),
     ];
     if (inp.factoryHasSpecialCombustible) {
-      chips.push(ibChipHtml("⚠️", "특수가연물", `지정수량 ${inp.factorySpecialCombustibleMultiple}배`));
+      chips.push(ibChipHtml("", "특수가연물", `지정수량 ${inp.factorySpecialCombustibleMultiple}배`));
     }
     const summaryHtml = ibSummaryHtml(chips);
     const exceptionItems = buildBefore2004ExceptionItems(results, pd);
@@ -16012,9 +16012,9 @@ function yearShowResults() {
     `<div class="ib-chip"><div class="ib-chip-label">${label}</div><div class="ib-chip-value">${value}</div></div>`;
   const ibSummary = (chips, note) =>
     `<div class="ib-title">입력값 기준</div><div class="ib-grid">${chips.join("")}</div>${note || ""}`;
-  const floorsChip = () => ibChip("🏬", "층수", `지상 ${inp.aboveGroundFloors} · 지하 ${inp.basementFloors}`);
-  const permitChip = () => ibChip("📅", "건축허가일", permitStr);
-  const areaChip = () => ibChip("📐", "연면적", `${nf(inp.totalArea)}㎡`);
+  const floorsChip = () => ibChip("", "층수", `지상 ${inp.aboveGroundFloors} · 지하 ${inp.basementFloors}`);
+  const permitChip = () => ibChip("", "건축허가일", permitStr);
+  const areaChip = () => ibChip("", "연면적", `${nf(inp.totalArea)}㎡`);
 
   let exceptionItems = [];
   const autoNoteParts = (kind) => {
@@ -16069,10 +16069,10 @@ function yearShowResults() {
     yearApplyTransitionalProvisions(results, inp, "after2004");
     exceptionItems = yearBuildLodgingExceptionItems(results, inp);
     summaryHtml = ibSummary([
-      ibChip("🏨", "용도", "숙박시설"),
+      ibChip("", "용도", "숙박시설"),
       permitChip(),
       areaChip(),
-      ibChip("📏", "숙박 사용면적", `${nf(inp.lodgingArea)}㎡`),
+      ibChip("", "숙박 사용면적", `${nf(inp.lodgingArea)}㎡`),
       floorsChip(),
     ], autoNoteParts("lodging"));
   } else if (inp.occupancyType === "elderly") {
@@ -16082,10 +16082,10 @@ function yearShowResults() {
     exceptionItems = yearBuildElderlyExceptionItems(results, inp);
     const subtypeLabel = inp.elderlySubtype === "living" ? "노유자 생활시설" : "일반 노유자시설";
     summaryHtml = ibSummary([
-      ibChip("🧓", "용도", `노유자시설(${subtypeLabel})`),
+      ibChip("", "용도", `노유자시설(${subtypeLabel})`),
       permitChip(),
       areaChip(),
-      ibChip("📏", "노유자 사용면적", `${nf(inp.elderlyArea)}㎡`),
+      ibChip("", "노유자 사용면적", `${nf(inp.elderlyArea)}㎡`),
       floorsChip(),
     ], autoNoteParts("elderly"));
   } else if (inp.occupancyType === "medical") {
@@ -16102,10 +16102,10 @@ function yearShowResults() {
     };
     const subtypeLabel = medicalSubtypeLabels[inp.medicalSubtype] || "의료시설";
     summaryHtml = ibSummary([
-      ibChip("🏥", "용도", `의료시설(${subtypeLabel})`),
+      ibChip("", "용도", `의료시설(${subtypeLabel})`),
       permitChip(),
       areaChip(),
-      ibChip("📏", "의료 사용면적", `${nf(inp.medicalArea)}㎡`),
+      ibChip("", "의료 사용면적", `${nf(inp.medicalArea)}㎡`),
       floorsChip(),
     ], autoNoteParts("medical"));
   } else if (inp.occupancyType === "religious") {
@@ -16114,7 +16114,7 @@ function yearShowResults() {
     yearApplyTransitionalProvisions(results, inp, "after2004");
     exceptionItems = yearBuildReligiousExceptionItems(results, inp);
     summaryHtml = ibSummary([
-      ibChip("⛪", "용도", "종교시설"),
+      ibChip("", "용도", "종교시설"),
       permitChip(),
       areaChip(),
       floorsChip(),
@@ -16129,10 +16129,10 @@ function yearShowResults() {
     if (inp.salesIsLargeStore) salesTags.push("대규모점포");
     const salesTagStr = salesTags.length ? `(${salesTags.join("·")})` : "";
     summaryHtml = ibSummary([
-      ibChip("🛒", "용도", `판매시설${salesTagStr}`),
+      ibChip("", "용도", `판매시설${salesTagStr}`),
       permitChip(),
       areaChip(),
-      ibChip("📏", "판매 사용면적", `${nf(inp.salesArea)}㎡`),
+      ibChip("", "판매 사용면적", `${nf(inp.salesArea)}㎡`),
       floorsChip(),
     ], autoNoteParts("sales"));
   } else if (inp.occupancyType === "office") {
@@ -16142,7 +16142,7 @@ function yearShowResults() {
     exceptionItems = yearBuildOfficeExceptionItems(results, inp);
     const officeTag = inp.officeIsOfficetel ? "(오피스텔)" : "";
     summaryHtml = ibSummary([
-      ibChip("🏢", "용도", `업무시설${officeTag}`),
+      ibChip("", "용도", `업무시설${officeTag}`),
       permitChip(),
       areaChip(),
       floorsChip(),
@@ -16154,7 +16154,7 @@ function yearShowResults() {
     exceptionItems = yearBuildFactoryExceptionItems(results, inp);
     const factoryScTag = inp.factoryHasSpecialCombustible ? ` (특수가연물 ${nf(inp.factorySpecialCombustibleMultiple)}배)` : "";
     summaryHtml = ibSummary([
-      ibChip("🏭", "용도", "공장"),
+      ibChip("", "용도", "공장"),
       permitChip(),
       areaChip(),
       floorsChip(),
@@ -16171,17 +16171,17 @@ function yearShowResults() {
     const householdText = inp.apartmentSubtype === "apt" ? `, ${inp.aptHouseholdCount}세대` : "";
     const isAvgMode = yearState.answers.yAptAreaMode === "average";
     const aptChips = [
-      ibChip("🏢", "용도", `공동주택(${subtypeLabel})`),
+      ibChip("", "용도", `공동주택(${subtypeLabel})`),
       permitChip(),
       isAvgMode
-        ? ibChip("📐", "연면적", `${nf(inp.totalArea)}㎡ (보고서 기준)`)
-        : ibChip("📐", "연면적", `${nf(inp.totalArea)}㎡ (대표동)`),
+        ? ibChip("", "연면적", `${nf(inp.totalArea)}㎡ (보고서 기준)`)
+        : ibChip("", "연면적", `${nf(inp.totalArea)}㎡ (대표동)`),
       isAvgMode
-        ? ibChip("🏘️", "동 수", `${dongCount}개 (동당 약 ${nf(perDong)}㎡)`)
-        : ibChip("🏘️", "판정 기준", "대표동 1개 기준"),
+        ? ibChip("", "동 수", `${dongCount}개 (동당 약 ${nf(perDong)}㎡)`)
+        : ibChip("", "판정 기준", "대표동 1개 기준"),
     ];
-    if (inp.apartmentSubtype === "apt") aptChips.push(ibChip("🚪", "세대수", `${nf(inp.aptHouseholdCount)}세대`));
-    aptChips.push(ibChip("🏬", "층수", `지상 ${inp.aboveGroundFloors} · 지하 ${inp.basementFloors}`));
+    if (inp.apartmentSubtype === "apt") aptChips.push(ibChip("", "세대수", `${nf(inp.aptHouseholdCount)}세대`));
+    aptChips.push(ibChip("", "층수", `지상 ${inp.aboveGroundFloors} · 지하 ${inp.basementFloors}`));
     summaryHtml = ibSummary(aptChips, (isAvgMode
       ? `<div class="ib-note">※ 보고서 기준(간이) 방식: 면적 기준은 동당 평균(연면적÷동수), 층수·지하는 최고 동·통합 지하 기준. 연면적에 부속동이 섞여 있으면 동당 평균이 실제 주거동보다 작게 나옵니다. 정확히 보려면 대표동 기준으로 다시 확인하세요.</div>`
       : `<div class="ib-note">※ 대표동 기준: 입력한 대표동 1개를 그대로 판정했습니다(면적 나눔 없음). 지하는 통합 지하 기준. 다른 동이 대표동보다 크면 그 동으로 다시 확인하세요.</div>`) + autoNoteParts("apartment"));
@@ -16191,7 +16191,7 @@ function yearShowResults() {
     yearApplyTransitionalProvisions(results, inp, "after2004");
     exceptionItems = yearBuildNeighborhoodExceptionItems(results, inp);
     summaryHtml = ibSummary([
-      ibChip("🏪", "용도", "근린생활시설"),
+      ibChip("", "용도", "근린생활시설"),
       permitChip(),
       areaChip(),
       floorsChip(),
@@ -16716,7 +16716,7 @@ function renderHomeReminders() {
     container.innerHTML = `
       <div class="reminder-panel">
         <div class="reminder-panel-header">
-          <span class="reminder-panel-title">📌 제출기한 알림판</span>
+          <span class="reminder-panel-title"><svg class="ic-inline a-amber" aria-hidden="true"><use href="#i-bell-sm"/></svg> 제출기한 알림판</span>
           <button class="reminder-add-btn" id="open-manual-reminder" type="button" aria-label="직접 알림 추가">+</button>
         </div>
         <div class="reminder-empty">법정기한 계산기에서 결과를 추가하거나<br>오른쪽 + 버튼으로<br>직접 알림을 등록할 수 있습니다.</div>
@@ -16739,9 +16739,9 @@ function renderHomeReminders() {
 
     let warningHtml = "";
     if (isOverdue) {
-      warningHtml = `<div class="reminder-card-warning">⚠ 기한 초과 (${Math.abs(remaining)}일 경과)</div>`;
+      warningHtml = `<div class="reminder-card-warning">기한 초과 (${Math.abs(remaining)}일 경과)</div>`;
     } else if (isUrgent) {
-      warningHtml = `<div class="reminder-card-warning">⚠ D-${remaining} 기한 임박!</div>`;
+      warningHtml = `<div class="reminder-card-warning">D-${remaining} 기한 임박!</div>`;
     }
 
     const baseLabel = REMINDER_BASE_LABELS[r.type] || "시작일";
@@ -16771,7 +16771,7 @@ function renderHomeReminders() {
   container.innerHTML = `
     <div class="reminder-panel">
       <div class="reminder-panel-header">
-        <span class="reminder-panel-title">📌 제출기한 알림판</span>
+        <span class="reminder-panel-title"><svg class="ic-inline a-amber" aria-hidden="true"><use href="#i-bell-sm"/></svg> 제출기한 알림판</span>
         <div class="reminder-header-actions">
           <span class="reminder-count">${reminders.length}건</span>
           <button class="reminder-add-btn" id="open-manual-reminder" type="button" aria-label="직접 알림 추가">+</button>
@@ -16889,10 +16889,6 @@ renderHomeReminders();
 // ── Theme Toggle ──────────────────────────────────────────────
 (function initTheme() {
   const SEASON_DAY   = { spring: 'blossom', summer: 'summer-night', autumn: 'autumn', winter: 'winter' };
-  const THEME_ICONS  = {
-    blossom: '🌸', autumn: '🍂', winter: '❄️',
-    'summer-night': '🌌', official: '☀️', dark: '🌙',
-  };
   const THEME_LABELS = {
     blossom: '벚꽃 테마로', autumn: '가을 테마로', winter: '겨울 테마로',
     'summer-night': '여름밤으로', official: '낮 모드로', dark: '밤 모드로',
@@ -16926,20 +16922,14 @@ renderHomeReminders();
     document.documentElement.setAttribute('data-theme', t);
     localStorage.setItem('theme', t);
     const next = getNextTheme(t);
-    const icon  = THEME_ICONS[next]  || '☀️';
     const title = (THEME_LABELS[next] || '테마 전환') + ' 전환';
     document.querySelectorAll('.theme-toggle-btn').forEach(btn => {
-      btn.textContent = icon;
+      btn.innerHTML = '<svg class="theme-ic" aria-hidden="true"><use href="#i-daynight-sm"/></svg>';
       btn.title = title;
     });
   }
 
-  document.querySelectorAll('.topbar').forEach(tb => {
-    const btn = document.createElement('button');
-    btn.className = 'theme-toggle-btn';
-    btn.type = 'button';
-    tb.appendChild(btn);
-  });
+  // 테마 버튼은 메인 화면 상단(#theme-toggle)에만 둔다. 하위 화면 상단 바에는 붙이지 않음.
 
   const isDev = localStorage.getItem('devMode') === 'true';
   let saved = localStorage.getItem('theme') || getSeasonalTheme();
@@ -17348,7 +17338,7 @@ history.replaceState({ screen: 'home' }, '');
       if (deferredPrompt) {
         modalTitle.textContent = '홈 화면에 설치';
         modalBody.innerHTML = '<p class="ios-guide-desc">아래 버튼을 누르면 홈 화면에 앱 아이콘이 추가됩니다.</p>';
-        modalAction.textContent = '📲 홈 화면에 추가';
+        modalAction.textContent = '홈 화면에 추가';
         modalAction.style.display = '';
         modalAction.onclick = async function () {
           deferredPrompt.prompt();
@@ -17375,7 +17365,7 @@ history.replaceState({ screen: 'home' }, '');
           step(2, '다운로드된 <strong>.url 파일</strong>을 바탕화면으로 이동') +
           step(3, '더블클릭하면 바로 열립니다') +
         '</div>';
-      modalAction.textContent = '⬇️ 바로가기 파일 다운로드';
+      modalAction.textContent = '바로가기 파일 다운로드';
       modalAction.style.display = '';
       modalAction.onclick = function () {
         var content = '[InternetShortcut]\r\nURL=' + APP_URL + '\r\n';
@@ -17766,7 +17756,7 @@ const RG_FACILITY_DESCS = {
   ],
   'ac04': [
     rgField('설치장소', '비상콘센트설비가 설치된 동명과 층을 기재합니다.'),
-    '<b>전원방식과 접속기 형식</b>을 확인하여 해당하는 란에 ✔표시합니다. 오래된 건물(고층 빌딩 등)을 제외하고 현재는 단상 220V와 접지형 2극 플러그접속기를 설치합니다.',
+    '<b>전원방식과 접속기 형식</b>을 확인하여 해당하는 란에 ✓표시합니다. 오래된 건물(고층 빌딩 등)을 제외하고 현재는 단상 220V와 접지형 2극 플러그접속기를 설치합니다.',
   ],
   'ac05': [
     rgField('설치장소', '무선통신보조설비가 설치된 동명과 층 범위를 기재합니다.'),
@@ -17972,7 +17962,7 @@ function renderReportGuide(restoreScroll) {
         <p class="wq-sub">목적에 맞는 항목을 선택하세요.</p>
         <div class="choice-list" style="margin-top:16px;">
           <button id="rg-sel-inspection" class="choice-button choice-card" type="button">
-            <span class="cc-icon mc-red">🏢</span>
+            <span class="cc-icon ic-art"><svg class="ic a-red" aria-hidden="true"><use href="#i-bldcheck"/></svg></span>
             <span class="cc-body">
               <span class="cc-num">01</span>
               <strong>작동·종합 대상 판독기</strong>
@@ -17981,7 +17971,7 @@ function renderReportGuide(restoreScroll) {
             <span class="cc-arrow">›</span>
           </button>
           <button id="rg-sel-guide" class="choice-button choice-card" type="button">
-            <span class="cc-icon mc-blue">📋</span>
+            <span class="cc-icon ic-art"><svg class="ic a-blue" aria-hidden="true"><use href="#i-highlight"/></svg></span>
             <span class="cc-body">
               <span class="cc-num">02</span>
               <strong>자체점검 보고서 읽는법</strong>
@@ -18080,7 +18070,7 @@ const RG_PAGE1_SECTIONS = [
     label: '점검 종류',
     img: './image/inspection/page 1/page1-점검종류.png',
     desc: [
-      '작동기능점검, 종합정밀점검, 최초점검 중 해당하는 부분에 ✔ 표시합니다.',
+      '작동기능점검, 종합정밀점검, 최초점검 중 해당하는 부분에 ✓ 표시합니다.',
       '3급 소방대상물의 관계인이 직접 점검하는 경우 대부분 <b>작동기능점검</b>에 해당합니다.',
       '최초점검은 해당 특정소방대상물의 소방시설등이 신설된 경우에만 표시합니다.',
     ],
@@ -18119,7 +18109,7 @@ const RG_PAGE1_SECTIONS = [
     label: '점검자',
     img: './image/inspection/page 1/page1-점검자.png',
     desc: [
-      '<b>관계인·소방안전관리자·소방시설관리업자 </b> 중 점검을 실시한 자에 ✔ 표시하고 전화번호를 기입합니다.',
+      '<b>관계인·소방안전관리자·소방시설관리업자 </b> 중 점검을 실시한 자에 ✓ 표시하고 전화번호를 기입합니다.',
       '<b>전자우편 송달에 동의</b>하는 경우, 불량사항 조치에 대한 사전통지와 조치명령서가 우편 대신 정보통신망을 통해 발송됩니다.',
     ],
   },
@@ -18281,7 +18271,7 @@ const RG_PAGE2_SECTIONS = [
     label: '관계인 정보 (대표자)',
     img: './image/inspection/page 2/page2-관계인정보.png',
     desc: [
-      '<b>대표자</b>는 소유자·관리자·점유자 중 해당하는 란에 ✔ 표시하고 성명과 전화번호를 기재합니다.',
+      '<b>대표자</b>는 소유자·관리자·점유자 중 해당하는 란에 ✓ 표시하고 성명과 전화번호를 기재합니다.',
       '<b>소방안전관리등급</b>: 「화재의 예방 및 안전관리에 관한 법률 시행령」 별표 4에 따른 등급(특급·1급·2급·3급)을 기재하고, 현재 선임된 소방안전관리자 정보를 기입합니다.',
       '<b>소방안전관리자</b>에는 현재 선임된 소방안전관리자 정보를 기입합니다. 최근 교육이수일은 최근에 받은 보수교육(2년마다 실시)을 받은 날을 기입합니다.',
     ],
@@ -18299,7 +18289,7 @@ const RG_PAGE2_SECTIONS = [
     desc: [
       '<b>소방계획서 / 자체점검(전년도) / 교육훈련(전년도)</b>: 「화재의 예방 및 안전관리에 관한 법률」 제24조에 따른 소방안전관리업무 실시사항을 기입합니다.',
       '<b>소방계획서(매년 작성)</b>는 연초에는 작성되어 있어야 하고, 관계인은 2년치를 보관하고 있어야 합니다.',
-      '<b>화재보험</b>: 해당 특정소방대상물에 화재보험이 가입되어 있는 경우 가입에 ✔ 표시하고, 가입기간과 가입금액(대인/대물)을 기재합니다.',
+      '<b>화재보험</b>: 해당 특정소방대상물에 화재보험이 가입되어 있는 경우 가입에 ✓ 표시하고, 가입기간과 가입금액(대인/대물)을 기재합니다.',
     ],
   },
   {
@@ -18307,9 +18297,9 @@ const RG_PAGE2_SECTIONS = [
     label: '다중이용업소 현황',
     img: './image/inspection/page 2/page2-다중이용업소.png',
     desc: [
-      '해당 특정소방대상물에 현재 입점 중인 다중이용업소 업종에 ✔ 표시하고, 그 업소 숫자를 기입합니다.',
+      '해당 특정소방대상물에 현재 입점 중인 다중이용업소 업종에 ✓ 표시하고, 그 업소 숫자를 기입합니다.',
       '휴게음식점, 일반음식점, 노래방, PC방 등이 해당됩니다.(해당 업소가 다중이용업소인지는 <b>다중이용업소 해당 여부 판독기</b> 사용)',
-      '해당 없는 경우 해당없음에 ✔ 표시합니다.',
+      '해당 없는 경우 해당없음에 ✓ 표시합니다.',
     ],
   },
   {
@@ -18374,7 +18364,7 @@ function rgPageBlock(imgSrc, altText) {
 }
 
 function renderRgPage1(c) {
-  c.appendChild(rgInfoBox('blue', '📄 1페이지 — 보고서 표지',
+  c.appendChild(rgInfoBox('blue', '1페이지 — 보고서 표지',
     '점검 기본 정보를 기재하는 페이지입니다. 각 항목을 클릭하면 작성 방법을 확인할 수 있습니다.'));
   c.appendChild(rgPageBlock('./image/inspection/page 1/page1-full.png', '1페이지 전체'));
 
@@ -18386,7 +18376,7 @@ function renderRgPage1(c) {
 }
 
 function renderRgPage2(c) {
-  c.appendChild(rgInfoBox('blue', '📄 2페이지 — 특정소방대상물 정보',
+  c.appendChild(rgInfoBox('blue', '2페이지 — 특정소방대상물 정보',
     '대상물의 소방안전 현황과 건축물 정보를 기재하는 페이지입니다. 각 항목을 클릭하면 작성 방법을 확인할 수 있습니다.'));
   c.appendChild(rgPageBlock('./image/inspection/page 2/page2-full.png', '2페이지 전체'));
 
@@ -18405,7 +18395,7 @@ function renderRgChecklist(c) {
 
   // ── 소방대상물 등급 선택 ──
   c.appendChild(rgSectionLabel('소방대상물 등급 선택'));
-  c.appendChild(rgInfoBox('blue', '💡 등급별 자동 선택',
+  c.appendChild(rgInfoBox('blue', '등급별 자동 선택',
     '등급을 선택하면 해당 대상물에 일반적으로 설치되는 설비가 자동으로 체크됩니다. 이후 직접 수정할 수 있습니다.'));
 
   var gradeGrid = document.createElement('div');
@@ -18540,7 +18530,7 @@ function renderRgSections(c) {
   });
 
   if (selectedFlat.length === 0) {
-    c.appendChild(rgInfoBox('amber', '⚠️ 선택된 설비 없음',
+    c.appendChild(rgInfoBox('amber', '선택된 설비 없음',
       '이전 탭(소방시설 선택)에서 해당 설비를 먼저 선택해 주세요.'));
     var backBtn = document.createElement('button');
     backBtn.type = 'button';
@@ -18691,7 +18681,7 @@ function renderFacilityBlock(c, item, selectedIds) {
       ? '점검표 이미지는 준비 중입니다. 곧 추가될 예정입니다.'
       : '이 시설은 특정한 상황에만 설치됩니다. 잘 쓰이지 않습니다.';
     noImg.innerHTML =
-      '<span class="rg-rare-icon">ℹ️</span>' +
+      '<span class="rg-rare-icon"><svg class="ic-inline" aria-hidden="true"><use href="#i-info-sm"/></svg></span>' +
       '<span>' + noImgText + '</span>';
     body.appendChild(noImg);
   }
@@ -18949,12 +18939,12 @@ function goToRgGuideSection(tab, sectionId) {
 (function initHomeSearch() {
   const SEARCH_ITEMS = [
     {
-      icon: "🔍", title: "소방시설 탐색기 (자세한 버전)", desc: "건축허가일 기준 법령 적용 상세 결과",
+      icon: "i-ext:fire", title: "소방시설 탐색기 (자세한 버전)", desc: "건축허가일 기준 법령 적용 상세 결과",
       keywords: ["탐색기", "자세한", "연도별", "건축허가", "법령", "소방시설"],
       action: () => { explorerRuntime.from = "home"; showScreen("explorerYear"); yearWizardRestart(); },
     },
     {
-      icon: "📅", title: "자체점검 제출기한 계산", desc: "점검 완료일로부터 15일 이내 제출기한",
+      icon: "i-alarm:blue", title: "자체점검 제출기한 계산", desc: "점검 완료일로부터 15일 이내 제출기한",
       keywords: ["자체점검", "제출기한", "점검", "날짜", "기한", "보고서"],
       action: () => {
         state.dateCalc.mode = "inspect_report";
@@ -18963,7 +18953,7 @@ function goToRgGuideSection(tab, sectionId) {
       },
     },
     {
-      icon: "📅", title: "소방안전관리자 선임기한 계산", desc: "해임·퇴직일로부터 선임 및 신고기한 계산",
+      icon: "i-alarm:blue", title: "소방안전관리자 선임기한 계산", desc: "해임·퇴직일로부터 선임 및 신고기한 계산",
       keywords: ["소방안전관리자", "선임기한", "신고", "날짜", "해임", "퇴직", "기한"],
       action: () => {
         state.dateCalc.mode = "fire_safety_manager";
@@ -18972,7 +18962,7 @@ function goToRgGuideSection(tab, sectionId) {
       },
     },
     {
-      icon: "📅", title: "소방안전관리보조자 선임기한 계산", desc: "해임·퇴직일로부터 선임 및 신고기한 계산",
+      icon: "i-alarm:blue", title: "소방안전관리보조자 선임기한 계산", desc: "해임·퇴직일로부터 선임 및 신고기한 계산",
       keywords: ["보조자", "소방안전관리보조자", "선임기한", "신고", "기한"],
       action: () => {
         state.dateCalc.mode = "fire_safety_assistant_manager";
@@ -18981,7 +18971,7 @@ function goToRgGuideSection(tab, sectionId) {
       },
     },
     {
-      icon: "🧮", title: "소방안전관리보조자 선임인원 계산", desc: "아파트 세대수·연면적으로 필요 인원 계산",
+      icon: "i-toolbox:amber", title: "소방안전관리보조자 선임인원 계산", desc: "아파트 세대수·연면적으로 필요 인원 계산",
       keywords: ["보조자", "인원", "선임인원", "계산기", "세대", "아파트", "연면적"],
       action: () => {
         occupancyState.tool = "staffing";
@@ -18990,7 +18980,7 @@ function goToRgGuideSection(tab, sectionId) {
       },
     },
     {
-      icon: "📅", title: "위험물안전관리자 선임기한 계산", desc: "해임·퇴직일로부터 선임 및 신고기한 계산",
+      icon: "i-alarm:blue", title: "위험물안전관리자 선임기한 계산", desc: "해임·퇴직일로부터 선임 및 신고기한 계산",
       keywords: ["위험물", "위험물안전관리자", "선임기한", "기한", "신고"],
       action: () => {
         state.dateCalc.mode = "hazardous_material_manager";
@@ -18999,7 +18989,7 @@ function goToRgGuideSection(tab, sectionId) {
       },
     },
     {
-      icon: "📅", title: "부적합 조치기한 계산", desc: "보고일로부터 10일/20일 이행완료 기한",
+      icon: "i-alarm:blue", title: "부적합 조치기한 계산", desc: "보고일로부터 10일/20일 이행완료 기한",
       keywords: ["부적합", "조치기한", "이행", "10일", "20일", "기한"],
       action: () => {
         state.dateCalc.mode = "noncompliance_action";
@@ -19008,12 +18998,12 @@ function goToRgGuideSection(tab, sectionId) {
       },
     },
     {
-      icon: "📋", title: "자체점검 가이드", desc: "자체점검 실시결과 보고서 작성·읽기 안내",
+      icon: "i-clip:amber", title: "자체점검 가이드", desc: "자체점검 실시결과 보고서 작성·읽기 안내",
       keywords: ["보고서", "읽는법", "자체점검", "작성", "점검표", "가이드"],
       action: () => { showScreen("reportGuide"); },
     },
     {
-      icon: "📖", title: "소방시설 도감", desc: "소방시설별 개요·종류·구성·설치기준",
+      icon: "i-index:purple", title: "소방시설 도감", desc: "소방시설별 개요·종류·구성·설치기준",
       keywords: ["소방시설", "도감", "설명", "종류", "구성", "설치기준", "유도등", "감지기"],
       action: () => {
         showScreen("facilities");
@@ -19021,7 +19011,7 @@ function goToRgGuideSection(tab, sectionId) {
       },
     },
     {
-      icon: "🏢", title: "작동·종합 대상 판독기", desc: "작동기능점검·종합정밀점검 대상 판정",
+      icon: "i-bldcheck:red", title: "작동·종합 대상 판독기", desc: "작동기능점검·종합정밀점검 대상 판정",
       keywords: ["작동", "종합", "판독기", "점검", "작동기능점검", "종합정밀점검"],
       action: () => {
         inspectionRestart();
@@ -19029,12 +19019,12 @@ function goToRgGuideSection(tab, sectionId) {
       },
     },
     {
-      icon: "👥", title: "다중이용업소 탐색기", desc: "업종별 다중이용업소 해당 여부 판정",
+      icon: "i-exit:green", title: "다중이용업소 탐색기", desc: "업종별 다중이용업소 해당 여부 판정",
       keywords: ["다중이용업소", "탐색기", "업종", "해당여부", "노래방", "pc방", "식당"],
       action: () => { multiuseRestart(); showScreen("multiuse"); },
     },
     {
-      icon: "🛡", title: "다중이용업소 안전시설 탐색", desc: "다중이용업소에 설치할 안전시설 확인",
+      icon: "i-exit:green", title: "다중이용업소 안전시설 탐색", desc: "다중이용업소에 설치할 안전시설 확인",
       keywords: ["다중이용업소", "안전시설", "설치", "탐색"],
       action: () => {
         explorerRuntime.mode = "multiuse-only";
@@ -19044,7 +19034,7 @@ function goToRgGuideSection(tab, sectionId) {
       },
     },
     {
-      icon: "🧮", title: "수용인원 계산기", desc: "용도별 법정 수용인원 산정",
+      icon: "i-toolbox:amber", title: "수용인원 계산기", desc: "용도별 법정 수용인원 산정",
       keywords: ["수용인원", "계산기", "면적", "용도", "강의실", "숙박", "유틸리티", "도구함"],
       action: () => {
         occupancyState.tool = "occupancy";
@@ -19056,7 +19046,7 @@ function goToRgGuideSection(tab, sectionId) {
       },
     },
     {
-      icon: "🏢", title: "건축물대장 조회", desc: "주소로 표제부·층별개요 조회",
+      icon: "i-plan:blue", title: "건축물대장 조회", desc: "주소로 표제부·층별개요 조회",
       keywords: ["건축물대장", "대장", "표제부", "세움터", "연면적", "사용승인", "주소", "층별"],
       action: () => document.getElementById("open-building-register").click(),
     },
@@ -19072,7 +19062,7 @@ function goToRgGuideSection(tab, sectionId) {
       const base = [sec.label, ...(sec.desc || []).map(stripTags)];
       // 항목(필드) 자체
       entries.push({
-        icon: "📋", title: sec.label, desc: ctx,
+        icon: "i-highlight:blue", title: sec.label, desc: ctx,
         keywords: base,
         action: () => goToRgGuideSection(tab, sec.id),
       });
@@ -19091,7 +19081,7 @@ function goToRgGuideSection(tab, sectionId) {
         (g.items || []).forEach((it) => { kw.push(it.tag); kw.push(stripTags(it.text)); });
         (g.rows || []).forEach((row) => row.forEach((cell) => kw.push(stripTags(cell))));
         entries.push({
-          icon: "📋", title: g.title, desc: ctx,
+          icon: "i-highlight:blue", title: g.title, desc: ctx,
           keywords: kw,
           action: () => goToRgGuideSection(tab, sec.id),
         });
@@ -19119,7 +19109,7 @@ function goToRgGuideSection(tab, sectionId) {
         (more.criteria || []).forEach((s) => kw.push(plain(s)));
         (more.usage || []).forEach((s) => kw.push(plain(s)));
         entries.push({
-          icon: "📖", title: item.name, desc: (item.category ? item.category + " · " : "") + "소방시설 도감",
+          icon: "i-index:purple", title: item.name, desc: (item.category ? item.category + " · " : "") + "소방시설 도감",
           keywords: kw.filter(Boolean),
           action: () => { if (typeof window.openFacilityItem === "function") window.openFacilityItem(idx, item.id); },
         });
@@ -19136,14 +19126,14 @@ function goToRgGuideSection(tab, sectionId) {
             kw.push(r.title); kw.push(plain(r.text));
             if (r.title) {
               entries.push({
-                icon: "📖", title: r.title, desc: intro.title + " · 소방시설 도감",
+                icon: "i-index:purple", title: r.title, desc: intro.title + " · 소방시설 도감",
                 keywords: [r.title, plain(r.text), intro.title, tab.tabLabel].filter(Boolean),
                 action: nav,
               });
             }
           });
         });
-        entries.push({ icon: "📖", title: intro.title, desc: "소방시설 도감", keywords: kw.filter(Boolean), action: nav });
+        entries.push({ icon: "i-index:purple", title: intro.title, desc: "소방시설 도감", keywords: kw.filter(Boolean), action: nav });
       }
     });
     return entries;
@@ -19215,7 +19205,7 @@ function goToRgGuideSection(tab, sectionId) {
           : "";
         return `
         <li class="hsr-item" data-index="${i}" tabindex="-1">
-          <span class="hsr-icon mc-${iconColor(item.icon)}">${item.icon}</span>
+          <span class="hsr-icon ic-art">${iconSvg(item.icon)}</span>
           <span class="hsr-text">
             <span class="hsr-title">${highlight(item.title, query.trim())}</span>
             <span class="hsr-desc">${item.desc}</span>
@@ -19238,10 +19228,10 @@ function goToRgGuideSection(tab, sectionId) {
     resultsList.classList.remove("hidden");
   }
 
-  function iconColor(icon) {
-    const map = { "🏗️": "blue", "🧪": "blue", "🧯": "red", "🔍": "red", "📅": "blue", "📋": "amber",
-                  "⚙️": "purple", "🏢": "amber", "👥": "green", "🛡": "green", "🧮": "amber" };
-    return map[icon] || "red";
+  // icon = "심볼id:색" (index.html 상단 아이콘 그림)
+  function iconSvg(icon) {
+    const [sym, color] = String(icon || "i-ext:fire").split(":");
+    return `<svg class="ic a-${color || "red"}" aria-hidden="true"><use href="#${sym}"/></svg>`;
   }
 
   function navigate(item) {
@@ -19611,7 +19601,8 @@ function goToRgGuideSection(tab, sectionId) {
       if (action.icon) {
         const ico = document.createElement("span");
         ico.className = "ilgu-panel-action-ico";
-        ico.textContent = action.icon;
+        const [sym, color] = String(action.icon).split(":");
+        ico.innerHTML = `<svg class="ic a-${color}" aria-hidden="true"><use href="#${sym}"/></svg>`;
         const lbl = document.createElement("span");
         lbl.className = "ilgu-panel-action-label";
         lbl.textContent = action.label;
@@ -19633,13 +19624,13 @@ function goToRgGuideSection(tab, sectionId) {
   }
 
   const MAIN_MENU_JUMPS = [
-    { id: "open-explorer", short: "소방시설 탐색기", icon: "🧯" },
-    { id: "open-multiuse-decoder", short: "다중이용업소 탐색기", icon: "👥" },
-    { id: "open-date-calculator", short: "법정기한 계산기", icon: "📅" },
-    { id: "open-report-guide", short: "자체점검 가이드", icon: "📋" },
-    { id: "open-facilities", short: "소방시설 도감", icon: "📖" },
-    { id: "open-occupancy-calculator", short: "유틸리티 도구함", icon: "🧮" },
-    { id: "open-building-register", short: "건축물대장 조회", icon: "🏢" },
+    { id: "open-explorer", short: "소방시설 탐색기", icon: "i-ext:fire" },
+    { id: "open-multiuse-decoder", short: "다중이용업소 탐색기", icon: "i-exit:green" },
+    { id: "open-date-calculator", short: "법정기한 계산기", icon: "i-alarm:blue" },
+    { id: "open-report-guide", short: "자체점검 가이드", icon: "i-clip:amber" },
+    { id: "open-facilities", short: "소방시설 도감", icon: "i-index:purple" },
+    { id: "open-occupancy-calculator", short: "유틸리티 도구함", icon: "i-toolbox:amber" },
+    { id: "open-building-register", short: "건축물대장 조회", icon: "i-plan:blue" },
   ];
 
   function openMenuJumpPanel() {
@@ -19708,7 +19699,7 @@ function goToRgGuideSection(tab, sectionId) {
     holdStateFrame("saluting", 2, { force: true });
     const house = document.createElement("div");
     house.className = "ilgu-house";
-    house.textContent = "🏠";
+    house.innerHTML = '<svg class="ic a-red" aria-hidden="true"><use href="#i-doghouse"/></svg>';
     house.setAttribute("aria-hidden", "true");
     root.appendChild(house);
     root.classList.add("is-entering");
@@ -19736,7 +19727,7 @@ function goToRgGuideSection(tab, sectionId) {
     setState("failed", { force: true });
     const house = document.createElement("div");
     house.className = "ilgu-house";
-    house.textContent = "🏠";
+    house.innerHTML = '<svg class="ic a-red" aria-hidden="true"><use href="#i-doghouse"/></svg>';
     house.setAttribute("aria-hidden", "true");
     root.appendChild(house);
     root.classList.add("is-leaving");
@@ -20229,7 +20220,7 @@ function goToRgGuideSection(tab, sectionId) {
     btn.setAttribute("aria-label", "메인 메뉴로");
     btn.title = "메인 메뉴로";
     btn.hidden = true;
-    btn.textContent = "🏠";
+    btn.innerHTML = '<svg class="home-jump-ic" aria-hidden="true"><use href="#i-home-sm"/></svg>';
     return btn;
   }
 
@@ -20302,7 +20293,7 @@ function goToRgGuideSection(tab, sectionId) {
   // 항상 노출 (개발자 모드 무관)
   openBtn.hidden = false;
 
-  // ✏️ 도입부만 자주 고친다면 LETTER_INTRO 상수만 수정하면 됨.
+  // 도입부만 자주 고친다면 LETTER_INTRO 상수만 수정하면 됨.
   // 형식: LETTER_INTRO = 도입부 / "[개발자가 전하는 글]" = 구분선 / "숫자. 제목" = 챕터 시작
   const LETTER_INTRO = `센터에서 예방 업무를 맡을 때도, 예방과에서 화재안전조사 업무를 할 때도 가장 어려운 부분은 법을 알고 적용하는 일이었습니다. 매일 보던 내용도 시간이 지나면 잊어버리고, 법령도 자주 바뀌어 그때마다 다시 찾아야 했습니다.
 
@@ -20693,7 +20684,7 @@ function goToRgGuideSection(tab, sectionId) {
         escapeHtml(it.url) + '">' +
         '<span class="lli-kind">' + escapeHtml(it.kind) + '</span>' +
         '<span class="lli-name">' + escapeHtml(it.name) + '</span>' +
-        '<span class="lli-arr">↗</span></button></li>';
+        '<svg class="lli-arr" aria-hidden="true"><use href="#i-link-sm"/></svg></button></li>';
     }).join("");
     modal.classList.remove("hidden");
   }

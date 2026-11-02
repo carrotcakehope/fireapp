@@ -356,7 +356,7 @@
     const body = document.createElement('div');
     body.className = 'fac-intro-body nf-body hidden';
     let h = `<p class="nf-summary">${md(intro.summary)}</p>`;
-    const icon = intro.groupsTitle ? '' : '📍 ';
+    const icon = '';
     let g = '';
     (intro.groups || []).forEach(gr => { g += `<div class="nf-place">${icon}${esc(gr.place)}</div>` + fieldRows(gr.rows || []); });
     h += sec(intro.groupsTitle || '장소별 장비', g);

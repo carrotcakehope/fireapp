@@ -515,11 +515,33 @@ input:focus-visible {
 /* 메인 타일 선화 아이콘: 상자 없이 그림만 (선=글자색, 포인트=--acc) */
 .menu-icon.ic-art { width: 56px; height: 56px; background: none; border: 0; border-radius: 0; }
 .menu-icon.ic-art .ic { display: block; width: 52px; height: 52px; color: var(--text); }
-.ic.a-red    { --acc: #d93025; } /* 소화기는 테마와 무관하게 항상 빨강 */
+.ic.a-red    { --acc: var(--red); }
+.ic.a-fire   { --acc: #d93025; } /* 소화기는 테마와 무관하게 항상 빨강 */
 .ic.a-green  { --acc: var(--green); }
 .ic.a-blue   { --acc: var(--blue); }
 .ic.a-amber  { --acc: var(--amber); }
 .ic.a-purple { --acc: #8b5cf6; }
+
+/* 하위 메뉴·이용 안내 카드도 같은 선화 (상자 없이) */
+.choice-card .cc-icon.ic-art,
+.guide-tool-icon.ic-art { background: none; border: 0; border-radius: 0; }
+.cc-icon.ic-art .ic,
+.guide-tool-icon.ic-art .ic { display: block; width: 40px; height: 40px; color: var(--text); }
+.guide-tool-icon.ic-art .ic-img { display: block; width: 38px; height: 38px; object-fit: contain; }
+
+/* 글자 옆 작은 아이콘 (알림판 제목, 메인화면에 표시 버튼) */
+.ic-inline { display: inline-block; width: 1.3em; height: 1.3em; vertical-align: -0.28em; flex-shrink: 0; }
+.ic-inline.a-amber { --acc: var(--amber); }
+.ic-inline.a-blue  { --acc: var(--blue); }
+
+/* 이모지 대신 들어간 선화 아이콘 자리별 크기 */
+.hsr-icon.ic-art { background: none; border: 0; }
+.hsr-icon.ic-art .ic { display: block; width: 32px; height: 32px; color: var(--text); }
+.ilgu-panel-action-ico .ic { display: block; width: 22px; height: 22px; color: var(--text); }
+.ilgu-house .ic { display: block; width: 72px; height: 72px; color: var(--text); }
+:is(#inspection-content, #multiuse-content) .insp-history-empty-icon .ic { display: inline-block; width: 44px; height: 44px; color: var(--text); }
+.lli-arr { width: 12px; height: 12px; }
+.dc-holiday-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #8b5cf6; flex-shrink: 0; }
 
 .mt-num {
   color: var(--text-dim);
@@ -1040,7 +1062,9 @@ input:focus-visible {
   transform: scale(0.96);
 }
 .law-link-chip .lk-arr {
-  font-size: 11px;
+  width: 9px;
+  height: 9px;
+  flex-shrink: 0;
   opacity: 0.75;
 }
 html[data-theme="official"] .law-link-chip {
@@ -4812,6 +4836,12 @@ html[data-theme="blossom"] #date-content .info-box.amber { border-left-color: va
   padding: 0;
 }
 
+.theme-toggle-btn .theme-ic {
+  width: 18px;
+  height: 18px;
+  display: block;
+}
+
 .theme-toggle-btn:hover {
   background: var(--surface3);
   border-color: var(--border2);
@@ -4866,6 +4896,19 @@ html[data-theme="blossom"] #date-content .info-box.amber { border-left-color: va
   font-size: 16px;
   line-height: 1;
   transition: background var(--transition), border-color var(--transition), color var(--transition), transform var(--transition);
+}
+
+/* 테마 버튼이 메인으로 옮겨가 모바일에선 홈 버튼이 상단 바 맨 오른쪽 → 뒤로가기와 좌우 대칭 */
+@media (max-width: 899px) {
+  .topbar .home-jump-btn {
+    margin-right: 0;
+  }
+}
+
+.topbar .home-jump-btn .home-jump-ic {
+  width: 18px;
+  height: 18px;
+  display: block;
 }
 
 .topbar .home-jump-btn:hover {
@@ -5273,31 +5316,79 @@ html[data-theme="blossom"] #date-content .info-box.amber { border-left-color: va
   line-height: 1.5;
   word-break: keep-all;
 }
+/* 테마 견본: 바탕색 위에 계절 분위기 점 (꽃잎·반딧불·낙엽·눈·해·별) */
 .theme-swatch-blossom {
-  background: linear-gradient(135deg, #fbdce0, #f9b6c2);
+  background:
+    radial-gradient(circle at 27% 30%, #e8688c 0 2.4px, transparent 2.9px),
+    radial-gradient(circle at 70% 22%, #ffffff 0 2px, transparent 2.5px),
+    radial-gradient(circle at 63% 64%, #ef86a3 0 2.2px, transparent 2.7px),
+    radial-gradient(circle at 24% 76%, #ffffff 0 1.8px, transparent 2.3px),
+    radial-gradient(circle at 84% 84%, #e8688c 0 1.6px, transparent 2.1px),
+    linear-gradient(135deg, #fbdce0, #f9b6c2);
   color: #b1325b;
 }
 .theme-swatch-summer-night {
+  position: relative;
   background: linear-gradient(135deg, #07101e, #132236);
   color: #22d3ee;
   border: 1px solid #1e3050;
 }
+.theme-swatch-summer-night::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background:
+    radial-gradient(circle at 28% 34%, #e4fbb0 0 1.4px, rgba(190, 242, 100, 0.35) 1.9px 4px, transparent 4.5px),
+    radial-gradient(circle at 70% 26%, #e4fbb0 0 1.2px, rgba(190, 242, 100, 0.3) 1.7px 3.5px, transparent 4px),
+    radial-gradient(circle at 58% 70%, #e4fbb0 0 1.5px, rgba(190, 242, 100, 0.35) 2px 4.2px, transparent 4.7px),
+    radial-gradient(circle at 20% 78%, #e4fbb0 0 1px, rgba(190, 242, 100, 0.25) 1.5px 3px, transparent 3.5px);
+  animation: swatch-firefly 2.6s ease-in-out infinite alternate;
+}
+@keyframes swatch-firefly {
+  from { opacity: 0.45; }
+  to   { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .theme-swatch-summer-night::after { animation: none; }
+}
 .theme-swatch-autumn {
-  background: linear-gradient(135deg, #fdf0d8, #f5d8a8);
+  background:
+    radial-gradient(circle at 26% 32%, #e07a2e 0 2.4px, transparent 2.9px),
+    radial-gradient(circle at 72% 24%, #a5532a 0 2px, transparent 2.5px),
+    radial-gradient(circle at 62% 66%, #f0a040 0 2.3px, transparent 2.8px),
+    radial-gradient(circle at 24% 76%, #a5532a 0 1.7px, transparent 2.2px),
+    radial-gradient(circle at 84% 82%, #e07a2e 0 1.6px, transparent 2.1px),
+    linear-gradient(135deg, #fdf0d8, #f5d8a8);
   color: #9a3808;
 }
 .theme-swatch-winter {
-  background: linear-gradient(135deg, #eef3f8, #d8eaf8);
+  background:
+    radial-gradient(circle at 26% 30%, #ffffff 0 2.2px, #a9c7e8 2.4px 3px, transparent 3.3px),
+    radial-gradient(circle at 72% 22%, #ffffff 0 1.8px, #a9c7e8 2px 2.5px, transparent 2.8px),
+    radial-gradient(circle at 60% 64%, #ffffff 0 2.4px, #a9c7e8 2.6px 3.2px, transparent 3.5px),
+    radial-gradient(circle at 22% 78%, #ffffff 0 1.6px, #a9c7e8 1.8px 2.3px, transparent 2.6px),
+    radial-gradient(circle at 84% 84%, #ffffff 0 1.6px, #a9c7e8 1.8px 2.3px, transparent 2.6px),
+    linear-gradient(135deg, #eef3f8, #d8eaf8);
   color: #3060a8;
   border: 1px solid #b8c8dc;
 }
 .theme-swatch-dark {
-  background: linear-gradient(135deg, #1a1a1a, #2a2a2a);
+  background:
+    radial-gradient(circle at 76% 25%, #242424 0 4.6px, transparent 5px),
+    radial-gradient(circle at 68% 32%, #ffd966 0 5px, transparent 5.4px),
+    radial-gradient(circle at 24% 30%, #ffd966 0 1.2px, transparent 1.6px),
+    radial-gradient(circle at 36% 68%, #fff3c4 0 1px, transparent 1.4px),
+    radial-gradient(circle at 74% 76%, #ffd966 0 1.3px, transparent 1.7px),
+    radial-gradient(circle at 16% 58%, #fff3c4 0 0.9px, transparent 1.3px),
+    linear-gradient(135deg, #1a1a1a, #2a2a2a);
   color: #ffd966;
   border: 1px solid #3a3a3a;
 }
 .theme-swatch-official {
-  background: linear-gradient(135deg, #ffffff, #eef0f4);
+  background:
+    radial-gradient(circle at 68% 34%, #f6b73c 0 5px, rgba(246, 183, 60, 0.28) 5.5px 8.5px, transparent 9px),
+    linear-gradient(135deg, #ffffff, #eef0f4);
   color: #003087;
   border: 1px solid #c4ccd8;
 }
@@ -5495,7 +5586,9 @@ html[data-theme="blossom"] #date-content .info-box.amber { border-left-color: va
 .br-recent .nm { font-size: 14px; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .br-recent .ad { font-size: 12px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-top: 2px; }
 .br-recent .ar { color: var(--text-dim); }
-.br-intro { padding: 4px 2px; }
+/* 배경을 깔아 계절 애니메이션(뒤에서 떨어지는 잎·꽃잎)이 글 위로 비치지 않게 — 최근 조회 목록과 같은 카드 */
+.br-intro { padding: 14px 14px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface); }
+.br-intro li:last-child { border-bottom: 0; padding-bottom: 4px; }
 .br-intro-lbl { font-size: 12px; font-weight: 700; color: var(--text-muted); margin-bottom: 10px; }
 .br-intro ul { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--border); }
 .br-intro li { display: flex; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--border); font-size: 13px; }
