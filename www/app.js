@@ -5306,7 +5306,7 @@ document.getElementById("back-from-occupancy").addEventListener("click", () => s
 // API 키는 Cloudflare Worker(worker/)에만 있다. 여기선 Worker만 부른다.
 // 여러 동·집합건물·부속지번 예외는 처리하지 않고 첫 동만 보여준다.
 const BUILDING_API = "https://fire-building.fire-assistant.workers.dev";
-const buildingState = { query: "", items: null, loading: false, error: "", picked: null, result: null, showFloors: false };
+const buildingState = { query: "", items: null, loading: false, error: "", picked: null, result: null, showFloors: false, showMore: false };
 
 function bldText(v) {
   const s = String(v ?? "").trim();
@@ -5333,12 +5333,19 @@ function bldDate(v) {
 async function buildingFetch(path) {
   const res = await fetch(BUILDING_API + path);
   const data = await res.json().catch(() => ({ error: "응답을 읽지 못했습니다." }));
+  // 주소·대장 API 서버가 잠깐 안 받는 경우(Worker가 502로 넘김)는 내부 메시지 대신 재시도 안내
+  if (res.status >= 500) {
+    console.warn("[건축물대장]", res.status, data.error);
+    throw new Error("서버가 잠시 응답하지 않습니다. 잠시 후 다시 시도해주세요.");
+  }
   if (!res.ok || data.error) throw new Error(data.error || `오류 ${res.status}`);
   return data;
 }
 
 async function buildingSearch(query) {
   buildingState.query = query;
+  buildingState.picked = null;
+  buildingState.result = null;
   buildingState.loading = true;
   buildingState.error = "";
   buildingState.items = null;
@@ -5357,6 +5364,7 @@ async function buildingPick(item) {
   buildingState.picked = item;
   buildingState.result = null;
   buildingState.showFloors = false;
+  buildingState.showMore = false;
   buildingState.loading = true;
   buildingState.error = "";
   renderBuilding();
@@ -5405,12 +5413,59 @@ function renderBuildingFloors(floors) {
   </table>`;
 }
 
+// 요약 카드에 없는 표제부 나머지 항목 (값이 비면 "-")
+function renderBuildingMore(t) {
+  const unit = (v, u, fmt = bldNum) => (String(v ?? "").trim() === "" ? "-" : `${fmt(v)} ${u}`);
+  const quake = { "1": "적용", "0": "미적용" }[String(t.rserthqkDsgnApplyYn).trim()] || "-";
+  const atchCnt = Number(t.atchBldCnt) || 0;
+  const regstr = [t.regstrGbCdNm, t.regstrKindCdNm].map((v) => String(v || "").trim()).filter(Boolean).join(" · ");
+  const groups = [
+    ["대지 · 면적", [
+      ["대지면적", unit(t.platArea, "㎡", bldArea), true],
+      ["건폐율", unit(t.bcRat, "%"), true],
+      ["용적률", unit(t.vlRat, "%"), true],
+      ["용적률 산정용 연면적", unit(t.vlRatEstmTotArea, "㎡", bldArea), true],
+    ]],
+    ["허가", [
+      ["허가 연도", bldText(t.pmsnoYear), true],
+      ["허가 기관", bldText(t.pmsnoKikCdNm)],
+      ["허가 구분", bldText(t.pmsnoGbCdNm)],
+    ]],
+    ["내진 · 인증", [
+      ["내진설계 적용", quake],
+      ["내진능력", bldText(t.rserthqkAblty)],
+      ["에너지효율등급", bldText(t.engrGrade)],
+      ["녹색건축 인증", bldText(t.gnBldGrade)],
+      ["지능형건축물 인증", bldText(t.itgBldGrade)],
+    ]],
+    ["대장 정보", [
+      ["대장 구분", regstr || "-"],
+      ["동 명칭", bldText(t.dongNm)],
+      ["주/부속 구분", bldText(t.mainAtchGbCdNm)],
+      ["부속건축물", atchCnt ? `${atchCnt}동 · ${bldArea(t.atchBldArea)} ㎡` : "0동"],
+      ["데이터 기준일", bldDate(t.crtnDay) || "-", true],
+    ]],
+  ];
+  return `<div class="br-more">${groups.map(([title, rows]) => `
+    <h3>${title}</h3>
+    <dl>${rows.map(([k, v, mono]) => `
+      <div class="row"><dt>${k}</dt><dd class="${v === "-" ? "none" : mono ? "mono" : ""}">${escapeHtml(v)}</dd></div>`).join("")}
+    </dl>`).join("")}
+  </div>`;
+}
+
 function renderBuildingCard(t) {
   const parking = [
     ["옥내 자주식", t.indrAutoUtcnt], ["옥내 기계식", t.indrMechUtcnt],
     ["옥외 자주식", t.oudrAutoUtcnt], ["옥외 기계식", t.oudrMechUtcnt],
   ];
   const parkingTotal = parking.reduce((s, [, n]) => s + (Number(n) || 0), 0);
+  const parkingArea = [t.indrAutoArea, t.indrMechArea, t.oudrAutoArea, t.oudrMechArea].reduce((s, a) => s + (Number(a) || 0), 0);
+  // 기타구조·기타지붕은 코드명과 다를 때만 아래 줄에
+  const subIfDiff = (main, etc) => {
+    const e = String(etc || "").trim();
+    return e && e !== String(main || "").trim() ? escapeHtml(e) : "";
+  };
   const ride = Number(t.rideUseElvtCnt) || 0;
   const emgen = Number(t.emgenUseElvtCnt) || 0;
   const dates = [["허가일", t.pmsDay], ["착공일", t.stcnsDay], ["사용승인일", t.useAprDay]].map(([k, v]) => {
@@ -5419,9 +5474,9 @@ function renderBuildingCard(t) {
   }).join("");
   const name = [String(t.bldNm || "").trim(), String(t.dongNm || "").trim()].filter(Boolean).join(" ");
   const etc = String(t.etcPurps || "").trim();
-  const cell = (k, v, unit, sub, full) => `<div class="br-cell${full ? " full" : ""}">
+  const cell = (k, v, unit, sub, full, txt) => `<div class="br-cell${full ? " full" : ""}">
       <div class="br-k">${k}</div>
-      <div class="br-v">${v}${unit ? `<span class="u">${unit}</span>` : ""}</div>
+      <div class="br-v${txt ? " txt" : ""}">${v}${unit ? `<span class="u">${unit}</span>` : ""}</div>
       ${sub ? `<div class="br-sub">${sub}</div>` : ""}
     </div>`;
 
@@ -5440,9 +5495,12 @@ function renderBuildingCard(t) {
       ${cell("건축면적", bldArea(t.archArea), "㎡")}
       ${cell("지상층수", bldNum(t.grndFlrCnt), "층")}
       ${cell("지하층수", bldNum(t.ugrndFlrCnt), "층")}
+      ${cell("구조", escapeHtml(bldText(t.strctCdNm)), "", subIfDiff(t.strctCdNm, t.etcStrct), true, true)}
+      ${cell("지붕", escapeHtml(bldText(t.roofCdNm)), "", subIfDiff(t.roofCdNm, t.etcRoof), false, true)}
+      ${cell("높이", bldNum(t.heit), "m")}
       ${cell("세대수", bldNum(t.hhldCnt), "세대", `가구 ${bldNum(t.fmlyCnt)} · 호 ${bldNum(t.hoCnt)}`)}
       ${cell("승강기", bldNum(ride + emgen), "대", `승용 ${ride} · 비상용 ${emgen}`)}
-      ${cell("주차장", bldNum(parkingTotal), "대", parking.map(([k, n]) => `${k} ${Number(n) || 0}`).join(" · "), true)}
+      ${cell("주차장", bldNum(parkingTotal), "대", parking.map(([k, n]) => `${k} ${Number(n) || 0}`).join(" · ") + `<br>면적 ${parkingTotal && !parkingArea ? "-" : `${bldArea(parkingArea)}㎡`}`, true)}
     </div>
     <div class="br-dates">
       <div class="br-k">일자</div>
@@ -5458,22 +5516,45 @@ function renderBuilding() {
     ? `<p class="br-hint">불러오는 중…</p>`
     : s.error ? `<div class="info-box amber">${escapeHtml(s.error)}</div>` : "";
 
+  // 검색창은 결과 화면에서도 위에 둔다 (결과가 없을 때 막힌 느낌이 안 들게)
+  const form = `
+    <form class="br-search" id="building-search-form">
+      <input type="search" id="building-search-input" placeholder="예: 학산로 75" autocomplete="off" value="${escapeHtml(s.query)}">
+      <button type="submit">검색</button>
+    </form>`;
+  const bindForm = () => {
+    root.querySelector("#building-search-form").addEventListener("submit", (e) => {
+      e.preventDefault();
+      const q = root.querySelector("#building-search-input").value.trim();
+      if (q.length >= 2) buildingSearch(q);
+    });
+  };
+
   // 결과 화면
   if (s.picked) {
     const t = s.result && s.result.title;
-    let html = notice;
-    if (s.result && !t) html += `<div class="info-box amber">이 주소로 등록된 건축물대장 표제부가 없습니다.</div>`;
+    let html = form + `<div class="br-gap"></div>` + notice;
+    // 세움터엔 있는데 공개 API(건축HUB)에 안 올라온 대장이 있다 (예: 대구 동구 신천동 427-12)
+    if (s.result && !t) html += `<div class="info-box amber">이 주소의 건축물대장 정보를 불러오지 못했습니다. 건물을 새로 짓는 중이거나 사용승인 전이라 아직 건축물대장이 없으면 이렇게 나올 수 있습니다. 자세한 내용은 세움터에서 직접 확인해주세요.</div>
+      <div class="br-actions"><button class="br-btn out wide" type="button" data-bld-eais>세움터 바로가기</button></div>`;
     if (t) {
       html += renderBuildingCard(t);
       html += `<div class="br-actions">
-        <button class="br-btn" type="button" data-bld-floors>${s.showFloors ? "층별 개요 닫기" : "층별 개요 보기"}</button>
-        <button class="br-btn out" type="button" data-bld-eais>세움터 원본</button>
+        <button class="br-btn${s.showFloors ? " is-on" : ""}" type="button" data-bld-floors>${s.showFloors ? "층별 개요 닫기" : "층별 개요 보기"}</button>
+        <button class="br-btn${s.showMore ? " is-on" : ""}" type="button" data-bld-more>${s.showMore ? "추가 정보 닫기" : "추가 정보 보기"}</button>
+        <button class="br-btn out wide" type="button" data-bld-eais>세움터 바로가기</button>
       </div>`;
       if (s.showFloors) html += `<div class="br-floors">${renderBuildingFloors(s.result.floors || [])}</div>`;
+      if (s.showMore) html += renderBuildingMore(t);
     }
     root.innerHTML = html;
+    bindForm();
     root.querySelector("[data-bld-floors]")?.addEventListener("click", () => {
       buildingState.showFloors = !buildingState.showFloors;
+      renderBuilding();
+    });
+    root.querySelector("[data-bld-more]")?.addEventListener("click", () => {
+      buildingState.showMore = !buildingState.showMore;
       renderBuilding();
     });
     root.querySelector("[data-bld-eais]")?.addEventListener("click", () => {
@@ -5493,19 +5574,11 @@ function renderBuilding() {
         </button>`).join("")
       : `<p class="br-hint">검색 결과가 없습니다.</p>`;
   }
-  root.innerHTML = `
-    <form class="br-search" id="building-search-form">
-      <input type="search" id="building-search-input" placeholder="예: 세종대로 110" autocomplete="off" value="${escapeHtml(s.query)}">
-      <button type="submit">검색</button>
-    </form>
+  root.innerHTML = `${form}
     <p class="br-hint">도로명, 지번, 건물명 모두 됩니다.</p>
     ${notice}${list}`;
 
-  root.querySelector("#building-search-form").addEventListener("submit", (e) => {
-    e.preventDefault();
-    const q = root.querySelector("#building-search-input").value.trim();
-    if (q.length >= 2) buildingSearch(q);
-  });
+  bindForm();
   root.querySelectorAll("[data-bld-idx]").forEach((btn) => {
     btn.addEventListener("click", () => buildingPick(buildingState.items[Number(btn.dataset.bldIdx)]));
   });
@@ -16913,8 +16986,13 @@ history.replaceState({ screen: 'home' }, '');
       return false;
     }
 
-    // 건축물대장 조회: 층별 개요 닫기 → 후보 목록 → 홈
+    // 건축물대장 조회: 추가 정보 닫기 → 층별 개요 닫기 → 후보 목록 → 홈
     if (current === "building") {
+      if (buildingState.showMore) {
+        buildingState.showMore = false;
+        renderBuilding();
+        return true;
+      }
       if (buildingState.showFloors) {
         buildingState.showFloors = false;
         renderBuilding();
