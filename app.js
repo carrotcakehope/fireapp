@@ -45,7 +45,7 @@ function trackMenuClick(menuName) {
 // ── 패치노트 설정 (여기만 수정하면 됩니다) ──────────────────────────────
 const PATCH_NOTES = {
   version: "v1.1.2",
-  date: "2026-11-02",
+  date: "2026-11-03",
   items: [
     { type: "notice",  text: "이걸 배포한지 벌써 3개월이 됐네요. 사용하면서 불편한게 있으시면 편하게 연락주세요!" },
     { type: "new",     text: "메인화면 7번째 기능 건축물대장 조회 추가"},
@@ -5532,6 +5532,9 @@ function renderBuildingCard(t) {
   ];
   const parkingTotal = parking.reduce((s, [, n]) => s + (Number(n) || 0), 0);
   const parkingArea = [t.indrAutoArea, t.indrMechArea, t.oudrAutoArea, t.oudrMechArea].reduce((s, a) => s + (Number(a) || 0), 0);
+  // 반 칸에 들어가게 0대인 종류는 빼고, 면적은 다음 줄에
+  const parkingKinds = parking.filter(([, n]) => (Number(n) || 0) > 0).map(([k, n]) => `${k} ${Number(n)}`).join(" · ");
+  const parkingSub = (parkingKinds ? parkingKinds + "<br>" : "") + `면적 ${parkingTotal && !parkingArea ? "-" : `${bldArea(parkingArea)}㎡`}`;
   // 기타구조·기타지붕은 코드명과 다를 때만 아래 줄에
   const subIfDiff = (main, etc) => {
     const e = String(etc || "").trim();
@@ -5566,12 +5569,12 @@ function renderBuildingCard(t) {
       ${cell("건축면적", bldMeasure(t.archArea, bldArea), "㎡")}
       ${cell("지상층수", bldNum(t.grndFlrCnt), "층")}
       ${cell("지하층수", bldNum(t.ugrndFlrCnt), "층")}
-      ${cell("구조", escapeHtml(bldText(t.strctCdNm)), "", subIfDiff(t.strctCdNm, t.etcStrct), true, true)}
+      ${cell("구조", escapeHtml(bldText(t.strctCdNm)), "", subIfDiff(t.strctCdNm, t.etcStrct), false, true)}
       ${cell("지붕", escapeHtml(bldText(t.roofCdNm)), "", subIfDiff(t.roofCdNm, t.etcRoof), false, true)}
       ${cell("높이", bldMeasure(t.heit), "m")}
       ${cell("세대수", bldNum(t.hhldCnt), "세대", `가구 ${bldNum(t.fmlyCnt)} · 호 ${bldNum(t.hoCnt)}`)}
       ${cell("승강기", bldNum(ride + emgen), "대", `승용 ${ride} · 비상용 ${emgen}`)}
-      ${cell("주차장", bldNum(parkingTotal), "대", parking.map(([k, n]) => `${k} ${Number(n) || 0}`).join(" · ") + `<br>면적 ${parkingTotal && !parkingArea ? "-" : `${bldArea(parkingArea)}㎡`}`, true)}
+      ${cell("주차장", bldNum(parkingTotal), "대", parkingSub)}
     </div>
     <div class="br-dates">
       <div class="br-k">일자</div>
@@ -5607,13 +5610,13 @@ function renderBuilding() {
     let html = form + `<div class="br-gap"></div>` + notice;
     // 세움터엔 있는데 공개 API(건축HUB)에 안 올라온 대장이 있다 (예: 대구 동구 신천동 427-12)
     if (s.result && !t) html += `<div class="info-box amber">이 주소의 건축물대장 정보를 불러오지 못했습니다. 건물을 새로 짓는 중이거나 사용승인 전이라 아직 건축물대장이 없으면 이렇게 나올 수 있습니다. 자세한 내용은 세움터에서 직접 확인해주세요.</div>
-      <div class="br-actions"><button class="br-btn out wide" type="button" data-bld-eais>세움터 바로가기</button></div>`;
+      <div class="br-actions"><button class="br-btn out wide" type="button" data-bld-eais>세움터 바로가기 <svg class="br-ext" aria-hidden="true"><use href="#i-link-sm"/></svg></button></div>`;
     if (t) {
       html += renderBuildingCard(t);
       html += `<div class="br-actions">
         <button class="br-btn${s.showFloors ? " is-on" : ""}" type="button" data-bld-floors>${s.showFloors ? "층별 개요 닫기" : "층별 개요 보기"}</button>
         <button class="br-btn${s.showMore ? " is-on" : ""}" type="button" data-bld-more>${s.showMore ? "추가 정보 닫기" : "추가 정보 보기"}</button>
-        <button class="br-btn out wide" type="button" data-bld-eais>세움터 바로가기</button>
+        <button class="br-btn out wide" type="button" data-bld-eais>세움터 바로가기 <svg class="br-ext" aria-hidden="true"><use href="#i-link-sm"/></svg></button>
       </div>`;
       if (s.showFloors) html += `<div class="br-floors">${renderBuildingFloors(s.result.floors || [])}</div>`;
       if (s.showMore) html += renderBuildingMore(t);
@@ -5755,7 +5758,7 @@ const yearState = {
     yEraChoice: "after2004",
     yOccupancyType: "neighborhood",
     yAutoCalcAreas: "yes",
-    yPermitdate: "2026-11-02",
+    yPermitdate: "2026-11-03",
     yTotalArea: "1500",
     yAboveGroundFloors: "4",
     yBasementFloors: "0",

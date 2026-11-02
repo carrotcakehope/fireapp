@@ -5375,19 +5375,15 @@ html[data-theme="blossom"] #date-content .info-box.amber { border-left-color: va
 }
 .theme-swatch-dark {
   background:
-    radial-gradient(circle at 76% 25%, #242424 0 4.6px, transparent 5px),
-    radial-gradient(circle at 68% 32%, #ffd966 0 5px, transparent 5.4px),
-    radial-gradient(circle at 24% 30%, #ffd966 0 1.2px, transparent 1.6px),
-    radial-gradient(circle at 36% 68%, #fff3c4 0 1px, transparent 1.4px),
-    radial-gradient(circle at 74% 76%, #ffd966 0 1.3px, transparent 1.7px),
-    radial-gradient(circle at 16% 58%, #fff3c4 0 0.9px, transparent 1.3px),
+    radial-gradient(circle at 60% 40%, #222222 0 6.2px, transparent 6.7px),
+    radial-gradient(circle at 48% 52%, #ffd966 0 7px, transparent 7.5px),
     linear-gradient(135deg, #1a1a1a, #2a2a2a);
   color: #ffd966;
   border: 1px solid #3a3a3a;
 }
 .theme-swatch-official {
   background:
-    radial-gradient(circle at 68% 34%, #f6b73c 0 5px, rgba(246, 183, 60, 0.28) 5.5px 8.5px, transparent 9px),
+    radial-gradient(circle at 50% 50%, #f6b73c 0 6px, rgba(246, 183, 60, 0.28) 6.5px 10px, transparent 10.5px),
     linear-gradient(135deg, #ffffff, #eef0f4);
   color: #003087;
   border: 1px solid #c4ccd8;
@@ -5627,7 +5623,7 @@ html[data-theme="blossom"] #date-content .info-box.amber { border-left-color: va
 .br-tl .empty span { color: var(--text-dim); font-weight: 400; }
 .br-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
 .br-btn { padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--border2); background: var(--surface2); color: var(--text); font-weight: 700; font-size: 13px; cursor: pointer; }
-.br-btn.out::after { content: " ↗"; color: var(--text-muted); }
+.br-btn.out .br-ext { width: 10px; height: 10px; margin-left: 4px; color: var(--text-muted); vertical-align: 0; }
 .br-btn.wide { grid-column: 1 / -1; }
 .br-btn.is-on { border-color: var(--red); background: var(--red-dim); }
 .br-more { margin-top: 14px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); overflow: hidden; }
