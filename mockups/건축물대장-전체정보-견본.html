@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<base href="../">
+<title>건축물대장 전체 정보 견본</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+  body { max-width: 1240px; padding: 16px; min-height: auto; }
+  .mk-top { margin: 4px 0 18px; }
+  .mk-top h1 { font-size: 20px; margin: 0 0 6px; letter-spacing: -0.4px; }
+  .mk-top p { margin: 0; color: var(--text-muted); font-size: 13px; line-height: 1.7; word-break: keep-all; }
+  .mk-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 18px; align-items: start; }
+  .mk-col-label { font-family: var(--mono); font-size: 11px; letter-spacing: 1px; color: var(--text-dim); margin-bottom: 8px; }
+  .mk-phone { border: 1px solid var(--border2); border-radius: 18px; overflow: hidden; background: var(--bg); }
+  .mk-phone .scroll-content { padding: 14px; }
+  .mk-memo { margin-top: 10px; padding: 12px 14px; border: 1px dashed var(--border2); border-radius: 10px; color: var(--text-muted); font-size: 12px; line-height: 1.7; word-break: keep-all; }
+  .mk-memo b { color: var(--text); }
+  .mk-memo ul { margin: 4px 0 0; padding-left: 18px; }
+  .mk-check { color: var(--amber); font-weight: 700; }
+  .mk-dim { opacity: .45; pointer-events: none; }
+
+  /* 버튼 3개 배치 */
+  .br-actions3 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+  .br-actions3 .wide { grid-column: 1 / -1; }
+  .br-btn.is-on { border-color: var(--red); background: var(--red-dim); }
+
+  /* 전체 정보 */
+  .br-more { margin-top: 14px; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); overflow: hidden; }
+  .br-more h3 { margin: 0; padding: 11px 16px; font-size: 12px; font-weight: 700; color: var(--text-muted); background: var(--surface2); border-bottom: 1px solid var(--border); }
+  .br-more h3 + dl { border-top: 0; }
+  .br-more dl { margin: 0; }
+  .br-more .row { display: flex; justify-content: space-between; gap: 12px; padding: 10px 16px; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .br-more dl:last-child .row:last-child { border-bottom: 0; }
+  .br-more dt { color: var(--text-muted); flex-shrink: 0; }
+  .br-more dd { margin: 0; text-align: right; font-weight: 700; word-break: keep-all; }
+  .br-more dd small { display: block; font-weight: 400; color: var(--text-dim); font-size: 11px; }
+  .br-more dd.mono { font-family: var(--mono); }
+  .br-more dd.none { color: var(--text-dim); font-weight: 400; }
+</style>
+</head>
+<body>
+
+<div class="mk-top">
+  <h1>건축물대장 · 전체 정보 견본</h1>
+  <p>요약 카드에 없는 표제부 나머지 항목을 <b>"전체 정보"</b> 버튼으로 펼쳐 보는 화면입니다. 값은 실제 조회한 서울시청(신관) 데이터입니다.
+  <span class="mk-check">⚠ 표시</span>는 정해주셔야 할 부분입니다.</p>
+</div>
+
+<div class="mk-cols">
+
+  <!-- ① 버튼 배치 -->
+  <div>
+    <div class="mk-col-label">① 요약 카드 아래 버튼 3개</div>
+    <div class="mk-phone">
+      <div class="topbar">
+        <button class="back-btn" type="button">←</button>
+        <span class="tb-title">건축물대장 조회</span>
+      </div>
+      <div class="scroll-content">
+        <div class="br-card mk-dim">
+          <div class="br-head">
+            <span class="br-badge">업무시설</span>
+            <div class="br-name">서울특별시 청사 신관</div>
+            <div class="br-addr">서울특별시 중구 세종대로 110 (태평로1가)<small>[지번] 서울특별시 중구 태평로1가 31번지</small></div>
+          </div>
+          <div class="br-grid">
+            <div class="br-cell"><div class="br-k">연면적</div><div class="br-v">83,625.55<span class="u">㎡</span></div></div>
+            <div class="br-cell"><div class="br-k">건축면적</div><div class="br-v">6,165.24<span class="u">㎡</span></div></div>
+          </div>
+          <div class="br-dates"><div class="br-k">… (기존 요약 카드 그대로)</div></div>
+        </div>
+
+        <div class="br-actions3">
+          <button class="br-btn" type="button">층별 개요 보기</button>
+          <button class="br-btn is-on" type="button">전체 정보 보기</button>
+          <button class="br-btn out wide" type="button">세움터 바로가기</button>
+        </div>
+      </div>
+    </div>
+    <div class="mk-memo">
+      <ul>
+        <li>"세움터 원본" → <b>"세움터 바로가기"</b>로 이름을 바꿨습니다(앱에는 이미 반영).</li>
+        <li>버튼이 3개가 돼서 펼치기 2개를 위 줄에, 바깥으로 나가는 세움터를 아래 줄에 길게 뒀습니다.</li>
+        <li>층별 개요와 전체 정보는 따로 펼치고 접습니다. 둘 다 펼치면 층별 → 전체 순서로 아래에 붙습니다.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ② 전체 정보 -->
+  <div>
+    <div class="mk-col-label">② 전체 정보 펼침</div>
+    <div class="mk-phone">
+      <div class="topbar">
+        <button class="back-btn" type="button">←</button>
+        <span class="tb-title">건축물대장 조회</span>
+      </div>
+      <div class="scroll-content">
+        <div class="br-more">
+          <h3>대지 · 면적</h3>
+          <dl>
+            <div class="row"><dt>대지면적</dt><dd class="mono">12,709.40 ㎡</dd></div>
+            <div class="row"><dt>건폐율</dt><dd class="mono">48.51 %</dd></div>
+            <div class="row"><dt>용적률</dt><dd class="mono">315.73 %</dd></div>
+            <div class="row"><dt>용적률 산정용 연면적</dt><dd class="mono">40,127.48 ㎡</dd></div>
+            <div class="row"><dt>주차장 면적</dt><dd class="mono">6,201.89 ㎡<small>옥내 자주식 6,201.89</small></dd></div>
+          </dl>
+
+          <h3>구조 · 형태</h3>
+          <dl>
+            <div class="row"><dt>구조</dt><dd>철골철근콘크리트구조</dd></div>
+            <div class="row"><dt>지붕</dt><dd>기타지붕<small>경사곡면지붕(철근콘크리트조)</small></dd></div>
+            <div class="row"><dt>높이</dt><dd class="mono">53.5 m</dd></div>
+            <div class="row"><dt>주/부속 구분</dt><dd>주건축물</dd></div>
+            <div class="row"><dt>부속건축물</dt><dd class="none">없음</dd></div>
+          </dl>
+
+          <h3>허가</h3>
+          <dl>
+            <div class="row"><dt>허가 연도</dt><dd class="mono">2008</dd></div>
+            <div class="row"><dt>허가 기관</dt><dd>건축과</dd></div>
+            <div class="row"><dt>허가 구분</dt><dd>공용건축물</dd></div>
+          </dl>
+
+          <h3>내진 · 인증</h3>
+          <dl>
+            <div class="row"><dt>내진설계 적용</dt><dd>적용</dd></div>
+            <div class="row"><dt>내진능력</dt><dd class="none">-</dd></div>
+            <div class="row"><dt>에너지효율등급</dt><dd class="none">-</dd></div>
+            <div class="row"><dt>녹색건축 인증</dt><dd class="none">-</dd></div>
+            <div class="row"><dt>지능형건축물 인증</dt><dd class="none">-</dd></div>
+          </dl>
+
+          <h3>대장 정보</h3>
+          <dl>
+            <div class="row"><dt>대장 구분</dt><dd>일반 · 일반건축물</dd></div>
+            <div class="row"><dt>동 명칭</dt><dd>신관</dd></div>
+            <div class="row"><dt>데이터 기준일</dt><dd class="mono">2026.07.15</dd></div>
+          </dl>
+        </div>
+      </div>
+    </div>
+    <div class="mk-memo">
+      표제부 API에서 요약 카드에 안 쓴 항목을 묶음별로 모았습니다. 코드값(시군구코드, 도로명코드 등)처럼 사람이 볼 필요 없는 건 뺐습니다.
+      <ul>
+        <li><span class="mk-check">⚠</span> 값이 비어 있는 항목(위의 "-")도 보여줄지, 아예 줄을 숨길지 정해주세요. 인증 쪽은 대부분 건물이 비어 있습니다.</li>
+        <li><span class="mk-check">⚠</span> 빼고 싶은 묶음이 있으면 말씀해주세요. 예를 들어 "내진 · 인증"은 소방 업무엔 덜 쓰일 수 있습니다.</li>
+        <li>변동사항, 소유자는 API에 없어서 여기에도 없습니다.</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

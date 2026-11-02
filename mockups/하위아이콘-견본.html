@@ -1,0 +1,282 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<base href="../">
+<title>하위 메뉴·이용 안내 아이콘 견본</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+  body { max-width: 1000px; padding: 16px; min-height: auto; }
+  .mk-top { margin: 4px 0 18px; display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+  .mk-top h1 { font-size: 20px; margin: 0 0 6px; letter-spacing: -0.4px; }
+  .mk-top p { margin: 0; color: var(--text-muted); font-size: 13px; line-height: 1.7; word-break: keep-all; }
+  .mk-theme button { border: 1px solid var(--border2); background: var(--surface); color: var(--text); border-radius: 8px; padding: 6px 12px; font-size: 12px; cursor: pointer; }
+  .mk-sec { font-family: var(--mono); font-size: 11px; letter-spacing: 1px; color: var(--text-dim); margin: 26px 0 12px; }
+
+  .ic { display: block; color: var(--text); }
+  .a-red    { --acc: var(--red); }
+  .a-green  { --acc: var(--green); }
+  .a-blue   { --acc: var(--blue); }
+  .a-amber  { --acc: var(--amber); }
+  .a-purple { --acc: #8b5cf6; }
+
+  .row { margin-bottom: 20px; }
+  .row h2 { font-size: 14px; margin: 0 0 10px; }
+  .row h2 small { font-size: 11px; color: var(--text-dim); margin-left: 6px; font-weight: 400; }
+  .opts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .opt { border: 1px solid var(--border); border-radius: 14px; background: var(--surface); padding: 14px 10px 12px; text-align: center; }
+  .opt.now { opacity: .6; }
+  .opt .big { width: 80px; height: 80px; margin: 0 auto 10px; }
+  .opt .emoji { font-size: 44px; line-height: 80px; height: 80px; margin-bottom: 10px; }
+  .opt img.big { object-fit: contain; }
+  .opt .sm { display: flex; justify-content: center; margin-bottom: 8px; height: 40px; align-items: center; }
+  .opt .sm .ic, .opt .sm img { width: 40px; height: 40px; }
+  .opt .sm .emoji-sm { font-size: 20px; }
+  .opt b { display: block; font-size: 13px; }
+  .opt span { display: block; font-size: 11px; color: var(--text-muted); margin-top: 3px; line-height: 1.5; word-break: keep-all; }
+  .mk-note { padding: 12px 14px; border: 1px dashed var(--border2); border-radius: 10px; color: var(--text-muted); font-size: 12px; line-height: 1.7; word-break: keep-all; }
+  @media (max-width: 520px) { .opt .big { width: 60px; height: 60px; } .opt .emoji { font-size: 34px; line-height: 60px; height: 60px; } }
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <!-- 공통 조각: 가게 -->
+    <g id="g-shop" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path fill="var(--surface)" d="M8 20v19h24V20"/>
+      <rect fill="var(--surface)" x="12" y="27" width="7" height="12"/>
+      <path d="M9 10h22l3 8H6z" fill="var(--acc)"/>
+      <path d="M6 18a3.5 3.5 0 0 0 7 0a3.5 3.5 0 0 0 7 0a3.5 3.5 0 0 0 7 0a3.5 3.5 0 0 0 7 0" fill="var(--acc)"/>
+      <path d="M15 10l-1 8M20 10v8M25 10l1 8" stroke="var(--surface)"/>
+      <path d="M4 39h24"/>
+    </g>
+
+    <!-- ===== 하위 메뉴 ===== -->
+    <symbol id="s1a" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <use href="#g-shop"/>
+      <circle cx="36" cy="34" r="8" fill="var(--acc)"/>
+      <path d="M32.5 34l2.5 2.5 4.5-5" stroke="var(--surface)" stroke-width="2.4"/>
+    </symbol>
+    <symbol id="s1b" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <use href="#g-shop"/>
+      <circle cx="36" cy="34" r="8" fill="var(--acc)"/>
+      <path d="M33.5 31.5a2.5 2.5 0 1 1 3.5 2.3c-1 .5-1 1.2-1 2" stroke="var(--surface)" stroke-width="2.2"/>
+      <circle cx="36" cy="39" r="1.1" fill="var(--surface)" stroke="none"/>
+    </symbol>
+
+    <symbol id="s2a" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path fill="var(--surface)" d="M24 6l14 5v11c0 9-6 15-14 19-8-4-14-10-14-19V11z"/>
+      <path d="M24 6v35c-8-4-14-10-14-19V11z" fill="var(--acc)"/>
+      <path d="M17.5 23.5l4.5 4.5 8.5-8.5" stroke-width="2.6"/>
+    </symbol>
+    <symbol id="s2b" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="11" y="5" width="26" height="9" rx="1.5" fill="var(--acc)"/>
+      <path d="M18 9.5h11M25.5 6.8l3.5 2.7-3.5 2.7" stroke="var(--surface)"/>
+      <rect fill="var(--surface)" x="13" y="18" width="22" height="24"/>
+      <path d="M13 18l11 3v19l-11 2z" fill="var(--acc)" fill-opacity=".35"/>
+      <circle cx="21" cy="31" r="1.2" fill="currentColor" stroke="none"/>
+      <path d="M7 42h34"/>
+    </symbol>
+
+    <symbol id="s3a" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect fill="var(--surface)" x="20.5" y="38" width="7" height="6" rx="1"/>
+      <circle fill="var(--surface)" cx="24" cy="23" r="16"/>
+      <path d="M14 15.5A12 12 0 0 1 21 11.4" stroke="var(--acc)" stroke-opacity=".35" stroke-width="4" stroke-linecap="butt"/>
+      <path d="M21 11.4A12 12 0 0 1 34 15.5" stroke="var(--acc)" stroke-width="4" stroke-linecap="butt"/>
+      <path d="M12 25h2M34 25h2M24 31v2"/>
+      <path d="M24 23l6-7" stroke-width="2.4"/>
+      <circle cx="24" cy="23" r="2.2" fill="currentColor" stroke="none"/>
+    </symbol>
+    <symbol id="s3b" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path fill="var(--surface)" d="M9 42V8h20v34"/>
+      <g fill="var(--acc)" stroke="none">
+        <rect x="13" y="12" width="4" height="4"/><rect x="21" y="12" width="4" height="4"/>
+        <rect x="13" y="19" width="4" height="4"/><rect x="21" y="19" width="4" height="4"/>
+        <rect x="13" y="26" width="4" height="4"/>
+      </g>
+      <path d="M5 42h24"/>
+      <circle cx="35" cy="34" r="8" fill="var(--acc)"/>
+      <path d="M31.5 34l2.5 2.5 4.5-5" stroke="var(--surface)" stroke-width="2.4"/>
+    </symbol>
+
+    <symbol id="s4a" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect fill="var(--surface)" x="8" y="5" width="25" height="33" rx="2"/>
+      <rect x="13" y="10" width="15" height="5" rx="1" fill="var(--acc)"/>
+      <path d="M13 21h15M13 27h9"/>
+      <path d="M37 37l5 5" stroke-width="3.5"/>
+      <circle fill="var(--surface)" cx="31" cy="31" r="8"/>
+      <path d="M27.5 31h7" stroke="var(--acc)" stroke-width="2.4"/>
+    </symbol>
+    <symbol id="s4b" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect fill="var(--surface)" x="8" y="5" width="25" height="35" rx="2"/>
+      <rect x="12" y="16.5" width="17" height="6" rx="1" fill="var(--acc)" fill-opacity=".45" stroke="none"/>
+      <path d="M13 12h15M13 19.5h15M13 27h15M13 33h9"/>
+      <path d="M31 36l11-11 3.5 3.5-11 11z" fill="var(--acc)"/>
+      <path d="M31 36l-2 5.5 5.5-2"/>
+    </symbol>
+
+    <!-- ===== 이용 안내 ===== -->
+    <symbol id="i1a" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect fill="var(--surface)" x="13" y="4" width="22" height="40" rx="3.5"/>
+      <path d="M21 8h6"/>
+      <path d="M24 15v14M18 23l6 6 6-6" stroke="var(--acc)" stroke-width="2.6"/>
+      <path d="M18 35h12" stroke="var(--acc)" stroke-width="2.6"/>
+    </symbol>
+    <symbol id="i1b" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect fill="var(--surface)" x="4" y="8" width="31" height="22" rx="2"/>
+      <path d="M16 30l-1.5 6h10L23 30M11 36h17"/>
+      <rect fill="var(--surface)" x="30" y="17" width="14" height="25" rx="2.5"/>
+      <rect x="32.5" y="20.5" width="9" height="15" rx="1" fill="var(--acc)" stroke="none"/>
+      <path d="M8.5 13h12M8.5 18h8" stroke="var(--acc)"/>
+    </symbol>
+
+    <symbol id="i2b" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M24 25c-6 0-11 5-11 10 0 4 3 6 6 6 2 0 3-1 5-1s3 1 5 1c3 0 6-2 6-6 0-5-5-10-11-10z" fill="var(--acc)"/>
+      <ellipse cx="11" cy="21" rx="3.5" ry="4.5" fill="var(--acc)"/>
+      <ellipse cx="18.5" cy="12" rx="3.5" ry="4.5" fill="var(--acc)"/>
+      <ellipse cx="29.5" cy="12" rx="3.5" ry="4.5" fill="var(--acc)"/>
+      <ellipse cx="37" cy="21" rx="3.5" ry="4.5" fill="var(--acc)"/>
+    </symbol>
+
+    <symbol id="i3a" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path fill="var(--surface)" d="M24 6C13 6 6 14 6 23c0 10 7 18 16 18 3 0 4-2 3-4-1.5-3 .5-6 4-6h5c5 0 8-3 8-8 0-9.5-8-17-18-17z"/>
+      <circle cx="15" cy="23" r="3" fill="var(--red)"/>
+      <circle cx="19" cy="14" r="3" fill="var(--amber)"/>
+      <circle cx="29" cy="13" r="3" fill="var(--green)"/>
+      <circle cx="35" cy="21" r="3" fill="var(--acc)"/>
+    </symbol>
+    <symbol id="i3b" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M24 5v4M24 39v4M10.5 10.5l2.8 2.8M10.5 37.5l2.8-2.8M5 24h4"/>
+      <circle fill="var(--surface)" cx="24" cy="24" r="11"/>
+      <path d="M24 13a11 11 0 0 1 0 22z" fill="var(--acc)"/>
+    </symbol>
+
+    <symbol id="i4a" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect fill="var(--surface)" x="8" y="11" width="32" height="31" rx="2"/>
+      <path d="M14 25h20M14 31h13M14 37h8"/>
+      <path d="M24 15v5"/>
+      <circle cx="24" cy="11" r="5" fill="var(--acc)"/>
+    </symbol>
+    <symbol id="i4b" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M24 5v3"/>
+      <path fill="var(--surface)" d="M24 8c-7 0-11 5-11 12v8l-4 6h30l-4-6v-8c0-7-4-12-11-12z"/>
+      <path d="M20 38a4 4 0 0 0 8 0"/>
+      <circle cx="35" cy="11" r="5.5" fill="var(--acc)"/>
+    </symbol>
+
+    <symbol id="i5a" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M24 6L43 40H5z" fill="var(--acc)"/>
+      <path d="M24 18v11" stroke="var(--surface)" stroke-width="3"/>
+      <circle cx="24" cy="34.5" r="1.8" fill="var(--surface)" stroke="none"/>
+    </symbol>
+    <symbol id="i5b" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle fill="var(--surface)" cx="24" cy="24" r="18"/>
+      <path d="M24 21v13" stroke="var(--acc)" stroke-width="3.2"/>
+      <circle cx="24" cy="14.5" r="2.2" fill="var(--acc)" stroke="none"/>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="mk-top">
+  <div>
+    <h1>하위 메뉴 · 이용 안내 아이콘 견본</h1>
+    <p>메인 타일과 같은 선화 스타일로, 이모지가 남아 있던 9곳을 두 가지씩 그렸습니다. 이용 안내의 도구 카드 7개(01~07)는 메인 타일 아이콘을 그대로 씁니다. 각 칸 위는 크게, 아래는 실제 크기(40px)입니다.</p>
+  </div>
+  <div class="mk-theme">
+    <button type="button" onclick="document.documentElement.dataset.theme='dark'">다크</button>
+    <button type="button" onclick="document.documentElement.dataset.theme='official'">밝은 테마</button>
+    <button type="button" onclick="document.documentElement.dataset.theme='autumn'">가을</button>
+  </div>
+</div>
+
+<div class="mk-sec">하위 메뉴</div>
+
+<div class="row">
+  <h2>다중이용업소 해당 여부 판독기<small>다중이용업소 탐색기 안</small></h2>
+  <div class="opts">
+    <div class="opt now"><div class="emoji">🏬</div><div class="sm"><span class="emoji-sm">🏬</span></div><b>지금</b></div>
+    <div class="opt"><svg class="ic big a-blue"><use href="#s1a"/></svg><div class="sm"><svg class="ic a-blue"><use href="#s1a"/></svg></div><b>1안 · 가게 + 체크</b><span>해당하는지 판정</span></div>
+    <div class="opt"><svg class="ic big a-blue"><use href="#s1b"/></svg><div class="sm"><svg class="ic a-blue"><use href="#s1b"/></svg></div><b>2안 · 가게 + 물음표</b><span>해당할까? 하고 묻는 느낌</span></div>
+  </div>
+</div>
+
+<div class="row">
+  <h2>다중이용업소에 설치할 안전시설 탐색<small>다중이용업소 탐색기 안</small></h2>
+  <div class="opts">
+    <div class="opt now"><div class="emoji">🧯</div><div class="sm"><span class="emoji-sm">🧯</span></div><b>지금</b></div>
+    <div class="opt"><svg class="ic big a-green"><use href="#s2a"/></svg><div class="sm"><svg class="ic a-green"><use href="#s2a"/></svg></div><b>1안 · 방패</b><span>안전시설을 갖춘다는 느낌</span></div>
+    <div class="opt"><svg class="ic big a-green"><use href="#s2b"/></svg><div class="sm"><svg class="ic a-green"><use href="#s2b"/></svg></div><b>2안 · 비상구</b><span>메인 타일 아이콘 그대로</span></div>
+  </div>
+</div>
+
+<div class="row">
+  <h2>작동·종합 대상 판독기<small>자체점검 가이드 안</small></h2>
+  <div class="opts">
+    <div class="opt now"><div class="emoji">🏢</div><div class="sm"><span class="emoji-sm">🏢</span></div><b>지금</b></div>
+    <div class="opt"><svg class="ic big a-red"><use href="#s3a"/></svg><div class="sm"><svg class="ic a-red"><use href="#s3a"/></svg></div><b>1안 · 압력계</b><span>점검 때 보는 계기판</span></div>
+    <div class="opt"><svg class="ic big a-red"><use href="#s3b"/></svg><div class="sm"><svg class="ic a-red"><use href="#s3b"/></svg></div><b>2안 · 건물 + 체크</b><span>대상 건물인지 판정</span></div>
+  </div>
+</div>
+
+<div class="row">
+  <h2>자체점검 보고서 읽는법<small>자체점검 가이드 안</small></h2>
+  <div class="opts">
+    <div class="opt now"><div class="emoji">📋</div><div class="sm"><span class="emoji-sm">📋</span></div><b>지금</b></div>
+    <div class="opt"><svg class="ic big a-blue"><use href="#s4a"/></svg><div class="sm"><svg class="ic a-blue"><use href="#s4a"/></svg></div><b>1안 · 문서 + 돋보기</b><span>꼼꼼히 들여다보기</span></div>
+    <div class="opt"><svg class="ic big a-blue"><use href="#s4b"/></svg><div class="sm"><svg class="ic a-blue"><use href="#s4b"/></svg></div><b>2안 · 문서 + 형광펜</b><span>중요한 줄을 짚어주는 느낌</span></div>
+  </div>
+</div>
+
+<div class="mk-sec">이용 안내</div>
+
+<div class="row">
+  <h2>바탕화면·홈 화면에 바로가기 추가</h2>
+  <div class="opts">
+    <div class="opt now"><div class="emoji">📲</div><div class="sm"><span class="emoji-sm">📲</span></div><b>지금</b></div>
+    <div class="opt"><svg class="ic big a-blue"><use href="#i1a"/></svg><div class="sm"><svg class="ic a-blue"><use href="#i1a"/></svg></div><b>1안 · 휴대폰 + 받기</b><span>폰에 내려받는 느낌</span></div>
+    <div class="opt"><svg class="ic big a-blue"><use href="#i1b"/></svg><div class="sm"><svg class="ic a-blue"><use href="#i1b"/></svg></div><b>2안 · PC + 휴대폰</b><span>PC·폰 둘 다 된다는 느낌</span></div>
+  </div>
+</div>
+
+<div class="row">
+  <h2>일구 — 화면 위를 돌아다니는 도우미</h2>
+  <div class="opts">
+    <div class="opt now"><div class="emoji">🐾</div><div class="sm"><span class="emoji-sm">🐾</span></div><b>지금</b></div>
+    <div class="opt"><img class="big" src="./assets/pets/mailpup/summon-face.png" alt=""><div class="sm"><img src="./assets/pets/mailpup/summon-face.png" alt=""></div><b>1안 · 일구 얼굴</b><span>메인 오른쪽 위 일구 버튼 그림을 그대로</span></div>
+    <div class="opt"><svg class="ic big a-amber"><use href="#i2b"/></svg><div class="sm"><svg class="ic a-amber"><use href="#i2b"/></svg></div><b>2안 · 발자국</b><span>지금 이모지를 선화로</span></div>
+  </div>
+</div>
+
+<div class="row">
+  <h2>테마 전환</h2>
+  <div class="opts">
+    <div class="opt now"><div class="emoji">🎨</div><div class="sm"><span class="emoji-sm">🎨</span></div><b>지금</b></div>
+    <div class="opt"><svg class="ic big a-purple"><use href="#i3a"/></svg><div class="sm"><svg class="ic a-purple"><use href="#i3a"/></svg></div><b>1안 · 팔레트</b><span>물감 네 가지</span></div>
+    <div class="opt"><svg class="ic big a-purple"><use href="#i3b"/></svg><div class="sm"><svg class="ic a-purple"><use href="#i3b"/></svg></div><b>2안 · 낮·밤 반반</b><span>밝은·어두운 테마 전환</span></div>
+  </div>
+</div>
+
+<div class="row">
+  <h2>계산 결과 저장 · D-day 알림</h2>
+  <div class="opts">
+    <div class="opt now"><div class="emoji">📌</div><div class="sm"><span class="emoji-sm">📌</span></div><b>지금</b></div>
+    <div class="opt"><svg class="ic big a-amber"><use href="#i4a"/></svg><div class="sm"><svg class="ic a-amber"><use href="#i4a"/></svg></div><b>1안 · 압정 메모</b><span>알림판에 꽂아둔 메모</span></div>
+    <div class="opt"><svg class="ic big a-amber"><use href="#i4b"/></svg><div class="sm"><svg class="ic a-amber"><use href="#i4b"/></svg></div><b>2안 · 알림 종</b><span>기한이 다가오면 알려줌</span></div>
+  </div>
+</div>
+
+<div class="row">
+  <h2>이 앱은 참고용입니다</h2>
+  <div class="opts">
+    <div class="opt now"><div class="emoji">⚠️</div><div class="sm"><span class="emoji-sm">⚠️</span></div><b>지금</b></div>
+    <div class="opt"><svg class="ic big a-red"><use href="#i5a"/></svg><div class="sm"><svg class="ic a-red"><use href="#i5a"/></svg></div><b>1안 · 경고 삼각형</b><span>주의하라는 느낌이 강함</span></div>
+    <div class="opt"><svg class="ic big a-red"><use href="#i5b"/></svg><div class="sm"><svg class="ic a-red"><use href="#i5b"/></svg></div><b>2안 · 안내 (i)</b><span>부드럽게 알려주는 느낌</span></div>
+  </div>
+</div>
+
+<div class="mk-note">본문 안의 작은 이모지(💡 팁, ✅, 📋 결과 복사, 테마 칩의 🌸 등)는 이번 범위에 넣지 않았습니다. 글자와 섞여 있어 아이콘을 바꾸려면 따로 손봐야 해서, 원하시면 다음에 따로 하겠습니다.</div>
+
+</body>
+</html>

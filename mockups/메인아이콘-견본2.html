@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<base href="../">
+<title>메인 아이콘 견본 2</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+  body { max-width: 1000px; padding: 16px; min-height: auto; }
+  .mk-top { margin: 4px 0 18px; display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+  .mk-top h1 { font-size: 20px; margin: 0 0 6px; letter-spacing: -0.4px; }
+  .mk-top p { margin: 0; color: var(--text-muted); font-size: 13px; line-height: 1.7; word-break: keep-all; }
+  .mk-theme button { border: 1px solid var(--border2); background: var(--surface); color: var(--text); border-radius: 8px; padding: 6px 12px; font-size: 12px; cursor: pointer; }
+
+  .ic { display: block; color: var(--text); }
+  .a-red    { --acc: var(--red); }
+  .a-green  { --acc: var(--green); }
+  .a-blue   { --acc: var(--blue); }
+  .a-amber  { --acc: var(--amber); }
+  .a-purple { --acc: #8b5cf6; }
+
+  .row { margin-bottom: 22px; }
+  .row h2 { font-size: 15px; margin: 0 0 10px; }
+  .row h2 small { font-family: var(--mono); font-size: 11px; color: var(--text-dim); margin-right: 6px; font-weight: 400; }
+  .opts { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .opt { border: 1px solid var(--border); border-radius: 14px; background: var(--surface); padding: 16px 10px 12px; text-align: center; }
+  .opt.now { opacity: .6; }
+  .opt .big { width: 88px; height: 88px; margin: 0 auto 10px; }
+  .opt .sm { display: flex; justify-content: center; margin-bottom: 8px; }
+  .opt .sm .ic { width: 46px; height: 46px; }
+  .opt b { display: block; font-size: 13px; }
+  .opt span { display: block; font-size: 11px; color: var(--text-muted); margin-top: 3px; line-height: 1.5; word-break: keep-all; }
+  @media (max-width: 520px) { .opt .big { width: 64px; height: 64px; } }
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <!-- ===== 지금 ===== -->
+    <symbol id="n-people" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <circle cx="31" cy="14" r="5"/>
+      <path d="M22 33c0-6 4-11 9-11s9 5 9 11"/>
+      <path d="M7 41c0-7 5-12 11-12s11 5 11 12z" fill="var(--acc)"/>
+      <circle fill="var(--surface)" cx="18" cy="21" r="6"/>
+    </symbol>
+    <symbol id="n-cal" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect fill="var(--surface)" x="9" y="12" width="30" height="28" rx="3"/>
+      <path d="M9 15a3 3 0 0 1 3-3h24a3 3 0 0 1 3 3v6H9z" fill="var(--acc)"/>
+      <path d="M17 8v7M31 8v7"/>
+      <path d="M17 30l4 4 9-9" stroke="var(--acc)" stroke-width="2.6"/>
+    </symbol>
+    <symbol id="n-book" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path fill="var(--surface)" d="M24 15c-4-3-10-4-17-3v26c7-1 13 0 17 3z"/>
+      <path d="M24 15c4-3 10-4 17-3v26c-7-1-13 0-17 3z" fill="var(--acc)"/>
+      <path d="M11 18c3-.4 6 0 9 1.3M11 24c3-.4 6 0 9 1.3M11 30c3-.4 6 0 9 1.3"/>
+    </symbol>
+    <symbol id="n-calc" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect fill="var(--surface)" x="12" y="7" width="24" height="35" rx="3"/>
+      <rect x="16" y="11" width="16" height="8" rx="1" fill="var(--acc)"/>
+      <g fill="currentColor" stroke="none">
+        <circle cx="18.5" cy="25" r="1.6"/><circle cx="24" cy="25" r="1.6"/><circle cx="29.5" cy="25" r="1.6"/>
+        <circle cx="18.5" cy="30.5" r="1.6"/><circle cx="24" cy="30.5" r="1.6"/><circle cx="29.5" cy="30.5" r="1.6"/>
+        <circle cx="18.5" cy="36" r="1.6"/><circle cx="24" cy="36" r="1.6"/>
+      </g>
+    </symbol>
+    <symbol id="n-bld" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path fill="var(--surface)" d="M8 42V12h16v30"/>
+      <g fill="var(--acc)" stroke="none">
+        <rect x="11" y="16" width="4" height="4"/><rect x="17" y="16" width="4" height="4"/>
+        <rect x="11" y="23" width="4" height="4"/><rect x="11" y="30" width="4" height="4"/>
+      </g>
+      <rect fill="var(--surface)" x="21" y="20" width="19" height="22" rx="2"/>
+      <path d="M21 22a2 2 0 0 1 2-2h15a2 2 0 0 1 2 2v4H21z" fill="var(--acc)"/>
+      <path d="M25 31h11M25 36h7"/>
+      <path d="M5 42h38"/>
+    </symbol>
+
+    <!-- ===== 02 다중이용업소 ===== -->
+    <!-- 1안: 가게 (차양 달린 상점) -->
+    <symbol id="s-shop" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path fill="var(--surface)" d="M10 20v21h28V20"/>
+      <rect fill="var(--surface)" x="14" y="27" width="8" height="14"/>
+      <rect x="26" y="27" width="8" height="7" rx="1" fill="var(--acc)" fill-opacity=".35"/>
+      <path d="M11 9h26l3 9H8z" fill="var(--acc)"/>
+      <path d="M8 18a4 4 0 0 0 8 0a4 4 0 0 0 8 0a4 4 0 0 0 8 0a4 4 0 0 0 8 0" fill="var(--acc)"/>
+      <path d="M18 9l-1 9M24 9v9M30 9l1 9" stroke="var(--surface)"/>
+      <path d="M6 41h36"/>
+    </symbol>
+    <!-- 2안: 비상구 (문 + 유도등) -->
+    <symbol id="s-exit" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="11" y="5" width="26" height="9" rx="1.5" fill="var(--acc)"/>
+      <path d="M18 9.5h11M25.5 6.8l3.5 2.7-3.5 2.7" stroke="var(--surface)"/>
+      <rect fill="var(--surface)" x="13" y="18" width="22" height="24"/>
+      <path d="M13 18l11 3v19l-11 2z" fill="var(--acc)" fill-opacity=".35"/>
+      <circle cx="21" cy="31" r="1.2" fill="currentColor" stroke="none"/>
+      <path d="M7 42h34"/>
+    </symbol>
+
+    <!-- ===== 03 법정기한 ===== -->
+    <!-- 1안: 모래시계 -->
+    <symbol id="s-hour" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path fill="var(--surface)" d="M15 7c0 9 8 11 8 17s-8 8-8 17h18c0-9-8-11-8-17s8-8 8-17z"/>
+      <path d="M17.5 13h13c-1 4-4 6-6.5 8-2.5-2-5.5-4-6.5-8z" fill="var(--acc)" stroke="none"/>
+      <path d="M17 39c1-4 4-6 7-7 3 1 6 3 7 7z" fill="var(--acc)" stroke="none"/>
+      <path d="M24 23v8" stroke="var(--acc)"/>
+      <path d="M11 7h26M11 41h26" stroke-width="2.6"/>
+    </symbol>
+    <!-- 2안: 알람시계 -->
+    <symbol id="s-alarm" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M7 15a6.5 6.5 0 0 1 10-8z" fill="var(--acc)"/>
+      <path d="M41 15a6.5 6.5 0 0 0-10-8z" fill="var(--acc)"/>
+      <path d="M14 38l-3 4M34 38l3 4"/>
+      <circle fill="var(--surface)" cx="24" cy="26" r="14"/>
+      <path d="M24 18v8l6 4" stroke="var(--acc)" stroke-width="2.6"/>
+      <circle cx="24" cy="26" r="1.4" fill="currentColor" stroke="none"/>
+    </symbol>
+
+    <!-- ===== 05 소방시설 도감 ===== -->
+    <!-- 1안: 돋보기로 스프링클러 헤드 들여다보기 -->
+    <symbol id="s-loupe" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M30 30l9 9" stroke="var(--acc)" stroke-width="6"/>
+      <circle fill="var(--surface)" cx="20" cy="20" r="13"/>
+      <rect x="17" y="10" width="6" height="4" rx=".5"/>
+      <path d="M17.5 14l-2.5 10M22.5 14l2.5 10"/>
+      <rect x="18.7" y="15.5" width="2.6" height="7" rx="1.3" fill="var(--acc)" stroke="none"/>
+      <path d="M13 26h14"/>
+      <path d="M15 26l-1 2M20 26v2M25 26l1 2"/>
+    </symbol>
+    <!-- 2안: 색인 탭 달린 도감 -->
+    <symbol id="s-index" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect x="34" y="11" width="6" height="7" rx="1.5" fill="var(--acc)"/>
+      <rect x="34" y="20" width="6" height="7" rx="1.5" fill="var(--acc)" fill-opacity=".6"/>
+      <rect x="34" y="29" width="6" height="7" rx="1.5" fill="var(--acc)" fill-opacity=".3"/>
+      <rect fill="var(--surface)" x="9" y="7" width="27" height="35" rx="2"/>
+      <path d="M14 7v35"/>
+      <rect x="19" y="14" width="12" height="7" rx="1" fill="var(--acc)"/>
+      <path d="M19 27h12M19 32h8"/>
+    </symbol>
+
+    <!-- ===== 06 유틸리티 도구함 ===== -->
+    <!-- 1안: 공구함 -->
+    <symbol id="s-toolbox" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect fill="var(--surface)" x="10" y="11" width="5" height="11" rx="1"/>
+      <path d="M12.5 14v2M12.5 18v2"/>
+      <path d="M34 22V11"/>
+      <rect x="32" y="6" width="4" height="6" rx="1" fill="var(--acc)"/>
+      <path d="M18 21v-4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v4"/>
+      <rect x="6" y="21" width="36" height="20" rx="2.5" fill="var(--acc)"/>
+      <path d="M6 28h36"/>
+      <rect fill="var(--surface)" x="21" y="25.5" width="6" height="5" rx="1"/>
+    </symbol>
+    <!-- 2안: 렌치 + 드라이버 -->
+    <symbol id="s-tools" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M22 22L37 37" />
+      <path d="M36 36l3 3"/>
+      <path d="M9 13l4-4 9 9-4 4z" fill="var(--acc)"/>
+      <path fill="var(--surface)" d="M13 39l18-18 2 2-18 18a1.4 1.4 0 0 1-2-2z"/>
+      <path fill="var(--surface)" d="M31 21a7 7 0 0 1 8.5-10.5l-4.5 4.5 1 3 3 1 4.5-4.5A7 7 0 0 1 33 23z"/>
+    </symbol>
+
+    <!-- ===== 07 건축물대장 ===== -->
+    <!-- 1안: 건물 + 돋보기 -->
+    <symbol id="s-bldsearch" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path fill="var(--surface)" d="M8 42V8h20v34"/>
+      <g fill="var(--acc)" stroke="none">
+        <rect x="12" y="12" width="4" height="4"/><rect x="20" y="12" width="4" height="4"/>
+        <rect x="12" y="19" width="4" height="4"/><rect x="12" y="26" width="4" height="4"/>
+      </g>
+      <path d="M39 37l4 4" stroke-width="3.5"/>
+      <circle fill="var(--surface)" cx="32" cy="30" r="9"/>
+      <path d="M28 28h8M28 32h5" stroke="var(--acc)"/>
+      <path d="M4 42h20"/>
+    </symbol>
+    <!-- 2안: 도면 + 건물 -->
+    <symbol id="s-plan" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect fill="var(--surface)" x="6" y="8" width="30" height="32" rx="2"/>
+      <path d="M11 15h12v10h-12zM23 20h6v12h-18v-7" stroke="var(--acc)"/>
+      <path d="M11 36h8"/>
+      <path fill="var(--surface)" d="M28 42V24l7-5 7 5v18z"/>
+      <rect x="32.5" y="34" width="5" height="8" fill="var(--acc)" stroke-width="2"/>
+      <path d="M25 42h20"/>
+    </symbol>
+  </defs>
+</svg>
+
+<div class="mk-top">
+  <div>
+    <h1>메인 아이콘 새 안 · 견본</h1>
+    <p>소방시설 탐색기(소화기)와 자체점검 가이드(점검표)는 그대로 두고, 나머지 5개를 이모지와 상관없이 두 가지씩 새로 그렸습니다. 각 칸 위는 크게, 아래는 실제 타일 크기입니다.</p>
+  </div>
+  <div class="mk-theme">
+    <button type="button" onclick="document.documentElement.dataset.theme='dark'">다크</button>
+    <button type="button" onclick="document.documentElement.dataset.theme='official'">밝은 테마</button>
+    <button type="button" onclick="document.documentElement.dataset.theme='autumn'">가을</button>
+  </div>
+</div>
+
+<div class="row">
+  <h2><small>02</small>다중이용업소 탐색기</h2>
+  <div class="opts">
+    <div class="opt now"><svg class="ic big a-green"><use href="#n-people"/></svg><div class="sm"><svg class="ic a-green"><use href="#n-people"/></svg></div><b>지금</b><span>사람 둘</span></div>
+    <div class="opt"><svg class="ic big a-green"><use href="#s-shop"/></svg><div class="sm"><svg class="ic a-green"><use href="#s-shop"/></svg></div><b>1안 · 가게</b><span>차양 달린 상점. 업소라는 게 바로 보임</span></div>
+    <div class="opt"><svg class="ic big a-green"><use href="#s-exit"/></svg><div class="sm"><svg class="ic a-green"><use href="#s-exit"/></svg></div><b>2안 · 비상구</b><span>유도등과 열린 문. 안전시설 쪽을 강조</span></div>
+  </div>
+</div>
+
+<div class="row">
+  <h2><small>03</small>법정기한 계산기</h2>
+  <div class="opts">
+    <div class="opt now"><svg class="ic big a-blue"><use href="#n-cal"/></svg><div class="sm"><svg class="ic a-blue"><use href="#n-cal"/></svg></div><b>지금</b><span>달력</span></div>
+    <div class="opt"><svg class="ic big a-blue"><use href="#s-hour"/></svg><div class="sm"><svg class="ic a-blue"><use href="#s-hour"/></svg></div><b>1안 · 모래시계</b><span>기한이 줄어드는 느낌</span></div>
+    <div class="opt"><svg class="ic big a-blue"><use href="#s-alarm"/></svg><div class="sm"><svg class="ic a-blue"><use href="#s-alarm"/></svg></div><b>2안 · 알람시계</b><span>마감을 알려준다는 느낌</span></div>
+  </div>
+</div>
+
+<div class="row">
+  <h2><small>05</small>소방시설 도감</h2>
+  <div class="opts">
+    <div class="opt now"><svg class="ic big a-purple"><use href="#n-book"/></svg><div class="sm"><svg class="ic a-purple"><use href="#n-book"/></svg></div><b>지금</b><span>펼친 책</span></div>
+    <div class="opt"><svg class="ic big a-purple"><use href="#s-loupe"/></svg><div class="sm"><svg class="ic a-purple"><use href="#s-loupe"/></svg></div><b>1안 · 돋보기</b><span>스프링클러 헤드를 들여다보는 모습</span></div>
+    <div class="opt"><svg class="ic big a-purple"><use href="#s-index"/></svg><div class="sm"><svg class="ic a-purple"><use href="#s-index"/></svg></div><b>2안 · 색인 도감</b><span>옆에 색인 탭이 달린 두꺼운 도감</span></div>
+  </div>
+</div>
+
+<div class="row">
+  <h2><small>06</small>유틸리티 도구함</h2>
+  <div class="opts">
+    <div class="opt now"><svg class="ic big a-amber"><use href="#n-calc"/></svg><div class="sm"><svg class="ic a-amber"><use href="#n-calc"/></svg></div><b>지금</b><span>계산기</span></div>
+    <div class="opt"><svg class="ic big a-amber"><use href="#s-toolbox"/></svg><div class="sm"><svg class="ic a-amber"><use href="#s-toolbox"/></svg></div><b>1안 · 공구함</b><span>자·드라이버가 꽂힌 공구함</span></div>
+    <div class="opt"><svg class="ic big a-amber"><use href="#s-tools"/></svg><div class="sm"><svg class="ic a-amber"><use href="#s-tools"/></svg></div><b>2안 · 렌치·드라이버</b><span>공구 두 개를 엇갈려 놓음</span></div>
+  </div>
+</div>
+
+<div class="row">
+  <h2><small>07</small>건축물대장 조회</h2>
+  <div class="opts">
+    <div class="opt now"><svg class="ic big a-blue"><use href="#n-bld"/></svg><div class="sm"><svg class="ic a-blue"><use href="#n-bld"/></svg></div><b>지금</b><span>건물 + 서류</span></div>
+    <div class="opt"><svg class="ic big a-blue"><use href="#s-bldsearch"/></svg><div class="sm"><svg class="ic a-blue"><use href="#s-bldsearch"/></svg></div><b>1안 · 건물 + 돋보기</b><span>건물을 찾아본다는 느낌</span></div>
+    <div class="opt"><svg class="ic big a-blue"><use href="#s-plan"/></svg><div class="sm"><svg class="ic a-blue"><use href="#s-plan"/></svg></div><b>2안 · 도면 + 집</b><span>평면도 위에 작은 건물</span></div>
+  </div>
+</div>
+
+</body>
+</html>

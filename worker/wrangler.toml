@@ -1,0 +1,5 @@
+name = "fire-building"
+main = "src/index.js"
+compatibility_date = "2026-10-01"
+
+# 키는 여기 적지 말 것. `npx wrangler secret put BLD_KEY` / `JUSO_KEY` 로 등록한다.

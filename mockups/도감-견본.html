@@ -1,0 +1,274 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<base href="../">
+<title>도감 견본 비교</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+  body { max-width: 1240px; padding: 16px; min-height: auto; }
+  .mk-top { margin: 4px 0 14px; }
+  .mk-top h1 { font-size: 20px; margin: 0 0 6px; letter-spacing: -0.4px; }
+  .mk-top p { margin: 0; color: var(--text-muted); font-size: 13px; line-height: 1.7; word-break: keep-all; }
+  .mk-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin: 12px 0 0; }
+  .mk-tabs button, .mk-toggle button { padding: 9px 14px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface2); color: var(--text-muted); font-weight: 700; cursor: pointer; }
+  .mk-tabs button.on, .mk-toggle button.on { background: var(--red-dim2); border-color: var(--red); color: var(--red-soft); }
+  .mk-tabs button small { font-weight: 500; opacity: 0.75; margin-left: 4px; }
+  .mk-toggle { display: none; gap: 6px; margin: 10px 0 0; }
+  .mk-toggle button { flex: 1; border-radius: 10px; }
+  .mk-item { margin: 26px 0 40px; }
+  .mk-item > h2 { font-size: 17px; margin: 0 0 10px; padding-bottom: 8px; border-bottom: 1px solid var(--border2); }
+  .mk-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
+  .mk-col-label { font-family: var(--mono); font-size: 11px; letter-spacing: 1px; color: var(--text-dim); margin-bottom: 8px; }
+  .mk-col-label b { color: var(--red-soft); }
+  .mk-old { border: 1px solid var(--border); border-radius: 14px; padding: 14px; background: var(--surface); }
+  .mk-old .fac-photo-desc-row, .mk-old .fac-photo-comp-row { display: block !important; }
+  .mk-old .fac-desc-col { margin-top: 12px; }
+  .mk-old-none { color: var(--text-dim); font-size: 13px; line-height: 1.7; }
+  .mk-old-intro-row { display: flex; gap: 10px; padding: 8px 0; border-top: 1px solid var(--border); font-size: 13px; line-height: 1.6; }
+  .mk-old-intro-row img { width: 64px; height: 64px; object-fit: cover; border-radius: 8px; flex-shrink: 0; }
+  .mk-old-intro-row .an { font-size: 11px; color: var(--amber); margin-left: 6px; }
+  @media (max-width: 899px) {
+    .mk-toggle { display: flex; }
+    .mk-cols { grid-template-columns: 1fr; }
+    body.show-new .mk-oldwrap { display: none; }
+    body.show-old .mk-newwrap { display: none; }
+  }
+
+  /* ── 새 틀 ── */
+  .nf { border: 1px solid var(--border); border-radius: 14px; background: var(--surface); overflow: hidden; }
+  .nf-head { padding: 16px 18px 12px; border-bottom: 1px solid var(--border); }
+  .nf-cat { font-size: 11px; color: var(--text-dim); margin-bottom: 2px; }
+  .nf-name { font-size: 18px; font-weight: 800; letter-spacing: -0.3px; }
+  .nf-badge { display: inline-block; margin-left: 8px; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; background: var(--blue-dim); color: #9fc4ff; vertical-align: 2px; }
+  .nf-body { padding: 16px 18px 18px; }
+  .nf-summary { margin: 0; font-size: 15px; line-height: 1.75; color: var(--text); word-break: keep-all; }
+  .nf-main-photo { margin: 14px 0 0; border-radius: 12px; overflow: hidden; position: relative; background: var(--surface2); }
+  .nf-main-photo img { width: 100%; max-height: 300px; object-fit: contain; display: block; }
+  .nf-sec { margin-top: 20px; }
+  .nf-sec-title { font-size: 13px; font-weight: 800; color: var(--red-soft); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+  .nf-sec-title::after { content: ""; flex: 1; height: 1px; background: var(--border); }
+  .nf-place { font-size: 12.5px; font-weight: 800; color: var(--text-muted); margin: 14px 0 2px; }
+  .nf-lead { margin: 0 0 10px; font-size: 14px; line-height: 1.7; color: var(--text); word-break: keep-all; padding: 10px 12px; border-radius: 10px; background: var(--surface2); }
+  .nf-field { display: flex; gap: 12px; padding: 10px 0; border-top: 1px solid var(--border); }
+  .nf-fields > .nf-field:first-child { border-top: none; padding-top: 2px; }
+  .nf-field-photo { flex-shrink: 0; width: 92px; height: 92px; border-radius: 10px; overflow: hidden; background: var(--surface2); position: relative; }
+  .nf-field-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+  .nf-field-photo .src { position: absolute; left: 0; right: 0; bottom: 0; font-size: 9px; padding: 2px 4px; background: rgba(0,0,0,0.6); color: #ddd; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .nf-field-text { font-size: 14px; line-height: 1.7; word-break: keep-all; color: var(--text); }
+  .nf-field-text > b:first-child { display: block; font-size: 14px; margin-bottom: 2px; }
+  .nf-list { margin: 0; padding-left: 18px; font-size: 14px; line-height: 1.75; word-break: keep-all; }
+  .nf-list li + li { margin-top: 4px; }
+  .nf-fields + .nf-list { margin-top: 8px; }
+  .nf-types { display: grid; gap: 6px; }
+  .nf-type { display: flex; gap: 10px; font-size: 13.5px; line-height: 1.6; padding: 8px 10px; border-radius: 9px; background: var(--surface2); word-break: keep-all; }
+  .nf-type b { flex-shrink: 0; min-width: 92px; }
+  .nf-type .rare { display: inline-block; margin-left: 6px; font-size: 10px; padding: 1px 6px; border-radius: 999px; border: 1px solid var(--border2); color: var(--text-dim); vertical-align: 1px; font-weight: 600; }
+  .nf-type-group { font-size: 12px; color: var(--text-dim); margin: 10px 0 4px; }
+  .nf-type-group:first-child { margin-top: 0; }
+  .nf-note { margin-top: 8px; font-size: 12.5px; line-height: 1.65; color: var(--text-muted); word-break: keep-all; }
+  .nf-explorer { margin-top: 20px; padding: 12px 14px; border-radius: 10px; border: 1px solid rgba(66,133,244,0.25); background: var(--blue-dim); color: #9fc4ff; font-size: 13.5px; line-height: 1.6; word-break: keep-all; }
+  .nf-explorer b { color: #cfe0ff; }
+  .nf-more { margin-top: 16px; border: 1px solid var(--border); border-radius: 10px; }
+  .nf-more > summary { cursor: pointer; padding: 12px 14px; font-weight: 700; font-size: 14px; color: var(--text-muted); list-style: none; }
+  .nf-more > summary::-webkit-details-marker { display: none; }
+  .nf-more > summary::before { content: "▸ "; }
+  .nf-more[open] > summary::before { content: "▾ "; }
+  .nf-more-body { padding: 0 14px 14px; }
+  .nf-more-body .nf-sec:first-child { margin-top: 4px; }
+  .nf-more-body .nf-sec-title { color: var(--text-muted); }
+  .nf-comp { font-size: 13.5px; line-height: 1.65; padding: 6px 0; border-top: 1px solid var(--border); word-break: keep-all; }
+  .nf-comp:first-of-type { border-top: none; }
+  .nf-comp b { margin-right: 6px; }
+
+  /* 검토용 메모 */
+  .mk-review { margin-top: 12px; padding: 12px 14px; border: 1px dashed var(--amber); border-radius: 10px; background: var(--amber-dim); font-size: 12.5px; line-height: 1.7; color: #e8c06a; word-break: keep-all; }
+  .mk-review-title { font-weight: 800; margin-bottom: 4px; }
+  .mk-review ul { margin: 0; padding-left: 18px; }
+  .tag { display: inline-block; font-size: 10px; font-weight: 700; padding: 0 6px; border-radius: 4px; margin-right: 4px; }
+  .tag.ok { background: rgba(52,168,83,0.2); color: #8fe0a8; }
+  .tag.prac { background: rgba(249,171,0,0.22); color: #ffd27e; }
+  .tag.old { background: rgba(255,255,255,0.1); color: #ccc; }
+  .tag.app { background: rgba(66,133,244,0.2); color: #9fc4ff; }
+
+  #fac-dummy { display: none; }
+  .nf-unv { background: rgba(255, 196, 0, 0.18); border-bottom: 2px dotted #e0a800; border-radius: 2px; }
+  body.hide-unv .nf-unv { background: none; border-bottom: none; }
+  .mk-unv { margin: 10px 0 0; font-size: 14px; color: var(--text-muted); display: flex; align-items: center; gap: 6px; cursor: pointer; }
+</style>
+</head>
+<body class="show-new">
+
+<div class="mk-top">
+  <h1>소방시설 도감 견본 — 지금 vs 새 틀</h1>
+  <p>왼쪽은 지금 앱에 나오는 그대로(실제 데이터로 그림), 오른쪽은 새 틀입니다. 오른쪽은 <code>facilities-data-v2.js</code>를 읽어서 그립니다. 노란 점선 상자는 검토용 메모라 실제 화면에는 나오지 않습니다.</p>
+  <div class="mk-tabs" id="mk-tabs"></div>
+  <label class="mk-unv"><input type="checkbox" id="mk-unv" checked> <span class="nf-unv">노란 밑줄</span> = 원문으로 확인 안 된 문장 (현장 확인 필요)</label>
+  <div class="mk-toggle">
+    <button type="button" data-view="old">지금</button>
+    <button type="button" data-view="new" class="on">새 틀</button>
+  </div>
+</div>
+
+<div id="mk-list"></div>
+
+<!-- facilities.js가 요구하는 요소 (지금 버전을 실제 코드로 그리기 위함) -->
+<div id="fac-dummy">
+  <button id="open-facilities"></button><button id="back-from-facilities"></button>
+  <div id="facilities-content"></div>
+  <div id="fac-modal-overlay" class="hidden"><div id="fac-modal-cat"></div><div id="fac-modal-title"></div><button id="fac-modal-close"></button><div id="fac-modal-body"></div></div>
+</div>
+<script src="facilities-data.js"></script>
+<script src="facilities-data-v2.js"></script>
+<script src="facilities.js"></script>
+<script>
+(function () {
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
+  function md(s) { return esc(s).replace(/\{\?(.+?)\?\}/g, '<span class="nf-unv">$1</span>').replace(/\*\*(.+?)\*\*/g, '<b>$1</b>'); }
+  function img(src, alt) { return '<img src="' + esc(src) + '" alt="' + esc(alt || '') + '" loading="lazy">'; }
+
+  function fieldRows(rows) {
+    var cards = '', bullets = '';
+    rows.forEach(function (r) {
+      if (r.title || r.photo) {
+        cards += '<div class="nf-field">' +
+          (r.photo ? '<div class="nf-field-photo">' + img(r.photo, r.title) + (r.source ? '<span class="src">출처: ' + esc(r.source) + '</span>' : '') + '</div>' : '') +
+          '<div class="nf-field-text">' + (r.title ? '<b>' + esc(r.title) + '</b>' : '') + md(r.text) + '</div></div>';
+      } else {
+        bullets += '<li>' + md(r.text) + '</li>';
+      }
+    });
+    return (cards ? '<div class="nf-fields">' + cards + '</div>' : '') + (bullets ? '<ul class="nf-list">' + bullets + '</ul>' : '');
+  }
+  function sec(title, inner) { return '<div class="nf-sec"><div class="nf-sec-title">' + esc(title) + '</div>' + inner + '</div>'; }
+  function ul(list, ordered) {
+    var t = ordered ? 'ol' : 'ul';
+    return '<' + t + ' class="nf-list">' + list.map(function (x) { return '<li>' + md(x) + '</li>'; }).join('') + '</' + t + '>';
+  }
+  function review(list) {
+    if (!list || !list.length) return '';
+    var names = { ok: '원문', prac: '실무', old: '기존', app: '탐색기' };
+    return '<div class="mk-review"><div class="mk-review-title">검토용 메모 (실제 화면엔 안 나옴)</div><ul>' +
+      list.map(function (r) { return '<li><span class="tag ' + r.tag + '">' + names[r.tag] + '</span>' + esc(r.text) + '</li>'; }).join('') + '</ul></div>';
+  }
+
+  function renderItem(it) {
+    var h = '<div class="nf"><div class="nf-head"><div class="nf-cat">' + esc(it.category) + '</div><div class="nf-name">' + esc(it.name) + '</div></div><div class="nf-body">';
+    h += '<p class="nf-summary">' + md(it.summary) + '</p>';
+    if (it.photo) h += '<div class="nf-main-photo">' + img(it.photo, it.name) + (it.photoLabel ? '<span class="fac-photo-source-badge">' + esc(it.photoLabel) + '</span>' : '') + '</div>';
+    if (it.field) h += sec('현장에서 알아보는 법', (it.field.lead ? '<p class="nf-lead">' + md(it.field.lead) + '</p>' : '') + fieldRows(it.field.rows || []));
+    (it.sections || []).forEach(function (s) { h += sec(s.title, ul(s.list) + (s.note ? '<div class="nf-note">' + md(s.note) + '</div>' : '')); });
+    if (it.types && it.types.length) {
+      var t = '', lastGroup = null, open = false;
+      it.types.forEach(function (ty) {
+        if (ty.group !== lastGroup) {
+          if (open) t += '</div>';
+          if (ty.group) t += '<div class="nf-type-group">' + esc(ty.group) + '</div>';
+          t += '<div class="nf-types">'; open = true; lastGroup = ty.group;
+        }
+        t += '<div class="nf-type"><b>' + esc(ty.name) + (ty.rare ? '<span class="rare">드묾</span>' : '') + '</b><span>' + md(ty.desc) + '</span></div>';
+      });
+      if (open) t += '</div>';
+      h += sec('종류', t);
+    }
+    if (it.checks && it.checks.length) h += sec('점검할 때 보는 것', ul(it.checks));
+    h += '<div class="nf-explorer"><b>이 건물에 필요한가요?</b> 설치 대상은 건축허가 시기에 따라 달라서 <b>소방시설 탐색기</b>에서 확인합니다. →</div>';
+    var m = it.more;
+    if (m) {
+      var parts = [], b = '';
+      if (m.components && m.components.length) { parts.push('구성요소'); b += sec('구성요소', m.components.map(function (c) { return '<div class="nf-comp"><b>' + esc(c.name) + '</b>' + md(c.desc) + '</div>'; }).join('')); }
+      if (m.criteria && m.criteria.length) { parts.push('설치기준'); b += sec('설치기준 (현행)', ul(m.criteria)); }
+      if (m.usage && m.usage.length) { var ut = m.usageTitle || '사용법'; parts.push(ut); b += sec(ut, ul(m.usage, !m.usageTitle) + (m.note ? '<div class="nf-note">' + md(m.note) + '</div>' : '')); }
+      else if (m.note) b += '<div class="nf-note">' + md(m.note) + '</div>';
+      (m.extra || []).forEach(function (x) { parts.push(x.title); b += sec(x.title, ul(x.list)); });
+      h += '<details class="nf-more"><summary>더 자세히 (' + esc(parts.join(' · ')) + ')</summary><div class="nf-more-body">' + b + '</div></details>';
+    }
+    h += '</div></div>';
+    return h + review(it.review);
+  }
+
+  function renderIntro(intro) {
+    var h = '<div class="nf"><div class="nf-head"><div class="nf-name">' + esc(intro.title) + (intro.badge ? '<span class="nf-badge">' + esc(intro.badge) + '</span>' : '') + '</div></div><div class="nf-body">';
+    h += '<p class="nf-summary">' + md(intro.summary) + '</p>';
+    var g = '';
+    var icon = intro.groupsTitle ? '' : '📍 ';
+    intro.groups.forEach(function (gr) { g += '<div class="nf-place">' + icon + esc(gr.place) + '</div>' + fieldRows(gr.rows); });
+    h += sec(intro.groupsTitle || '장소별 장비', g);
+    if (intro.note) h += '<div class="nf-note">' + md(intro.note) + '</div>';
+    if (intro.checks) h += sec('점검할 때 보는 것', ul(intro.checks));
+    h += '</div></div>';
+    return h + review(intro.review);
+  }
+
+  function oldHtmlFor(id) {
+    window.openFacilityModal(id);
+    var body = document.querySelector('#fac-modal-body > .rg-accordion-body');
+    window.closeFacilityModal();
+    return body;
+  }
+  function oldIntro(intro) {
+    var d = document.createElement('div');
+    if (intro.type === 'comparison') {
+      d.innerHTML = '<div style="font-weight:800;margin-bottom:4px">' + esc(intro.title) + '</div><div class="mk-old-none" style="margin-bottom:6px">' + esc(intro.description) + '</div>' +
+        '<div style="overflow-x:auto"><table style="border-collapse:collapse;font-size:13px;width:100%"><tr>' + intro.headers.map(function (x) { return '<th style="border:1px solid var(--border,#444);padding:4px">' + esc(x) + '</th>'; }).join('') + '</tr>' +
+        intro.rows.map(function (r) { return '<tr>' + r.map(function (x) { return '<td style="border:1px solid var(--border,#444);padding:4px">' + esc(x) + '</td>'; }).join('') + '</tr>'; }).join('') + '</table></div>';
+      return d;
+    }
+    d.innerHTML = '<div class="mk-old-none" style="margin-bottom:8px">지금은 탭 맨 위에 안 보이고, 옥내소화전·스프링클러 항목 안의 "🔧 수계소화설비 공통 구성요소" 버튼을 눌러야 보입니다.</div>' +
+      '<div style="font-weight:800;margin-bottom:4px">' + esc(intro.title) + '</div><div class="mk-old-none" style="margin-bottom:6px">' + esc(intro.description) + '</div>' +
+      intro.components.map(function (c) {
+        return '<div class="mk-old-intro-row">' + (c.photo ? img(c.photo.replace(/^\.\//, ''), c.name) : '') + '<div><b>' + esc(c.name) + '</b><span class="an">' + esc(c.analogy || '') + '</span><div>' + esc(c.desc) + '</div>' + (c.note ? '<div style="color:var(--amber)">⚠️ ' + esc(c.note) + '</div>' : '') + '</div></div>';
+      }).join('');
+    return d;
+  }
+
+  function block(title, oldNode, newHtml) {
+    var s = document.createElement('section');
+    s.className = 'mk-item';
+    s.innerHTML = '<h2>' + esc(title) + '</h2><div class="mk-cols"><div class="mk-oldwrap"><div class="mk-col-label"><b>앱 화면</b> · facilities.js 실제 렌더링</div><div class="mk-old"></div></div><div class="mk-newwrap"><div class="mk-col-label"><b>새 틀</b></div>' + newHtml + '</div></div>';
+    var slot = s.querySelector('.mk-old');
+    if (oldNode) slot.appendChild(oldNode); else slot.innerHTML = '<div class="mk-old-none">지금 도감에는 없습니다.</div>';
+    return s;
+  }
+
+  var list = document.getElementById('mk-list');
+  function showTab(idx) {
+    var tab = FACILITIES_V2[idx];
+    list.innerHTML = '';
+    var n = 0;
+    if (tab.intro) {
+      var oldTab = FACILITIES_DATA.filter(function (t) { return t.tabId === tab.tabId; })[0];
+      list.appendChild(block('탭 맨 위 카드 · ' + tab.intro.title, oldTab && oldTab.intro ? oldIntro(oldTab.intro) : null, renderIntro(tab.intro)));
+    }
+    tab.items.forEach(function (it) { n++; list.appendChild(block(n + '. ' + it.name, oldHtmlFor(it.id), renderItem(it))); });
+    document.querySelectorAll('#mk-tabs button').forEach(function (b, i) { b.classList.toggle('on', i === idx); });
+    try { localStorage.setItem('mk-tab', String(idx)); } catch (e) {}
+    window.scrollTo(0, 0);
+  }
+
+  var tabsEl = document.getElementById('mk-tabs');
+  FACILITIES_V2.forEach(function (tab, i) {
+    var all = FACILITIES_DATA.filter(function (t) { return t.tabId === tab.tabId; })[0];
+    var b = document.createElement('button');
+    b.type = 'button';
+    b.innerHTML = esc(tab.tabLabel) + '<small>' + tab.items.length + (all ? '/' + all.items.length : '') + '</small>';
+    b.addEventListener('click', function () { showTab(i); });
+    tabsEl.appendChild(b);
+  });
+  var start = 0;
+  try { var saved = Number(localStorage.getItem('mk-tab')); if (saved >= 0 && saved < FACILITIES_V2.length) start = saved; } catch (e) {}
+  showTab(start);
+
+  document.getElementById('mk-unv').addEventListener('change', function (e) { document.body.classList.toggle('hide-unv', !e.target.checked); });
+
+  document.querySelectorAll('.mk-toggle button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      document.body.className = 'show-' + b.dataset.view;
+      document.querySelectorAll('.mk-toggle button').forEach(function (x) { x.classList.toggle('on', x === b); });
+    });
+  });
+})();
+</script>
+</body>
+</html>

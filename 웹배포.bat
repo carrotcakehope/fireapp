@@ -16,7 +16,7 @@ where node > nul 2>&1
 if %errorlevel% neq 0 (
     echo  [WARN] node not found - syntax check skipped
 ) else (
-    for %%F in (app.js sw.js facilities.js facilities-data.js layout-learn.js) do (
+    for %%F in (app.js sw.js facilities.js facilities-data.js facilities-data-v2.js layout-learn.js) do (
         if exist %%F (
             node --check %%F
             if errorlevel 1 (
@@ -78,6 +78,7 @@ if exist icon-192.png      copy /Y icon-192.png       docs\icon-192.png       > 
 if exist icon-512.png      copy /Y icon-512.png       docs\icon-512.png       > nul  &  copy /Y icon-512.png       www\icon-512.png       > nul
 if exist facilities.js     copy /Y facilities.js       docs\facilities.js      > nul  &  copy /Y facilities.js       www\facilities.js      > nul
 if exist facilities-data.js copy /Y facilities-data.js docs\facilities-data.js > nul  &  copy /Y facilities-data.js www\facilities-data.js > nul
+if exist facilities-data-v2.js copy /Y facilities-data-v2.js docs\facilities-data-v2.js > nul  &  copy /Y facilities-data-v2.js www\facilities-data-v2.js > nul
 if exist layout-learn.js   copy /Y layout-learn.js   docs\layout-learn.js   > nul  &  copy /Y layout-learn.js   www\layout-learn.js   > nul
 if exist pdf.min.js        copy /Y pdf.min.js          docs\pdf.min.js         > nul  &  copy /Y pdf.min.js          www\pdf.min.js         > nul
 if exist pdf.worker.min.js copy /Y pdf.worker.min.js  docs\pdf.worker.min.js  > nul  &  copy /Y pdf.worker.min.js  www\pdf.worker.min.js  > nul
@@ -144,6 +145,7 @@ git add capacitor.config.json
 git add index.html styles.css app.js manifest.json
 if exist facilities.js     git add facilities.js
 if exist facilities-data.js git add facilities-data.js
+if exist facilities-data-v2.js git add facilities-data-v2.js
 if exist layout-learn.js   git add layout-learn.js
 if exist tests git add tests/
 git commit -m "update: web deploy" --allow-empty

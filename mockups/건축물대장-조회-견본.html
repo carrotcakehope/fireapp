@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<base href="../">
+<title>건축물대장 조회 견본</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+  body { max-width: 1240px; padding: 16px; min-height: auto; }
+  .mk-top { margin: 4px 0 18px; }
+  .mk-top h1 { font-size: 20px; margin: 0 0 6px; letter-spacing: -0.4px; }
+  .mk-top p { margin: 0; color: var(--text-muted); font-size: 13px; line-height: 1.7; word-break: keep-all; }
+  .mk-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 18px; align-items: start; }
+  .mk-col-label { font-family: var(--mono); font-size: 11px; letter-spacing: 1px; color: var(--text-dim); margin-bottom: 8px; }
+  .mk-phone { border: 1px solid var(--border2); border-radius: 18px; overflow: hidden; background: var(--bg); }
+  .mk-phone .scroll-content { padding: 14px; }
+  .mk-memo { margin-top: 10px; padding: 12px 14px; border: 1px dashed var(--border2); border-radius: 10px; color: var(--text-muted); font-size: 12px; line-height: 1.7; word-break: keep-all; }
+  .mk-memo b { color: var(--text); }
+  .mk-memo ul { margin: 4px 0 0; padding-left: 18px; }
+  .mk-check { color: var(--amber); font-weight: 700; }
+
+  /* 검색 */
+  .br-search { display: flex; gap: 8px; }
+  .br-search input { flex: 1; min-width: 0; padding: 12px 14px; border-radius: var(--radius-sm); border: 1px solid var(--border2); background: var(--surface); color: var(--text); }
+  .br-search button { padding: 0 16px; border-radius: var(--radius-sm); border: 0; background: var(--red); color: #fff; font-weight: 700; }
+  .br-hint { margin: 8px 2px 16px; font-size: 12px; color: var(--text-dim); }
+  .br-list-label { font-size: 12px; color: var(--text-muted); margin: 0 2px 8px; }
+  .br-cand { display: block; width: 100%; text-align: left; padding: 12px 14px; margin-bottom: 8px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--surface); color: var(--text); }
+  .br-cand.is-sel { border-color: var(--red); background: var(--red-dim); }
+  .br-cand .road { font-size: 14px; font-weight: 700; }
+  .br-cand .jibun { font-size: 12px; color: var(--text-muted); margin-top: 3px; }
+  .br-cand .nm { font-size: 12px; color: var(--text-dim); margin-top: 3px; }
+
+  /* 결과 카드 */
+  .br-card { border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); overflow: hidden; }
+  .br-head { padding: 16px 16px 14px; border-bottom: 1px solid var(--border); }
+  .br-badge { display: inline-block; padding: 3px 9px; border-radius: 999px; font-size: 11px; font-weight: 700; background: var(--red-dim2); color: var(--red-soft); }
+  .br-name { font-size: 18px; font-weight: 800; margin: 8px 0 6px; letter-spacing: -0.3px; }
+  .br-addr { font-size: 13px; color: var(--text); line-height: 1.6; }
+  .br-addr small { display: block; color: var(--text-muted); font-size: 12px; }
+  .br-grid { display: grid; grid-template-columns: 1fr 1fr; }
+  .br-cell { padding: 12px 16px; border-bottom: 1px solid var(--border); }
+  .br-cell:nth-child(odd) { border-right: 1px solid var(--border); }
+  .br-cell.full { grid-column: 1 / -1; border-right: 0; }
+  .br-k { font-size: 11px; color: var(--text-dim); margin-bottom: 4px; }
+  .br-v { font-size: 15px; font-weight: 700; font-family: var(--mono); }
+  .br-v .u { font-size: 12px; font-weight: 400; color: var(--text-muted); font-family: var(--sans); margin-left: 2px; }
+  .br-sub { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
+  .br-dates { padding: 14px 16px; border-bottom: 1px solid var(--border); }
+  .br-dates .br-k { margin-bottom: 10px; }
+  .br-tl { display: grid; grid-template-columns: repeat(3, 1fr); position: relative; }
+  .br-tl::before { content: ""; position: absolute; left: 16%; right: 16%; top: 5px; height: 2px; background: var(--border2); }
+  .br-tl div { text-align: center; position: relative; }
+  .br-tl i { display: block; width: 12px; height: 12px; margin: 0 auto 7px; border-radius: 50%; background: var(--surface3); border: 2px solid var(--border2); }
+  .br-tl .on i { background: var(--red); border-color: var(--red); }
+  .br-tl b { display: block; font-size: 11px; color: var(--text-muted); font-weight: 400; }
+  .br-tl span { display: block; font-family: var(--mono); font-size: 13px; font-weight: 700; margin-top: 2px; }
+  .br-tl .empty span { color: var(--text-dim); font-weight: 400; }
+  .br-miss { padding: 10px 16px; font-size: 12px; color: var(--text-dim); background: var(--surface2); }
+  .br-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 12px; }
+  .br-btn { padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--border2); background: var(--surface2); color: var(--text); font-weight: 700; font-size: 13px; }
+  .br-btn.out::after { content: " ↗"; color: var(--text-muted); }
+
+  /* 층별개요 */
+  .br-flr { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .br-flr th { text-align: left; font-weight: 400; font-size: 11px; color: var(--text-dim); padding: 8px 10px; border-bottom: 1px solid var(--border2); }
+  .br-flr td { padding: 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  .br-flr td.f { font-family: var(--mono); font-weight: 700; white-space: nowrap; }
+  .br-flr td.a { font-family: var(--mono); text-align: right; white-space: nowrap; }
+  .br-flr tr.ug td.f { color: var(--amber); }
+  .br-flr td small { display: block; color: var(--text-dim); font-size: 11px; }
+  .br-flr tfoot td { font-weight: 700; border-bottom: 0; }
+</style>
+</head>
+<body>
+
+<div class="mk-top">
+  <h1>건축물대장 조회 · 견본</h1>
+  <p>주소를 입력해 건축물대장 표제부를 한 장으로 보는 화면입니다. <b>모든 값은 가짜 예시입니다.</b> 여러 동, 집합건물, 부속지번 같은 예외는 처리하지 않고 첫 번째 동만 보여줍니다.
+  <span class="mk-check">⚠ 표시</span>는 실제 API 응답을 보고 다시 확인해야 하는 부분입니다.</p>
+</div>
+
+<div class="mk-cols">
+
+  <!-- ① 검색 -->
+  <div>
+    <div class="mk-col-label">① 주소 검색 → 후보 선택</div>
+    <div class="mk-phone">
+      <div class="topbar">
+        <button class="back-btn" type="button">←</button>
+        <span class="tb-title">건축물대장 조회</span>
+      </div>
+      <div class="scroll-content">
+        <div class="br-search">
+          <input type="text" value="예시로 45">
+          <button type="button">검색</button>
+        </div>
+        <p class="br-hint">도로명, 지번, 건물명 모두 됩니다.</p>
+
+        <p class="br-list-label">검색 결과 3건</p>
+        <button class="br-cand is-sel" type="button">
+          <div class="road">서울특별시 가나구 예시로 45</div>
+          <div class="jibun">[지번] 가나구 다라동 123-4</div>
+          <div class="nm">예시프라자</div>
+        </button>
+        <button class="br-cand" type="button">
+          <div class="road">서울특별시 가나구 예시로 45-1</div>
+          <div class="jibun">[지번] 가나구 다라동 123-7</div>
+        </button>
+        <button class="br-cand" type="button">
+          <div class="road">경기도 마바시 예시로 45</div>
+          <div class="jibun">[지번] 마바시 사아동 88</div>
+          <div class="nm">예시빌라</div>
+        </button>
+      </div>
+    </div>
+    <div class="mk-memo">
+      <b>주소 검색</b>은 행정안전부 도로명주소 API로 합니다. 후보를 누르면 그 주소의 법정동코드와 번지로 건축물대장을 조회합니다.
+      <ul>
+        <li>후보가 1건이면 바로 ② 화면으로 넘어가게 할 수 있습니다.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ② 결과 카드 -->
+  <div>
+    <div class="mk-col-label">② 표제부 요약 카드</div>
+    <div class="mk-phone">
+      <div class="topbar">
+        <button class="back-btn" type="button">←</button>
+        <span class="tb-title">건축물대장 조회</span>
+      </div>
+      <div class="scroll-content">
+        <div class="br-card">
+          <div class="br-head">
+            <span class="br-badge">제2종근린생활시설</span>
+            <div class="br-name">예시프라자</div>
+            <div class="br-addr">
+              서울특별시 가나구 예시로 45
+              <small>[지번] 서울특별시 가나구 다라동 123-4</small>
+            </div>
+          </div>
+
+          <div class="br-grid">
+            <div class="br-cell">
+              <div class="br-k">연면적</div>
+              <div class="br-v">3,482.56<span class="u">㎡</span></div>
+            </div>
+            <div class="br-cell">
+              <div class="br-k">건축면적</div>
+              <div class="br-v">612.30<span class="u">㎡</span></div>
+            </div>
+            <div class="br-cell">
+              <div class="br-k">지상층수</div>
+              <div class="br-v">7<span class="u">층</span></div>
+            </div>
+            <div class="br-cell">
+              <div class="br-k">지하층수</div>
+              <div class="br-v">2<span class="u">층</span></div>
+            </div>
+            <div class="br-cell">
+              <div class="br-k">세대수</div>
+              <div class="br-v">0<span class="u">세대</span></div>
+              <div class="br-sub">가구 0 · 호 14</div>
+            </div>
+            <div class="br-cell">
+              <div class="br-k">승강기</div>
+              <div class="br-v">2<span class="u">대</span></div>
+              <div class="br-sub">승용 1 · 비상용 1</div>
+            </div>
+            <div class="br-cell full">
+              <div class="br-k">주차장</div>
+              <div class="br-v">28<span class="u">대</span></div>
+              <div class="br-sub">옥내 자주식 22 · 옥내 기계식 0 · 옥외 자주식 6 · 옥외 기계식 0</div>
+            </div>
+          </div>
+
+          <div class="br-dates">
+            <div class="br-k">일자</div>
+            <div class="br-tl">
+              <div class="on"><i></i><b>허가일</b><span>2008.03.17</span></div>
+              <div class="on"><i></i><b>착공일</b><span>2008.06.02</span></div>
+              <div class="on"><i></i><b>사용승인일</b><span>2010.01.25</span></div>
+            </div>
+          </div>
+
+        </div>
+
+        <div class="br-actions">
+          <button class="br-btn" type="button">층별 개요 보기</button>
+          <button class="br-btn out" type="button">세움터 원본</button>
+        </div>
+      </div>
+    </div>
+    <div class="mk-memo">
+      <ul>
+        <li>일자 칸이 비어 있으면(오래된 건물에 흔함) 회색 점과 "-"로 표시합니다.</li>
+        <li><span class="mk-check">⚠</span> 다가구주택은 세대수가 0이고 가구수에 값이 들어오는 경우가 있어 셋을 같이 보여줍니다.</li>
+        <li><span class="mk-check">⚠</span> "세움터 원본"은 세움터 열람 페이지로 이동만 합니다. 주소를 자동으로 채워 넘길 수 있는지는 확인이 필요합니다. 로그인은 그쪽에서 해야 합니다.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ③ 층별 개요 -->
+  <div>
+    <div class="mk-col-label">③ 층별 개요 (펼치기)</div>
+    <div class="mk-phone">
+      <div class="topbar">
+        <button class="back-btn" type="button">←</button>
+        <span class="tb-title">층별 개요 · 예시프라자</span>
+      </div>
+      <div class="scroll-content">
+        <table class="br-flr">
+          <thead>
+            <tr><th>층</th><th>용도</th><th style="text-align:right">면적(㎡)</th></tr>
+          </thead>
+          <tbody>
+            <tr><td class="f">7F</td><td>사무소<small>제2종근린생활시설</small></td><td class="a">398.20</td></tr>
+            <tr><td class="f">6F</td><td>사무소<small>제2종근린생활시설</small></td><td class="a">398.20</td></tr>
+            <tr><td class="f">5F</td><td>학원<small>제2종근린생활시설</small></td><td class="a">398.20</td></tr>
+            <tr><td class="f">4F</td><td>학원<small>제2종근린생활시설</small></td><td class="a">398.20</td></tr>
+            <tr><td class="f">3F</td><td>일반음식점<small>제2종근린생활시설</small></td><td class="a">412.66</td></tr>
+            <tr><td class="f">2F</td><td>휴게음식점<small>제1종근린생활시설</small></td><td class="a">412.66</td></tr>
+            <tr><td class="f">1F</td><td>소매점<small>제1종근린생활시설</small></td><td class="a">405.10</td></tr>
+            <tr class="ug"><td class="f">B1</td><td>주차장<small>제2종근린생활시설</small></td><td class="a">329.67</td></tr>
+            <tr class="ug"><td class="f">B2</td><td>주차장, 기계실<small>제2종근린생활시설</small></td><td class="a">329.67</td></tr>
+          </tbody>
+          <tfoot>
+            <tr><td></td><td>합계</td><td class="a">3,482.56</td></tr>
+          </tfoot>
+        </table>
+      </div>
+    </div>
+    <div class="mk-memo">
+      층별개요 API의 층번호, 용도(세부 용도와 대분류), 면적을 그대로 보여줍니다. 지하층은 주황색으로 구분합니다.
+      <ul>
+        <li><span class="mk-check">⚠</span> 한 층에 용도가 여러 개면 API가 줄을 나눠서 줍니다. 같은 층끼리 묶을지 그대로 둘지 정해야 합니다.</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>

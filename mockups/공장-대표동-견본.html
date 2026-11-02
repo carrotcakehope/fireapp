@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<base href="../">
+<title>공장 대표동 견본</title>
+<link rel="stylesheet" href="styles.css">
+<style>
+  body { max-width: 1240px; padding: 16px; min-height: auto; }
+  .mk-top { margin: 4px 0 18px; }
+  .mk-top h1 { font-size: 20px; margin: 0 0 6px; letter-spacing: -0.4px; }
+  .mk-top p { margin: 0; color: var(--text-muted); font-size: 13px; line-height: 1.7; word-break: keep-all; }
+  .mk-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 18px; align-items: start; }
+  .mk-col-label { font-family: var(--mono); font-size: 11px; letter-spacing: 1px; color: var(--text-dim); margin-bottom: 8px; }
+  .mk-phone { border: 1px solid var(--border2); border-radius: 18px; overflow: hidden; background: var(--bg); }
+  .mk-phone .scroll-content { padding: 14px; }
+  .mk-memo { margin-top: 10px; padding: 12px 14px; border: 1px dashed var(--border2); border-radius: 10px; color: var(--text-muted); font-size: 12px; line-height: 1.7; word-break: keep-all; }
+  .mk-memo b { color: var(--text); }
+  .mk-memo ul { margin: 4px 0 0; padding-left: 18px; }
+  .mk-check { color: var(--amber); font-weight: 700; }
+  .info-box ul { margin: 4px 0 0; padding-left: 18px; }
+  .info-box li + li { margin-top: 4px; }
+</style>
+</head>
+<body>
+
+<div class="mk-top">
+  <h1>공장 대표동 입력 · 견본</h1>
+  <p>소방시설 탐색기(연도별) 공장 용도에 대표동 기준을 넣었을 때의 화면입니다. 아파트처럼 "보고서 기준(평균)" 토글은 두지 않고 대표동 입력 하나만 둡니다.
+  <span class="mk-check">⚠ 표시</span>는 법령 문구·수치를 실제 조문과 맞춰 봐야 하는 부분입니다.</p>
+</div>
+
+<div class="mk-cols">
+
+  <!-- ① 연면적 입력 화면 -->
+  <div>
+    <div class="mk-col-label">① 연면적 입력 (기존 yTotalArea 스텝 자리)</div>
+    <div class="mk-phone">
+      <div class="topbar">
+        <button class="back-btn" type="button">←</button>
+        <span class="tb-title">소방시설 탐색기 (연도별)</span>
+      </div>
+      <div class="wiz-prog-wrap">
+        <ol class="phase-steps">
+          <li class="is-done"><span class="ph-dot"></span><span class="ph-label">용도</span></li>
+          <li class="is-active"><span class="ph-dot"></span><span class="ph-label">규모</span></li>
+          <li><span class="ph-dot"></span><span class="ph-label">특수조건</span></li>
+          <li><span class="ph-dot"></span><span class="ph-label">결과</span></li>
+        </ol>
+      </div>
+      <div class="scroll-content">
+        <section class="wq-card">
+          <p class="wq-label">QUESTION 4</p>
+          <h2 class="wq-title">대표동 연면적(㎡)</h2>
+          <p class="wq-sub">소방시설 설치 여부는 동(棟)별로 판정합니다. 공장 안에서 판정할 동 하나를 골라 그 동의 연면적만 입력하세요.</p>
+
+          <div class="calc-form-row">
+            <label>대표동 연면적(㎡)</label>
+            <input class="calc-input" type="number" placeholder="예: 3200">
+          </div>
+
+          <div class="info-box blue">
+            <div class="ib-title">대표동 고르는 법</div>
+            건축물대장에서 <strong>연면적이 가장 크고 층수가 가장 높은 생산동</strong>을 고르세요. 경비실·관리동 같은 작은 부속동은 빼고 고릅니다. 다음 질문의 층수·지하층도 같은 동 기준으로 입력하세요.
+          </div>
+
+          <div class="info-box amber">
+            <div class="ib-title">이런 경우는 따로 확인하세요</div>
+            <ul>
+              <li><strong>연결통로로 이어진 동</strong>: 연결통로로 이어진 동은 하나의 대상물로 봅니다. 이어진 동들의 연면적을 <strong>합쳐서</strong> 입력하세요. (방화셔터 등으로 구획돼 있으면 따로 봅니다) <span class="mk-check">⚠</span></li>
+              <li><strong>특수가연물을 쌓아 두는 동</strong>: 면화·합성수지·목재 등을 저장하는 창고동은 작아도 스프링클러·옥내소화전 대상이 될 수 있습니다. 그런 동이 따로 있으면 <strong>그 동으로 한 번 더</strong> 판정해 보세요.</li>
+              <li><strong>옥외소화전</strong>: 같은 구내 건물끼리 가까이 붙어 있으면(연소 우려 구조) 동별이 아니라 <strong>하나로 합쳐</strong> 판정합니다. 이건 뒤에서 따로 묻습니다.</li>
+            </ul>
+          </div>
+
+          <div class="w-nav">
+            <button class="btn btn-ghost" type="button">이전</button>
+            <button class="btn btn-primary" type="button">다음</button>
+          </div>
+        </section>
+      </div>
+    </div>
+    <div class="mk-memo">
+      <b>메모</b>
+      <ul>
+        <li>연결통로를 하나로 보는 조건(시행령 별표2 비고, 통로 길이·벽 유무·방화셔터 예외)은 조건이 꽤 세부적이라, 견본에는 한 줄로만 줄여 썼습니다. <span class="mk-check">⚠ 조문 대조 필요</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ② 옥외소화전 전용 질문 -->
+  <div>
+    <div class="mk-col-label">② 옥외소화전 질문 (기존 yFactoryFirstSecondFloorArea 자리)</div>
+    <div class="mk-phone">
+      <div class="scroll-content">
+        <section class="wq-card">
+          <p class="wq-label">QUESTION 12</p>
+          <h2 class="wq-title">지상 1층·2층 바닥면적 합계(㎡)</h2>
+          <p class="wq-sub">옥외소화전설비(1·2층 바닥면적 합계 9,000㎡ 이상) 판단에 사용됩니다. 옥외소화전은 동별이 아니라 아래처럼 가까운 건물을 묶어서 판정합니다.</p>
+
+          <div class="calc-form-row">
+            <label>지상 1·2층 바닥면적 합계(㎡)</label>
+            <input class="calc-input" type="number" placeholder="예: 0">
+          </div>
+
+          <div class="info-box amber">
+            <div class="ib-title">가까운 건물은 합쳐서 입력</div>
+            같은 구내의 건물끼리 <strong>1층은 6m 이하, 2층 이상은 10m 이하</strong>로 붙어 있고 서로 마주 보는 쪽에 창·문 같은 개구부가 있으면, 연소 우려가 있는 구조로 보아 <strong>하나의 대상물</strong>로 판정합니다. 이 경우 대표동만 넣지 말고 그 건물들의 1·2층 바닥면적을 모두 합쳐 입력하세요. <span class="mk-check">⚠</span>
+          </div>
+
+          <div class="w-nav">
+            <button class="btn btn-ghost" type="button">이전</button>
+            <button class="btn btn-primary" type="button">다음</button>
+          </div>
+        </section>
+      </div>
+    </div>
+    <div class="mk-memo">
+      <b>메모</b>
+      <ul>
+        <li>지금 이 질문은 <b>연면적 9,000㎡ 이상일 때만</b> 나옵니다. 대표동 기준으로 바꾸면 대표동은 9,000㎡ 미만이어도 묶은 건물 합계가 9,000㎡ 이상일 수 있어서, 공장은 연면적과 관계없이 항상 묻도록 조건을 바꿔야 합니다.</li>
+        <li>6m / 10m 거리 기준과 개구부 조건은 시행규칙의 "연소 우려가 있는 건축물의 구조" 조문에서 가져온 것입니다. <span class="mk-check">⚠ 조문 대조 필요</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ③ 결과 화면 안내 -->
+  <div>
+    <div class="mk-col-label">③ 결과 화면 상단 안내 (공장일 때만)</div>
+    <div class="mk-phone">
+      <div class="scroll-content">
+        <div class="info-box blue">
+          <div class="ib-title">대표동 기준 결과입니다</div>
+          입력한 대표동 하나를 기준으로 판정한 결과입니다. 공장 안의 <strong>모든 동에 아래 시설이 다 있어야 한다는 뜻은 아닙니다.</strong> 작은 동은 기준이 더 낮을 수 있고, 특수가연물 창고동처럼 조건이 다른 동은 따로 판정해 보세요.
+        </div>
+        <div class="result-card">
+          <div class="result-item">
+            <div class="result-top">
+              <div>
+                <p class="result-category">소화설비</p>
+                <p class="result-name">옥내소화전설비</p>
+              </div>
+              <span class="result-status status-required">설치 필요</span>
+            </div>
+            <p class="result-reason">(견본) 대표동 연면적 3,200㎡ — 연면적 1,500㎡ 이상</p>
+          </div>
+          <div class="result-item">
+            <div class="result-top">
+              <div>
+                <p class="result-category">소화설비</p>
+                <p class="result-name">옥외소화전설비</p>
+              </div>
+              <span class="result-status status-not-required">해당 없음</span>
+            </div>
+            <p class="result-reason">(견본) 1·2층 바닥면적 합계 4,800㎡ — 9,000㎡ 미만. 가까운 건물을 합쳐 입력했는지 확인하세요.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="mk-memo">
+      <b>메모</b>
+      <ul>
+        <li>결과 목록과 판정 로직은 지금과 같고, 공장일 때 맨 위 파란 안내만 추가됩니다. 옥외소화전이 "해당 없음"일 때만 이유 끝에 합산 확인 문구를 붙입니다.</li>
+        <li>결과 복사 텍스트에도 "대표동 기준" 한 줄을 넣을지 정해 주세요.</li>
+      </ul>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

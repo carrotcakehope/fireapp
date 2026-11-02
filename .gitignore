@@ -2,3 +2,5 @@ node_modules/
 *.apk
 .claude/
 supply-fireapp/
+
+.wrangler/
