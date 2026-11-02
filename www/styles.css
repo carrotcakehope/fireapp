@@ -512,6 +512,15 @@ input:focus-visible {
 .mc-blue  { background: var(--blue-dim);  border: 1px solid rgba(66, 133, 244, 0.22); }
 .mc-green { background: var(--green-dim); border: 1px solid rgba(52, 168, 83, 0.22); }
 
+/* 메인 타일 선화 아이콘: 상자 없이 그림만 (선=글자색, 포인트=--acc) */
+.menu-icon.ic-art { width: 56px; height: 56px; background: none; border: 0; border-radius: 0; }
+.menu-icon.ic-art .ic { display: block; width: 52px; height: 52px; color: var(--text); }
+.ic.a-red    { --acc: #d93025; } /* 소화기는 테마와 무관하게 항상 빨강 */
+.ic.a-green  { --acc: var(--green); }
+.ic.a-blue   { --acc: var(--blue); }
+.ic.a-amber  { --acc: var(--amber); }
+.ic.a-purple { --acc: #8b5cf6; }
+
 .mt-num {
   color: var(--text-dim);
   font-family: var(--mono);
@@ -4393,6 +4402,9 @@ html[data-theme="blossom"] #date-content .info-box.amber { border-left-color: va
     font-size: 20px;
   }
 
+  .menu-icon.ic-art { width: 48px; height: 48px; }
+  .menu-icon.ic-art .ic { width: 46px; height: 46px; }
+
   .menu-grid {
     padding: 14px 12px 20px;
   }
@@ -6663,8 +6675,10 @@ html[data-theme="light"] .fac-photo-source-badge {
 
 .fac-intro-header-left {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
+  gap: 4px 8px;
+  min-width: 0;
 }
 
 .fac-intro-icon {
@@ -6676,6 +6690,7 @@ html[data-theme="light"] .fac-photo-source-badge {
   font-weight: 700;
   color: var(--blue);
   letter-spacing: -0.01em;
+  white-space: nowrap;
 }
 
 .fac-intro-badge {
@@ -6686,6 +6701,7 @@ html[data-theme="light"] .fac-photo-source-badge {
   border: 1px solid var(--blue);
   border-radius: 4px;
   padding: 1px 6px;
+  white-space: nowrap;
 }
 
 .fac-intro-toggle {
