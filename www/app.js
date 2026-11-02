@@ -44,11 +44,11 @@ function trackMenuClick(menuName) {
 
 // ── 패치노트 설정 (여기만 수정하면 됩니다) ──────────────────────────────
 const PATCH_NOTES = {
-  version: "v1.0.2",
+  version: "v1.1.1",
   date: "2026-11-02",
   items: [
     { type: "notice",  text: "이걸 배포한지 벌써 3개월이 됐네요. 사용하면서 불편한게 있으시면 편하게 연락주세요!" },
-    { type: "new",     text: "소방시설 탐색기 공장 용도 동별 세분화(진행중)"},
+    { type: "new",     text: "건축물대장 검색기능 추가. 7번 탭에 있습니다."},
     { type: "improve", text: "소방시설 도감 리뉴얼중. 내용 수정중이니 오류가 있으면 연락주세요!" },
     { type: "fix",     text: "법정기한 계산기 자체점검, 부적합 주말 표시 버그 수정" },
   ],
@@ -5325,18 +5325,32 @@ function bldArea(v) {
   return n.toLocaleString("ko-KR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
+// 높이·면적·비율처럼 실제 건물에서 0일 수 없는 값은 0이면 "미기재"로 보고 "-"
+function bldMeasure(v, fmt = bldNum) {
+  return Number(v) > 0 ? fmt(v) : "-";
+}
+
 function bldDate(v) {
   const s = String(v ?? "").trim();
   return /^\d{8}$/.test(s) ? `${s.slice(0, 4)}.${s.slice(4, 6)}.${s.slice(6, 8)}` : "";
 }
 
+const BUILDING_RETRY_MSG = "서버가 잠시 응답하지 않습니다. 잠시 후 다시 시도해주세요. 계속 실패하면 새로고침(F5)을 하거나 앱을 종료한 뒤 다시 켜주세요. 문제가 계속되면 개발자에게 연락주세요.";
+
 async function buildingFetch(path) {
-  const res = await fetch(BUILDING_API + path);
+  let res;
+  try {
+    res = await fetch(BUILDING_API + path);
+  } catch (e) {
+    // 네트워크 끊김·Worker 연결 실패
+    console.warn("[건축물대장]", e);
+    throw new Error(BUILDING_RETRY_MSG);
+  }
   const data = await res.json().catch(() => ({ error: "응답을 읽지 못했습니다." }));
-  // 주소·대장 API 서버가 잠깐 안 받는 경우(Worker가 502로 넘김)는 내부 메시지 대신 재시도 안내
+  // 주소·대장 API 서버가 잠깐 안 받는 경우(Worker가 재시도 후에도 실패하면 502로 넘김)
   if (res.status >= 500) {
     console.warn("[건축물대장]", res.status, data.error);
-    throw new Error("서버가 잠시 응답하지 않습니다. 잠시 후 다시 시도해주세요.");
+    throw new Error(BUILDING_RETRY_MSG);
   }
   if (!res.ok || data.error) throw new Error(data.error || `오류 ${res.status}`);
   return data;
@@ -5371,6 +5385,8 @@ async function buildingPick(item) {
   try {
     const p = new URLSearchParams({ admCd: item.admCd, bun: item.bun, ji: item.ji, mtYn: item.mtYn });
     buildingState.result = await buildingFetch("/building?" + p);
+    const t = buildingState.result.title;
+    if (t) saveBuildingRecent(item, [String(t.bldNm || "").trim(), String(t.dongNm || "").trim()].filter(Boolean).join(" "));
   } catch (e) {
     buildingState.error = "건축물대장 조회에 실패했습니다. " + e.message;
   }
@@ -5378,6 +5394,59 @@ async function buildingPick(item) {
   renderBuilding();
   document.getElementById("building-content").scrollTop = 0;
 }
+
+// 최근 조회: 대장이 조회된 건물만, 이 기기에만, 최대 10개
+const BUILDING_RECENT_KEY = "buildingRecent";
+const BUILDING_RECENT_MAX = 10;
+const bldRecentKey = (it) => [it.admCd, it.bun, it.ji, it.mtYn].join("|");
+
+function loadBuildingRecent() {
+  try {
+    const list = JSON.parse(localStorage.getItem(BUILDING_RECENT_KEY) || "[]");
+    return Array.isArray(list) ? list : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveBuildingRecent(item, name) {
+  const entry = { roadAddr: item.roadAddr, jibunAddr: item.jibunAddr, admCd: item.admCd, bun: item.bun, ji: item.ji, mtYn: item.mtYn, name: name || item.bdNm || "" };
+  const list = [entry, ...loadBuildingRecent().filter((r) => bldRecentKey(r) !== bldRecentKey(entry))].slice(0, BUILDING_RECENT_MAX);
+  try { localStorage.setItem(BUILDING_RECENT_KEY, JSON.stringify(list)); } catch {}
+}
+
+function clearBuildingRecent() {
+  try { localStorage.removeItem(BUILDING_RECENT_KEY); } catch {}
+}
+
+function renderBuildingRecent(list, confirming) {
+  if (!list.length) return "";
+  const head = confirming
+    ? `<span class="br-clear-ask">기록을 모두 지울까요?</span>
+       <span><button class="br-clear" type="button" data-no-history data-bld-clear-yes>지우기</button><button class="br-clear" type="button" data-no-history data-bld-clear-no>취소</button></span>`
+    : `<span>최근 조회</span><button class="br-clear" type="button" data-no-history data-bld-clear>기록 비우기</button>`;
+  return `<div class="br-recent-head">${head}</div>
+    <ul class="br-recent">${list.map((r, i) => {
+      // 건물명이 없으면 도로명주소를 굵게, 지번을 아래에
+      const title = r.name || r.roadAddr;
+      const sub = r.name ? r.roadAddr : r.jibunAddr;
+      return `<li><button type="button" data-bld-recent="${i}"><span class="ic">🏢</span><span class="tx"><div class="nm">${escapeHtml(title)}</div><div class="ad">${escapeHtml(sub || "")}</div></span><span class="ar">›</span></button></li>`;
+    }).join("")}</ul>`;
+}
+
+const BUILDING_INTRO_HTML = `<div class="br-intro">
+    <h3>주소만 넣으면 바로 볼 수 있어요</h3>
+    <p>세움터 로그인 없이 건축물대장 표제부의 주요 내용을 한 장으로 보여줍니다.</p>
+    <div class="br-intro-grid">
+      <div><b>📐</b>면적</div>
+      <div><b>🏢</b>층수·구조</div>
+      <div><b>📅</b>사용승인일</div>
+      <div><b>🛗</b>승강기</div>
+      <div><b>🚗</b>주차장</div>
+      <div><b>📑</b>층별 용도</div>
+    </div>
+    <small>국토교통부 공개 데이터라 참고용입니다. 변동사항·소유자는 세움터에서 확인하세요.</small>
+  </div>`;
 
 // 층별개요는 순서가 섞여 오고 한 층이 여러 줄로 올 수 있다 → 층별로 묶고 위층부터 정렬
 function groupBuildingFloors(floors) {
@@ -5415,7 +5484,10 @@ function renderBuildingFloors(floors) {
 
 // 요약 카드에 없는 표제부 나머지 항목 (값이 비면 "-")
 function renderBuildingMore(t) {
-  const unit = (v, u, fmt = bldNum) => (String(v ?? "").trim() === "" ? "-" : `${fmt(v)} ${u}`);
+  const unit = (v, u, fmt = bldNum) => {
+    const s = bldMeasure(v, fmt);
+    return s === "-" ? s : `${s} ${u}`;
+  };
   const quake = { "1": "적용", "0": "미적용" }[String(t.rserthqkDsgnApplyYn).trim()] || "-";
   const atchCnt = Number(t.atchBldCnt) || 0;
   const regstr = [t.regstrGbCdNm, t.regstrKindCdNm].map((v) => String(v || "").trim()).filter(Boolean).join(" · ");
@@ -5476,7 +5548,7 @@ function renderBuildingCard(t) {
   const etc = String(t.etcPurps || "").trim();
   const cell = (k, v, unit, sub, full, txt) => `<div class="br-cell${full ? " full" : ""}">
       <div class="br-k">${k}</div>
-      <div class="br-v${txt ? " txt" : ""}">${v}${unit ? `<span class="u">${unit}</span>` : ""}</div>
+      <div class="br-v${txt ? " txt" : ""}">${v}${unit && v !== "-" ? `<span class="u">${unit}</span>` : ""}</div>
       ${sub ? `<div class="br-sub">${sub}</div>` : ""}
     </div>`;
 
@@ -5491,13 +5563,13 @@ function renderBuildingCard(t) {
       </div>
     </div>
     <div class="br-grid">
-      ${cell("연면적", bldArea(t.totArea), "㎡")}
-      ${cell("건축면적", bldArea(t.archArea), "㎡")}
+      ${cell("연면적", bldMeasure(t.totArea, bldArea), "㎡")}
+      ${cell("건축면적", bldMeasure(t.archArea, bldArea), "㎡")}
       ${cell("지상층수", bldNum(t.grndFlrCnt), "층")}
       ${cell("지하층수", bldNum(t.ugrndFlrCnt), "층")}
       ${cell("구조", escapeHtml(bldText(t.strctCdNm)), "", subIfDiff(t.strctCdNm, t.etcStrct), true, true)}
       ${cell("지붕", escapeHtml(bldText(t.roofCdNm)), "", subIfDiff(t.roofCdNm, t.etcRoof), false, true)}
-      ${cell("높이", bldNum(t.heit), "m")}
+      ${cell("높이", bldMeasure(t.heit), "m")}
       ${cell("세대수", bldNum(t.hhldCnt), "세대", `가구 ${bldNum(t.fmlyCnt)} · 호 ${bldNum(t.hoCnt)}`)}
       ${cell("승강기", bldNum(ride + emgen), "대", `승용 ${ride} · 비상용 ${emgen}`)}
       ${cell("주차장", bldNum(parkingTotal), "대", parking.map(([k, n]) => `${k} ${Number(n) || 0}`).join(" · ") + `<br>면적 ${parkingTotal && !parkingArea ? "-" : `${bldArea(parkingArea)}㎡`}`, true)}
@@ -5574,21 +5646,45 @@ function renderBuilding() {
         </button>`).join("")
       : `<p class="br-hint">검색 결과가 없습니다.</p>`;
   }
+  // 검색 전에는 최근 조회(있으면) 아래로 안내 카드를 밀어낸다
+  const recent = loadBuildingRecent();
+  const idle = !s.items && !s.loading && !s.error;
   root.innerHTML = `${form}
     <p class="br-hint">도로명, 지번, 건물명 모두 됩니다.</p>
-    ${notice}${list}`;
+    ${notice}${list}
+    ${idle ? renderBuildingRecent(recent, s.confirmClear) + BUILDING_INTRO_HTML : ""}`;
 
   bindForm();
   root.querySelectorAll("[data-bld-idx]").forEach((btn) => {
     btn.addEventListener("click", () => buildingPick(buildingState.items[Number(btn.dataset.bldIdx)]));
   });
+  root.querySelectorAll("[data-bld-recent]").forEach((btn) => {
+    btn.addEventListener("click", () => buildingPick(recent[Number(btn.dataset.bldRecent)]));
+  });
+  root.querySelector("[data-bld-clear]")?.addEventListener("click", () => {
+    buildingState.confirmClear = true;
+    renderBuilding();
+  });
+  root.querySelector("[data-bld-clear-no]")?.addEventListener("click", () => {
+    buildingState.confirmClear = false;
+    renderBuilding();
+  });
+  root.querySelector("[data-bld-clear-yes]")?.addEventListener("click", () => {
+    clearBuildingRecent();
+    buildingState.confirmClear = false;
+    renderBuilding();
+  });
 }
 
 document.getElementById("open-building-register").addEventListener("click", () => {
   trackMenuClick("건축물대장 조회");
+  // 다시 들어오면 이전 검색어·결과 없이 처음부터
+  buildingState.query = "";
+  buildingState.items = null;
   buildingState.picked = null;
   buildingState.result = null;
   buildingState.error = "";
+  buildingState.confirmClear = false;
   renderBuilding();
   showScreen("building");
 });
