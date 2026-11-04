@@ -2,6 +2,9 @@
 // - API 키(BLD_KEY: 공공데이터포털 Decoding 키, JUSO_KEY: 도로명주소 검색 API 승인키)는 secret으로만 보관
 // - GET /search?q=주소        → 도로명주소 검색 결과(후보 목록)
 // - GET /building?admCd=&bun=&ji=&mtYn=  → 표제부 첫 동 + 층별개요
+// - POST /feedback  → 의견 보내기를 텔레그램으로 전달 (feedback.js)
+
+import { handleFeedback } from "./feedback.js";
 
 const ALLOWED_ORIGINS = [
   "https://fire-assistant.github.io",
@@ -19,13 +22,19 @@ export default {
     const origin = request.headers.get("Origin") || "";
     const cors = {
       "Access-Control-Allow-Origin": ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0],
-      "Access-Control-Allow-Methods": "GET, OPTIONS",
+      "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
       "Vary": "Origin",
     };
     if (request.method === "OPTIONS") return new Response(null, { headers: cors });
 
     const url = new URL(request.url);
     try {
+      if (url.pathname === "/feedback") {
+        if (request.method !== "POST") return json({ error: "method not allowed" }, cors, 405);
+        if (!ALLOWED_ORIGINS.includes(origin)) return json({ ok: false, error: "forbidden" }, cors, 403);
+        const [body, status] = await handleFeedback(request, env);
+        return json(body, cors, status);
+      }
       if (url.pathname === "/search") return json(await searchAddress(url.searchParams.get("q"), env), cors);
       if (url.pathname === "/building") return json(await getBuilding(url.searchParams, env), cors);
       // 원인 확인용: 허용된 대장 조회를 그대로 돌려준다 (ji 생략은 noJi=1)

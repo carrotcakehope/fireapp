@@ -3,3 +3,13 @@ main = "src/index.js"
 compatibility_date = "2026-10-01"
 
 # 키는 여기 적지 말 것. `npx wrangler secret put BLD_KEY` / `JUSO_KEY` 로 등록한다.
+# 의견 보내기: `npx wrangler secret put TG_TOKEN` / `TG_CHAT_ID`
+
+# 의견 보내기 하루 횟수 세기용 (`npx wrangler kv namespace create FEEDBACK_KV`로 만듦)
+[[kv_namespaces]]
+binding = "FEEDBACK_KV"
+id = "dec5a89431bb4a0c97b8b89267178d3c"
+
+[vars]
+# 장난 의견 차단: 텔레그램 메시지의 기기ID 또는 IP표식을 쉼표로 이어 적고 다시 배포
+FEEDBACK_BLOCK = ""
