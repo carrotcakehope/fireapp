@@ -17230,9 +17230,9 @@ history.replaceState({ screen: 'home' }, '');
       var tag = ae.tagName;
       if (tag === "INPUT" || tag === "TEXTAREA" || tag === "SELECT" || ae.isContentEditable) return;
     }
-    if (window._pnIsOpen && window._pnIsOpen()) {              // 패치노트 모달은 자체 처리(아래 history.back로 닫힘)
+    if (window._pnIsOpen && window._pnIsOpen()) {              // 패치노트 모달은 히스토리 없이 직접 닫음
       event.preventDefault();
-      history.back();
+      window._pnClose();
       return;
     }
     event.preventDefault();
@@ -19182,20 +19182,16 @@ applyDevMode();
 
   function pnIsOpen() { return !modal.classList.contains('hidden'); }
 
+  // 페이지 로드 직후(사용자 제스처 없음) 열리므로 pushState 하지 않는다.
+  // 제스처 없이 push하면 크롬 history-intervention이 접속 엔트리를 "건너뛸 엔트리"로 찍어,
+  // 닫을 때 history.back()이 사이트 밖(접속 전 화면)으로 나가버린다.
   function openPn() {
     modal.classList.remove('hidden');
-    history.pushState({ patchModal: true }, '');
   }
 
-  // 모달 닫기. UI 클릭/네이티브 뒤로가기로 닫을 땐 직접 push한 history 항목을
-  // history.back()으로 되감음(웹 popstate로 이미 pop된 경우는 건드리지 않음).
   function closePn() {
     if (!pnIsOpen()) return;
     modal.classList.add('hidden');
-    if (history.state && history.state.patchModal) {
-      pnSelfClosing = true;
-      history.back();
-    }
   }
 
   // 뒤로가기 핸들러(initBackButton)에서 참조
