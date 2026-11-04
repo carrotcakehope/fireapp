@@ -17295,7 +17295,7 @@ history.replaceState({ screen: 'home' }, '');
         else if (isAndroid) desc.textContent = '홈 화면에 앱 설치하기';
         else                desc.textContent = 'PC에 앱으로 설치하기';
       }
-      cardBtn.addEventListener('click', openInstallModal);
+      cardBtn.addEventListener('click', onInstallClick);
 
       // 브라우저 탭에서도 "우리 앱이 이미 설치돼 있는지" 감지해 버튼 표시/숨김.
       // getInstalledRelatedApps: 안드로이드 크롬 지원, iOS 사파리 미지원(그때는 항상 노출).
@@ -17336,6 +17336,25 @@ history.replaceState({ screen: 'home' }, '');
   if (modal)      modal.addEventListener('click', e => { if (e.target === modal) closeModal(); });
 
   function closeModal() { modal.classList.add('hidden'); }
+
+  // 설치 프롬프트가 있으면 안내창 없이 바로 브라우저 설치창을 띄움.
+  // 아직 안 왔으면 잠깐(클릭 제스처 유효시간 안) 기다렸다가 띄우고, 끝내 없을 때만 안내창.
+  async function onInstallClick() {
+    if (!deferredPrompt && !isIOS) {
+      await new Promise(function (resolve) {
+        var t = setTimeout(resolve, 2500);
+        window.addEventListener('beforeinstallprompt', function () { clearTimeout(t); resolve(); }, { once: true });
+      });
+    }
+    if (deferredPrompt) {
+      var p = deferredPrompt;
+      deferredPrompt = null;
+      p.prompt();
+      await p.userChoice;
+      return;
+    }
+    openInstallModal();
+  }
 
   function openInstallModal() {
     if (!modal) return;
