@@ -4805,6 +4805,13 @@ html:has(.reminder-modal-overlay:not(.hidden), .pn-overlay:not(.hidden), .fac-mo
   overscroll-behavior: contain;
 }
 
+/* PC는 안내창 공용 폭(360px)이 좁아서 의견 보내기만 넓힘. 모바일은 그대로 */
+@media (min-width: 768px) {
+  .feedback-box {
+    max-width: 520px;
+  }
+}
+
 .feedback-select {
   appearance: none;
   -webkit-appearance: none;
