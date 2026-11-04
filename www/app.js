@@ -17263,12 +17263,10 @@ history.replaceState({ screen: 'home' }, '');
 (function initInstall() {
   if (window.Capacitor) return; // APK 환경에서는 불필요
 
-  const APP_URL = 'https://fire-assistant.github.io/app/';
-  const APP_NAME = '예방업무 어시스턴트';
-
   const isIOS     = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
   const isAndroid = /Android/.test(navigator.userAgent);
   const isPC      = !isIOS && !isAndroid;
+  const isEdge    = /Edg\//.test(navigator.userAgent);
   const isStandalone =
     window.matchMedia('(display-mode: standalone)').matches ||
     window.navigator.standalone === true;
@@ -17295,7 +17293,7 @@ history.replaceState({ screen: 'home' }, '');
       if (desc) {
         if (isIOS)          desc.textContent = '홈 화면에 앱 아이콘 추가하기';
         else if (isAndroid) desc.textContent = '홈 화면에 앱 설치하기';
-        else                desc.textContent = '바탕화면에 브라우저 바로가기 만들기';
+        else                desc.textContent = 'PC에 앱으로 설치하기';
       }
       cardBtn.addEventListener('click', openInstallModal);
 
@@ -17355,9 +17353,11 @@ history.replaceState({ screen: 'home' }, '');
         '</div>';
     } else if (isAndroid || deferredPrompt) {
       if (deferredPrompt) {
-        modalTitle.textContent = '홈 화면에 설치';
-        modalBody.innerHTML = '<p class="ios-guide-desc">아래 버튼을 누르면 홈 화면에 앱 아이콘이 추가됩니다.</p>';
-        modalAction.textContent = '홈 화면에 추가';
+        modalTitle.textContent = isPC ? 'PC에 앱 설치' : '홈 화면에 설치';
+        modalBody.innerHTML = isPC
+          ? '<p class="ios-guide-desc">아래 버튼을 누르면 앱으로 설치됩니다.</p>' + pcDesktopShortcutTip()
+          : '<p class="ios-guide-desc">아래 버튼을 누르면 홈 화면에 앱 아이콘이 추가됩니다.</p>';
+        modalAction.textContent = isPC ? '앱 설치' : '홈 화면에 추가';
         modalAction.style.display = '';
         modalAction.onclick = async function () {
           deferredPrompt.prompt();
@@ -17375,25 +17375,22 @@ history.replaceState({ screen: 'home' }, '');
           '</div>';
       }
     } else {
-      // PC
-      modalTitle.textContent = '바탕화면 바로가기 추가';
-      modalBody.innerHTML =
-        '<p class="ios-guide-desc">바로가기 파일을 다운로드해서<br>바탕화면에 옮겨두세요.</p>' +
-        '<div class="ios-guide-steps">' +
-          step(1, '아래 <strong>다운로드</strong> 버튼 클릭') +
-          step(2, '다운로드된 <strong>.url 파일</strong>을 바탕화면으로 이동') +
-          step(3, '더블클릭하면 바로 열립니다') +
-        '</div>';
-      modalAction.textContent = '바로가기 파일 다운로드';
-      modalAction.style.display = '';
-      modalAction.onclick = function () {
-        var content = '[InternetShortcut]\r\nURL=' + APP_URL + '\r\n';
-        var blob = new Blob([content], { type: 'text/plain' });
-        var a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = APP_NAME + '.url';
-        a.click();
-      };
+      // PC: 설치 프롬프트가 아직 없을 때(앱 삭제 직후 등) 브라우저 메뉴로 안내.
+      // .url 파일 다운로드는 브라우저가 보안상 '.download'로 이름을 바꿔버려 쓸 수 없음.
+      modalTitle.textContent = 'PC에 앱 설치';
+      modalBody.innerHTML = isEdge
+        ? '<p class="ios-guide-desc">Edge 메뉴에서 앱으로 설치할 수 있습니다.</p>' +
+          '<div class="ios-guide-steps">' +
+            step(1, '주소창 오른쪽 <strong>⋯ 메뉴</strong> 클릭') +
+            step(2, '<strong>앱 → 이 사이트를 앱으로 설치</strong> 선택') +
+            step(3, '<strong>설치</strong> 클릭') +
+          '</div>' + pcDesktopShortcutTip()
+        : '<p class="ios-guide-desc">Chrome 메뉴에서 앱으로 설치할 수 있습니다.</p>' +
+          '<div class="ios-guide-steps">' +
+            step(1, '주소창 오른쪽 <strong>⋮ 메뉴</strong> 클릭') +
+            step(2, '<strong>전송, 저장, 공유 → 페이지를 앱으로 설치</strong> 선택') +
+            step(3, '<strong>설치</strong> 클릭') +
+          '</div>' + pcDesktopShortcutTip();
     }
 
     modal.classList.remove('hidden');
@@ -17401,6 +17398,15 @@ history.replaceState({ screen: 'home' }, '');
 
   function step(n, text) {
     return '<div class="ios-guide-step"><span class="ios-step-num">' + n + '</span><span>' + text + '</span></div>';
+  }
+
+  // 바탕화면 바로가기는 웹에서 강제할 수 없음(Edge는 설치 후 창에서 체크해야 생김). 방법만 안내.
+  function pcDesktopShortcutTip() {
+    return '<p class="ios-guide-desc" style="margin-top:12px;">바탕화면에 아이콘이 안 생기면: ' +
+      (isEdge
+        ? '설치 직후 뜨는 창에서 <strong>바탕 화면 바로 가기 만들기</strong>를 체크하거나, 주소창에 <strong>edge://apps</strong> 입력 후 앱의 <strong>⋯ → 바탕 화면 바로 가기 만들기</strong>.'
+        : '주소창에 <strong>chrome://apps</strong> 입력 후 앱 아이콘 <strong>우클릭 → 바로가기 만들기 → 바탕화면</strong> 체크.') +
+      '<br>또는 시작 메뉴에서 앱을 찾아 바탕화면으로 끌어다 놓아도 됩니다.</p>';
   }
 })();
 
