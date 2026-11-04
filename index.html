@@ -314,6 +314,15 @@
         <rect x="5" y="10" width="38" height="28" rx="3"/>
         <path d="M7 13l17 13 17-13"/>
       </symbol>
+      <symbol id="i-chat-sm" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="3.2">
+        <path d="M8 10h32a3 3 0 0 1 3 3v18a3 3 0 0 1-3 3H20l-9 7v-7H8a3 3 0 0 1-3-3V13a3 3 0 0 1 3-3z"/>
+        <path d="M15 20h18M15 26h11"/>
+      </symbol>
+      <symbol id="i-image-sm" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="3.2">
+        <rect x="5" y="8" width="38" height="32" rx="3"/>
+        <circle cx="16" cy="18" r="3.5"/>
+        <path d="M5 34l11-10 9 8 6-5 12 10"/>
+      </symbol>
       <symbol id="i-info-sm" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="3.2">
         <circle cx="24" cy="24" r="18"/>
         <path d="M24 22v11"/>
@@ -445,7 +454,7 @@
         <svg class="ic-inline" aria-hidden="true"><use href="#i-book-sm"/></svg> 이용 안내
       </button>
       <button id="open-contact" class="shortcut-add-btn" type="button">
-        <svg class="ic-inline" aria-hidden="true"><use href="#i-mail-sm"/></svg> 문의하기
+        <svg class="ic-inline" aria-hidden="true"><use href="#i-chat-sm"/></svg> 의견 보내기
       </button>
     </div>
   </section>
@@ -1168,6 +1177,47 @@
     </div>
     <div id="facilities-content" class="rg-outer"></div>
   </section>
+
+  <!-- 의견 보내기 모달 (Worker /feedback → 텔레그램) -->
+  <div id="feedback-modal" class="reminder-modal-overlay hidden">
+    <div class="reminder-modal-box feedback-box">
+      <h3 class="reminder-modal-title">의견 보내기</h3>
+      <p class="reminder-modal-desc">불편했던 점, 버그, 바라는 점을 적어주세요. 개발자에게 바로 전달됩니다.</p>
+      <div class="calc-form-row">
+        <label for="feedback-category">분류</label>
+        <select id="feedback-category" class="calc-input feedback-select" required>
+          <option value="" disabled selected>선택해 주세요</option>
+          <option>버그</option>
+          <option>불편한 점</option>
+          <option>건의</option>
+          <option>기타</option>
+        </select>
+      </div>
+      <div class="calc-form-row">
+        <label for="feedback-message">내용</label>
+        <textarea id="feedback-message" class="calc-input feedback-textarea" rows="5" maxlength="300" placeholder="예: 연도별 탐색기에서 결과 화면이 잘려 보여요"></textarea>
+        <div class="feedback-meta"><span>사용 기기·현재 화면 정보가 함께 전달됩니다</span><span id="feedback-count">0 / 300</span></div>
+      </div>
+      <div class="calc-form-row">
+        <label>사진 (최대 3장)</label>
+        <div id="feedback-photos" class="feedback-photos">
+          <button id="feedback-photo-add" class="feedback-photo-add" type="button"><svg class="ic-inline" aria-hidden="true"><use href="#i-image-sm"/></svg> 사진 첨부</button>
+        </div>
+        <input id="feedback-photo-input" type="file" accept="image/*" multiple hidden>
+      </div>
+      <div class="calc-form-row">
+        <label for="feedback-contact">답장 받을 연락처 (선택)</label>
+        <input id="feedback-contact" class="calc-input" type="text" maxlength="100" placeholder="이메일 또는 전화번호" autocomplete="off">
+      </div>
+      <input id="feedback-website" class="feedback-hp" type="text" tabindex="-1" autocomplete="off" aria-hidden="true">
+      <p id="feedback-error" class="feedback-error"></p>
+      <div class="w-nav" style="margin-top:12px;">
+        <button id="feedback-cancel" class="btn btn-ghost" type="button">닫기</button>
+        <button id="feedback-send" class="btn btn-primary" type="button">보내기</button>
+      </div>
+      <p class="feedback-mail-note">메일로 보내고 싶다면 <button id="feedback-open-mail" class="feedback-link" type="button">메일 주소 보기</button></p>
+    </div>
+  </div>
 
   <!-- 개발자 연락 확인 모달 -->
   <div id="contact-confirm-modal" class="reminder-modal-overlay hidden">

@@ -45,7 +45,7 @@ function trackMenuClick(menuName) {
 // ── 패치노트 설정 (여기만 수정하면 됩니다) ──────────────────────────────
 const PATCH_NOTES = {
   version: "v1.1.2",
-  date: "2026-11-03",
+  date: "2026-11-04",
   items: [
     { type: "notice",  text: "이걸 배포한지 벌써 3개월이 됐네요. 사용하면서 불편한게 있으시면 편하게 연락주세요!" },
     { type: "new",     text: "메인화면 7번째 기능 건축물대장 조회 추가"},
@@ -1401,7 +1401,11 @@ function setPinchZoom(enabled) {
   );
 }
 
+let prevScreenName = "";  // 의견 보내기에 "직전 화면"으로 붙인다
+
 function showScreen(name) {
+  const activeKey = Object.keys(screens).find(k => screens[k].classList.contains("active"));
+  if (activeKey && activeKey !== name) prevScreenName = activeKey;
   Object.entries(screens).forEach(([key, element]) => {
     element.classList.toggle("active", key === name);
   });
@@ -5758,7 +5762,7 @@ const yearState = {
     yEraChoice: "after2004",
     yOccupancyType: "neighborhood",
     yAutoCalcAreas: "yes",
-    yPermitdate: "2026-11-03",
+    yPermitdate: "2026-11-04",
     yTotalArea: "1500",
     yAboveGroundFloors: "4",
     yBasementFloors: "0",
@@ -17134,6 +17138,11 @@ history.replaceState({ screen: 'home' }, '');
       window._pnClose();
       return;
     }
+    // 의견 보내기 모달이 열려 있으면 모달만 닫기
+    if (window._feedbackIsOpen && window._feedbackIsOpen()) {
+      window._feedbackClose();
+      return;
+    }
 
     const current = getCurrentScreen();
     if (window.__bl) window.__bl('HB scr=' + current + ' len=' + history.length);
@@ -18746,9 +18755,212 @@ document.getElementById('back-from-report-guide').addEventListener('click', func
   }
 });
 
-document.getElementById('open-contact').addEventListener('click', function () {
-  document.getElementById('contact-confirm-modal').classList.remove('hidden');
-});
+// ── 의견 보내기 (Worker /feedback → 텔레그램) ─────────────
+(function initFeedback() {
+  var modal = document.getElementById('feedback-modal');
+  var categoryEl = document.getElementById('feedback-category');
+  var messageEl = document.getElementById('feedback-message');
+  var countEl = document.getElementById('feedback-count');
+  var contactEl = document.getElementById('feedback-contact');
+  var websiteEl = document.getElementById('feedback-website');
+  var photosEl = document.getElementById('feedback-photos');
+  var addBtn = document.getElementById('feedback-photo-add');
+  var fileInput = document.getElementById('feedback-photo-input');
+  var errorEl = document.getElementById('feedback-error');
+  var sendBtn = document.getElementById('feedback-send');
+  var MAX_PHOTOS = 3;
+  var photos = [];   // { blob, url }
+  var sending = false;
+
+  function getDeviceId() {
+    try {
+      var id = localStorage.getItem('feedbackDeviceId');
+      if (!id) {
+        id = Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4);
+        localStorage.setItem('feedbackDeviceId', id);
+      }
+      return id;
+    } catch (e) {
+      return 'nostore';
+    }
+  }
+
+  function getDeviceInfo() {
+    var ua = navigator.userAgent;
+    var os = /android/i.test(ua) ? 'Android' : /iPad|iPhone|iPod/.test(ua) ? 'iOS' : /Windows/.test(ua) ? 'Windows' : /Mac/.test(ua) ? 'Mac' : '기타';
+    var isApk = /android/i.test(ua) && /; wv\)/.test(ua);
+    var isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
+    var browser = /SamsungBrowser/.test(ua) ? '삼성인터넷' : /NAVER/.test(ua) ? '네이버앱' : /KAKAOTALK/.test(ua) ? '카카오톡' : /Edg\//.test(ua) ? 'Edge' : /Whale/.test(ua) ? '웨일' : /Chrome\//.test(ua) ? 'Chrome' : /Safari\//.test(ua) ? 'Safari' : '기타';
+    var current = Object.keys(screens).find(function (k) { return screens[k].classList.contains('active'); }) || 'home';
+    return {
+      os: os,
+      app: isApk ? 'APK 앱' : isStandalone ? '바로가기(PWA)' : '웹',
+      browser: isApk ? 'WebView' : browser,
+      viewport: window.innerWidth + 'x' + window.innerHeight + ' @' + (window.devicePixelRatio || 1),
+      screen: current,
+      prevScreen: prevScreenName && prevScreenName !== current ? prevScreenName : '',
+      version: PATCH_NOTES.version + ' (' + PATCH_NOTES.date + ')',
+    };
+  }
+
+  // 긴 변 1600px, JPEG로 줄여 장당 수백 KB 안팎으로 만든다
+  function shrinkImage(file) {
+    return new Promise(function (resolve, reject) {
+      var url = URL.createObjectURL(file);
+      var img = new Image();
+      img.onload = function () {
+        var scale = Math.min(1, 1600 / Math.max(img.naturalWidth, img.naturalHeight));
+        var canvas = document.createElement('canvas');
+        canvas.width = Math.round(img.naturalWidth * scale);
+        canvas.height = Math.round(img.naturalHeight * scale);
+        var ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+        URL.revokeObjectURL(url);
+        canvas.toBlob(function (blob) {
+          if (blob) resolve(blob); else reject(new Error('toBlob'));
+        }, 'image/jpeg', 0.82);
+      };
+      img.onerror = function () {
+        URL.revokeObjectURL(url);
+        reject(new Error('load'));
+      };
+      img.src = url;
+    });
+  }
+
+  function renderPhotos() {
+    photosEl.querySelectorAll('.feedback-thumb').forEach(function (el) { el.remove(); });
+    photos.forEach(function (p, i) {
+      var thumb = document.createElement('div');
+      thumb.className = 'feedback-thumb';
+      var img = document.createElement('img');
+      img.src = p.url;
+      img.alt = '첨부 사진 ' + (i + 1);
+      var del = document.createElement('button');
+      del.type = 'button';
+      del.textContent = '✕';
+      del.setAttribute('aria-label', '사진 빼기');
+      del.addEventListener('click', function () {
+        URL.revokeObjectURL(p.url);
+        photos.splice(i, 1);
+        renderPhotos();
+      });
+      thumb.appendChild(img);
+      thumb.appendChild(del);
+      photosEl.insertBefore(thumb, addBtn);
+    });
+    addBtn.disabled = photos.length >= MAX_PHOTOS;
+  }
+
+  function setError(msg) {
+    errorEl.textContent = msg || '';
+  }
+
+  function resetForm() {
+    categoryEl.value = '';
+    messageEl.value = '';
+    contactEl.value = '';
+    websiteEl.value = '';
+    countEl.textContent = '0 / 300';
+    photos.forEach(function (p) { URL.revokeObjectURL(p.url); });
+    photos = [];
+    renderPhotos();
+    setError('');
+  }
+
+  function open() {
+    setError('');
+    modal.classList.remove('hidden');
+  }
+
+  function close() {
+    modal.classList.add('hidden');
+  }
+
+  window._feedbackIsOpen = function () { return !modal.classList.contains('hidden'); };
+  window._feedbackClose = close;
+
+  document.getElementById('open-contact').addEventListener('click', open);
+  document.getElementById('feedback-cancel').addEventListener('click', close);
+  modal.addEventListener('click', function (e) {
+    if (e.target === modal) close();
+  });
+
+  document.getElementById('feedback-open-mail').addEventListener('click', function () {
+    close();
+    document.getElementById('contact-confirm-modal').classList.remove('hidden');
+  });
+
+  messageEl.addEventListener('input', function () {
+    countEl.textContent = messageEl.value.length + ' / 300';
+    setError('');
+  });
+  categoryEl.addEventListener('change', function () { setError(''); });
+
+  addBtn.addEventListener('click', function () { fileInput.click(); });
+  fileInput.addEventListener('change', function () {
+    var files = Array.prototype.slice.call(fileInput.files || []);
+    fileInput.value = '';
+    var room = MAX_PHOTOS - photos.length;
+    if (files.length > room) showToast('사진은 최대 ' + MAX_PHOTOS + '장까지 첨부할 수 있어요.');
+    files.slice(0, room).forEach(function (file) {
+      if (!/^image\//.test(file.type)) return;
+      shrinkImage(file).then(function (blob) {
+        if (photos.length >= MAX_PHOTOS) return;
+        photos.push({ blob: blob, url: URL.createObjectURL(blob) });
+        renderPhotos();
+      }).catch(function () {
+        showToast('사진을 불러오지 못했어요.');
+      });
+    });
+  });
+
+  sendBtn.addEventListener('click', function () {
+    if (sending) return;
+    if (!categoryEl.value) { setError('분류를 선택해 주세요.'); categoryEl.focus(); return; }
+    if (!messageEl.value.trim()) { setError('내용을 적어주세요.'); messageEl.focus(); return; }
+
+    var fd = new FormData();
+    fd.append('category', categoryEl.value);
+    fd.append('message', messageEl.value.trim());
+    fd.append('contact', contactEl.value.trim());
+    fd.append('website', websiteEl.value);
+    fd.append('deviceId', getDeviceId());
+    fd.append('device', JSON.stringify(getDeviceInfo()));
+    photos.forEach(function (p, i) { fd.append('photo', p.blob, 'photo' + i + '.jpg'); });
+
+    sending = true;
+    sendBtn.disabled = true;
+    sendBtn.textContent = '보내는 중...';
+    setError('');
+    fetch(BUILDING_API + '/feedback', { method: 'POST', body: fd })
+      .then(function (res) {
+        return res.json().catch(function () { return {}; }).then(function (data) {
+          if (res.ok && data.ok) {
+            resetForm();
+            close();
+            showToast('의견이 전달됐어요. 고맙습니다.');
+          } else if (res.status === 429 || data.error === 'limit') {
+            setError('오늘은 더 보낼 수 없어요. 내일 다시 보내주세요.');
+          } else if (data.error === 'photo') {
+            setError('사진을 보낼 수 없어요. 사진을 빼고 다시 보내주세요.');
+          } else {
+            setError('전송에 실패했어요. 잠시 후 다시 시도해 주세요.');
+          }
+        });
+      })
+      .catch(function () {
+        setError('전송에 실패했어요. 인터넷 연결을 확인해 주세요.');
+      })
+      .then(function () {
+        sending = false;
+        sendBtn.disabled = false;
+        sendBtn.textContent = '보내기';
+      });
+  });
+})();
 
 document.getElementById('contact-confirm-cancel').addEventListener('click', function () {
   document.getElementById('contact-confirm-modal').classList.add('hidden');
@@ -19348,7 +19560,7 @@ function goToRgGuideSection(tab, sectionId) {
     intro: "\ud544\uc694\ud558\uba74 \uc5b8\uc81c\ub4e0 \ubd88\ub7ec\uc8fc\uc138\uc694. \uc228\uae30\uae30\ub97c \ub204\ub974\uba74 \uc77c\uad6c\uac00 \uc9d1\uc5d0 \uc26c\ub7ec \ub3cc\uc544\uac00\uc694. \uc77c\uad6c\ub97c \ub354\ube14\ud074\ub9ad\ud558\uba74 \uba54\uc778\ud654\uba74\uc73c\ub85c \ub3cc\uc544\uac08 \uc218 \uc788\uc5b4\uc694.",
     search: "\uae30\ub2a5 \ucc3e\uae30",
     guide: "\uc774\uc6a9 \uc548\ub0b4",
-    contact: "\ubb38\uc758\ud558\uae30",
+    contact: "\uc758\uacac \ubcf4\ub0b4\uae30",
     hide: "\uc228\uae30\uae30",
     open: "\ubc14\ub85c \uc5f4\uae30",
     close: "\ub2eb\uae30",
@@ -19368,7 +19580,7 @@ function goToRgGuideSection(tab, sectionId) {
     "open-building-register": { title: "건축물대장 조회", body: "주소만 넣으면 세움터 로그인 없이 연면적, 용도, 층수, 사용승인일 같은 표제부 내용을 바로 보여줘요." },
     "open-install-guide": { title: "\ubc14\ub85c\uac00\uae30 \ucd94\uac00", body: "\uc790\uc8fc \uc4f0\ub294 \uae30\uae30\uc5d0 \uc571\ucc98\ub7fc \uc5f4 \uc218 \uc788\uac8c \ud648 \ud654\uba74\uc774\ub098 \ubc14\ud0d5\ud654\uba74\uc5d0 \ucd94\uac00\ud558\ub294 \uc548\ub0b4\uc5d0\uc694." },
     "open-guide": { title: "\uc0ac\uc6a9 \uc548\ub0b4", body: "\uc0ac\uc774\ud2b8\uc758 \uae30\ubcf8 \uc0ac\uc6a9\ubc95\uacfc \uc8fc\uc694 \uae30\ub2a5\uc744 \uc9e7\uac8c \ud655\uc778\ud560 \uc218 \uc788\uc5b4\uc694." },
-    "open-contact": { title: "\uac1c\ubc1c\uc790\uc5d0\uac8c \ubb38\uc758", body: "\uc624\ub958, \uac1c\uc120 \uc81c\uc548, \ucd94\uac00\ud558\uace0 \uc2f6\uc740 \uae30\ub2a5\uc744 \uba54\uc77c\ub85c \ubcf4\ub0b4\ub294 \uc785\uad6c\uc5d0\uc694." },
+    "open-contact": { title: "\uc758\uacac \ubcf4\ub0b4\uae30", body: "\ubc84\uadf8, \ubd88\ud3b8\ud55c \uc810, \ubc14\ub77c\ub294 \uc810\uc744 \uc0ac\uc9c4\uacfc \ud568\uaed8 \uac1c\ubc1c\uc790\uc5d0\uac8c \ubc14\ub85c \ubcf4\ub0b4\ub294 \uc785\uad6c\uc5d0\uc694." },
   };
 
   function isDesktopDevModeEnabled() {
