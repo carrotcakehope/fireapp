@@ -17263,7 +17263,9 @@ history.replaceState({ screen: 'home' }, '');
 (function initInstall() {
   if (window.Capacitor) return; // APK 환경에서는 불필요
 
-  const isIOS     = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  // iPadOS 13+ 사파리는 Mac으로 위장하므로 터치 지원 여부로 구분
+  const isIOS     = (/iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream) ||
+                    (/Macintosh/.test(navigator.userAgent) && navigator.maxTouchPoints > 1);
   const isAndroid = /Android/.test(navigator.userAgent);
   const isPC      = !isIOS && !isAndroid;
   const isEdge    = /Edg\//.test(navigator.userAgent);
@@ -17316,6 +17318,12 @@ history.replaceState({ screen: 'home' }, '');
       document.addEventListener('visibilitychange', function () {
         if (!document.hidden) refreshInstallBtn();
       });
+      // PC 크롬은 설치 직후 보던 탭을 새로고침 없이 앱 창으로 옮김 → 그 순간 바로 숨김
+      window.addEventListener('appinstalled', function () { cardBtn.style.display = 'none'; });
+      var standaloneMq = window.matchMedia('(display-mode: standalone)');
+      if (standaloneMq.addEventListener) {
+        standaloneMq.addEventListener('change', function (e) { if (e.matches) cardBtn.style.display = 'none'; });
+      }
     }
   }
 
