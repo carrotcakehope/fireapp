@@ -4912,6 +4912,79 @@ html[data-theme="blossom"] #date-content .info-box.amber { border-left-color: va
   display: none;
 }
 
+.feedback-context-note {
+  margin: 0 0 4px;
+  padding: 9px 12px;
+  border-radius: 8px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.feedback-context-note:empty {
+  display: none;
+}
+
+.result-feedback-row {
+  margin: 14px 0 0;
+  text-align: center;
+  color: var(--text-dim);
+  font-size: 12.5px;
+}
+
+.result-feedback-link {
+  border: none;
+  background: none;
+  padding: 0;
+  color: var(--text-muted);
+  font-size: 12.5px;
+  font-family: var(--sans);
+  font-weight: 700;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  cursor: pointer;
+}
+
+/* 상단바 의견 보내기 아이콘 (home-jump-btn과 같은 모양, 홈 버튼 바로 왼쪽) */
+.topbar .topbar-feedback-btn {
+  width: 34px;
+  height: 34px;
+  flex-shrink: 0;
+  margin-left: auto;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  background: var(--surface2);
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background var(--transition), border-color var(--transition), color var(--transition), transform var(--transition);
+}
+
+.topbar .topbar-feedback-btn:hover {
+  background: var(--surface3);
+  border-color: var(--border2);
+  color: var(--text);
+}
+
+.topbar .topbar-feedback-btn:active {
+  transform: scale(0.94);
+}
+
+.topbar .topbar-feedback-ic {
+  width: 17px;
+  height: 17px;
+  display: block;
+}
+
+.topbar .topbar-feedback-btn + .home-jump-btn {
+  margin-left: 0;
+}
+
 .feedback-mail-note {
   margin: 12px 0 0;
   color: var(--text-dim);

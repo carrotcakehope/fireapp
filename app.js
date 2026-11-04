@@ -2701,19 +2701,14 @@ function copyResultText(text, btn) {
 })();
 
 /* ── 연도별 탐색기 결과 복사 ── */
-(function initYearExplorerCopyBtn() {
-  const btn = document.getElementById("year-explorer-copy-result-btn");
-  if (!btn) return;
-  btn.addEventListener("click", () => {
+// 결과 화면의 요약·설치 시설을 글로 만든다. 결과가 없으면 null. (결과 복사·의견 보내기 공용)
+function getYearResultLines() {
     const rows = document.querySelectorAll("#year-required-list .facility-row");
     const items = Array.from(rows).map((r) => {
       const spans = r.querySelectorAll("span");
       return spans.length >= 2 ? spans[spans.length - 1].textContent.trim() : "";
     }).filter(Boolean);
-    if (items.length === 0) {
-      showToast("복사할 결과가 없습니다.");
-      return;
-    }
+    if (items.length === 0) return null;
     const summaryEl = document.getElementById("year-result-summary");
     const summaryLines = [];
     if (summaryEl) {
@@ -2742,6 +2737,18 @@ function copyResultText(text, btn) {
     lines.push("");
     lines.push("■ 설치 필요한 소방시설");
     items.forEach((name) => lines.push("• " + name));
+    return lines;
+}
+
+(function initYearExplorerCopyBtn() {
+  const btn = document.getElementById("year-explorer-copy-result-btn");
+  if (!btn) return;
+  btn.addEventListener("click", () => {
+    const lines = getYearResultLines();
+    if (!lines) {
+      showToast("복사할 결과가 없습니다.");
+      return;
+    }
     lines.push("");
     lines.push("※ 본 결과는 입력값 기준의 실무 참고용입니다. (앱 " + PATCH_NOTES.version + " · " + PATCH_NOTES.date + " 기준)");
     copyResultText(lines.join("\n"), btn);
@@ -18868,11 +18875,53 @@ document.getElementById('back-from-report-guide').addEventListener('click', func
     photos = [];
     renderPhotos();
     setError('');
+    context = '';
+    if (contextNote) contextNote.textContent = '';
   }
 
-  function open() {
+  // opts.category: 분류 미리 고르기, opts.context: 메시지에 덧붙일 화면 정보(탐색기 입력값 등)
+  var context = '';
+  var contextNote = document.getElementById('feedback-context-note');
+  function open(opts) {
+    opts = opts && opts.target ? {} : (opts || {});
+    context = opts.context || '';
+    if (contextNote) contextNote.textContent = opts.contextLabel || '';
+    if (opts.category && !categoryEl.value) categoryEl.value = opts.category;
     setError('');
     modal.classList.remove('hidden');
+  }
+  window.openFeedback = open;
+
+  // 각 기능 화면 상단바에 의견 보내기 아이콘
+  document.querySelectorAll('.topbar').forEach(function (tb) {
+    if (tb.querySelector('.topbar-feedback-btn')) return;
+    var btn = document.createElement('button');
+    btn.className = 'topbar-feedback-btn';
+    btn.type = 'button';
+    btn.setAttribute('aria-label', '의견 보내기');
+    btn.title = '의견 보내기';
+    btn.innerHTML = '<svg class="topbar-feedback-ic" aria-hidden="true"><use href="#i-chat-sm"/></svg>';
+    btn.addEventListener('click', function (e) {
+      e.stopPropagation();
+      open();
+    });
+    tb.appendChild(btn);
+  });
+
+  // 연도별 탐색기 결과 → 판정 의견 (입력값을 정답지 입력값.js 형식 그대로 붙인다)
+  var yearResultFb = document.getElementById('year-result-feedback');
+  if (yearResultFb) {
+    yearResultFb.addEventListener('click', function () {
+      var answers = {};
+      Object.keys(yearState.answers).forEach(function (k) {
+        var v = yearState.answers[k];
+        if (v !== '' && v !== null && v !== undefined) answers[k] = v;
+      });
+      var lines = getYearResultLines() || ['(결과 없음)'];
+      lines.push('');
+      lines.push('입력값: ' + JSON.stringify(answers));
+      open({ category: '버그', context: lines.join('\n'), contextLabel: '지금 탐색기 입력값과 판정 결과가 함께 전달됩니다.' });
+    });
   }
 
   function close() {
@@ -18903,6 +18952,29 @@ document.getElementById('back-from-report-guide').addEventListener('click', func
   fileInput.addEventListener('change', function () {
     var files = Array.prototype.slice.call(fileInput.files || []);
     fileInput.value = '';
+    addPhotoFiles(files);
+  });
+
+  // 내용 칸에서 붙여넣기한 이미지(캡처 등)는 사진 첨부로 넣는다. 글자는 그대로 붙는다.
+  messageEl.addEventListener('paste', function (e) {
+    var items = (e.clipboardData && e.clipboardData.items) || [];
+    var files = [];
+    for (var i = 0; i < items.length; i++) {
+      if (items[i].kind === 'file' && /^image\//.test(items[i].type)) {
+        var f = items[i].getAsFile();
+        if (f) files.push(f);
+      }
+    }
+    if (!files.length) return;
+    e.preventDefault();
+    if (photos.length >= MAX_PHOTOS) {
+      showToast('사진은 최대 ' + MAX_PHOTOS + '장까지 첨부할 수 있어요.');
+      return;
+    }
+    addPhotoFiles(files);
+  });
+
+  function addPhotoFiles(files) {
     var room = MAX_PHOTOS - photos.length;
     if (files.length > room) showToast('사진은 최대 ' + MAX_PHOTOS + '장까지 첨부할 수 있어요.');
     files.slice(0, room).forEach(function (file) {
@@ -18915,7 +18987,7 @@ document.getElementById('back-from-report-guide').addEventListener('click', func
         showToast('사진을 불러오지 못했어요.');
       });
     });
-  });
+  }
 
   sendBtn.addEventListener('click', function () {
     if (sending) return;
@@ -18929,6 +19001,7 @@ document.getElementById('back-from-report-guide').addEventListener('click', func
     fd.append('website', websiteEl.value);
     fd.append('deviceId', getDeviceId());
     fd.append('device', JSON.stringify(getDeviceInfo()));
+    if (context) fd.append('context', context);
     photos.forEach(function (p, i) { fd.append('photo', p.blob, 'photo' + i + '.jpg'); });
 
     sending = true;

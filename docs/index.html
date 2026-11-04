@@ -517,6 +517,7 @@
           <button id="year-result-prev-btn" class="btn btn-ghost" type="button" style="flex:1;">이전</button>
           <button id="year-restart-btn" class="btn btn-ghost" type="button" style="flex:1;margin-top:0;">다시 입력</button>
         </div>
+        <p class="result-feedback-row">판정이 이상한가요? <button id="year-result-feedback" class="result-feedback-link" type="button">의견 보내기</button></p>
       </section>
 
       <section id="year-multiuse-safety-card" class="result-card hidden">
@@ -1209,6 +1210,7 @@
         <label for="feedback-contact">답장 받을 연락처 (선택)</label>
         <input id="feedback-contact" class="calc-input" type="text" maxlength="100" placeholder="이메일 또는 전화번호" autocomplete="off">
       </div>
+      <p id="feedback-context-note" class="feedback-context-note"></p>
       <input id="feedback-website" class="feedback-hp" type="text" tabindex="-1" autocomplete="off" aria-hidden="true">
       <p id="feedback-error" class="feedback-error"></p>
       <div class="w-nav" style="margin-top:12px;">
