@@ -16935,6 +16935,10 @@ renderHomeReminders();
   function applyTheme(t) {
     document.documentElement.setAttribute('data-theme', t);
     localStorage.setItem('theme', t);
+    // 폰 상태바·주소창 색(theme-color)을 테마 배경색에 맞춤 (기본값 빨강이면 화면과 따로 놂)
+    const themeMeta = document.querySelector('meta[name="theme-color"]');
+    const bodyBg = getComputedStyle(document.body).backgroundColor;
+    if (themeMeta && bodyBg && bodyBg !== 'rgba(0, 0, 0, 0)') themeMeta.setAttribute('content', bodyBg);
     const next = getNextTheme(t);
     const title = (THEME_LABELS[next] || '테마 전환') + ' 전환';
     document.querySelectorAll('.theme-toggle-btn').forEach(btn => {
