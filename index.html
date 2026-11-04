@@ -156,6 +156,25 @@
         <circle cx="21" cy="31" r="1.2" fill="currentColor" stroke="none"/>
         <path d="M7 42h34"/>
       </symbol>
+
+      <!-- 다중이용업소 안전시설 탐색 (비상구 + 소화기). 판독기 i-exit와 구분용, 소화기는 i-ext를 축소해 항상 빨강 -->
+      <symbol id="i-exit-ext" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="4" y="5" width="22" height="8" rx="1.5" fill="var(--acc)"/>
+        <path d="M9 9h10M16.5 6.6l3 2.4-3 2.4" stroke="var(--surface)"/>
+        <rect fill="var(--surface)" x="6" y="17" width="18" height="25"/>
+        <path d="M6 17l9 2.6v20l-9 2.4z" fill="var(--acc)" fill-opacity=".35"/>
+        <circle cx="12.5" cy="30" r="1.1" fill="currentColor" stroke="none"/>
+        <path d="M2 42h44"/>
+        <g transform="translate(19.5 15.5) scale(0.63)" stroke-width="3.2">
+          <path d="M20 17v-4h8v4"/>
+          <path d="M19 9h11l-3 4"/>
+          <path d="M28 12c6 0 9 4 9 10v6"/>
+          <path d="M35 28h4l-1 5h-2z"/>
+          <rect x="16" y="17" width="16" height="25" rx="4" fill="#d93025"/>
+          <rect fill="var(--surface)" x="16" y="25" width="16" height="8"/>
+          <path d="M21 29h6"/>
+        </g>
+      </symbol>
   
       <!-- 03 법정기한 (알람시계) -->
       <symbol id="i-alarm" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -1060,7 +1079,7 @@
             <span class="cc-arrow">›</span>
           </button>
           <button id="multiuse-select-safety" class="choice-button choice-card" type="button">
-            <span class="cc-icon ic-art"><svg class="ic a-green" aria-hidden="true"><use href="#i-exit"/></svg></span>
+            <span class="cc-icon ic-art"><svg class="ic a-green" aria-hidden="true"><use href="#i-exit-ext"/></svg></span>
             <span class="cc-body">
               <span class="cc-num">02</span>
               <strong>다중이용업소에 설치할 안전시설 탐색</strong>
