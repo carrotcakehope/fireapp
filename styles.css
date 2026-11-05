@@ -1203,6 +1203,18 @@ html[data-theme="official"] .lli-kind {
   word-break: keep-all;
   overflow-wrap: break-word;
   text-wrap: pretty;
+  position: relative;
+}
+/* 안내 상자 배경은 테마마다 반투명이라 뒤에서 떨어지는 계절 애니메이션(꽃잎·낙엽·눈)이 글 위로 비친다.
+   상자 바로 아래에 페이지 배경색을 한 겹 깔아 가린다 (z-index:auto라 상자 자기 배경보다 아래에 그려짐). */
+.info-box::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: var(--bg);
+  pointer-events: none;
 }
 
 .info-box .ib-title {
@@ -5787,7 +5799,21 @@ html:has(.reminder-modal-overlay:not(.hidden), .pn-overlay:not(.hidden), .fac-mo
    LIGHT THEME
    ?�═?�═?�═?�═?�═?�═?�═?�═?�═?�═?�═?�═?�═?�═?�═?�═?�═?�═?�═?�═?�═?�═?�═ */
 /* 건축물대장 조회 */
+.br-search-wrap { position: relative; z-index: 5; }
 .br-search { display: flex; gap: 8px; }
+/* 입력 중 주소 후보 드롭다운 */
+.br-suggest { position: absolute; left: 0; right: 0; top: calc(100% + 6px); max-height: 60vh; overflow-y: auto; border: 1px solid var(--border2); border-radius: var(--radius-sm); background: var(--surface); box-shadow: var(--shadow-md); }
+.br-suggest[hidden] { display: none; }
+.bs-item { display: flex; flex-direction: column; gap: 4px; width: 100%; padding: 10px 12px; border: 0; background: none; color: var(--text); text-align: left; cursor: pointer; }
+.bs-item + .bs-item { border-top: 1px solid var(--border); }
+.bs-item:hover, .bs-item.is-active { background: var(--surface2); }
+.bs-row { display: flex; align-items: baseline; gap: 8px; min-width: 0; }
+.bs-tag { flex-shrink: 0; padding: 1px 6px; border-radius: 4px; font-size: 11px; font-weight: 700; color: #fff; }
+.bs-tag.road { background: var(--green); }
+.bs-tag.jibun { background: var(--blue); }
+.bs-addr { font-size: 13px; line-height: 1.45; word-break: keep-all; }
+.bs-row + .bs-row .bs-addr { color: var(--text-muted); font-size: 12px; }
+.bs-msg { margin: 0; padding: 12px 14px; font-size: 13px; color: var(--text-muted); }
 .br-search input { flex: 1; min-width: 0; padding: 12px 14px; border-radius: var(--radius-sm); border: 1px solid var(--border2); background: var(--surface); color: var(--text); }
 .br-search button { padding: 0 16px; border-radius: var(--radius-sm); border: 0; background: var(--red); color: #fff; font-weight: 700; cursor: pointer; }
 .br-hint { margin: 8px 2px 16px; font-size: 12px; color: var(--text-dim); }

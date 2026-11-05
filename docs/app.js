@@ -5455,7 +5455,7 @@ const BUILDING_INTRO_HTML = `<div class="br-intro">
       <li><b>세대</b><span>세대수, 가구수, 호수</span></li>
       <li><b>층별</b><span>층마다 용도와 면적</span></li>
     </ul>
-    <p class="br-intro-note">국토교통부 공개 데이터로, 참고용입니다. 변동사항과 소유자는 나오지 않으니 세움터에서 확인하세요.</p>
+    <p class="br-intro-note">국토교통부 공개 데이터로, 참고용입니다. 변동사항과 소유자는 나오지 않으니 세움터에서 확인하세요.<br>건물명으로 조회되지 않으면 도로명이나 지번으로 검색해보세요. 실제 건물이 있는데도 조회되지 않으면 주소가 정확하지 않거나 공개 데이터에 대장 정보가 없는 경우입니다.</p>
   </div>`;
 
 // 층별개요는 순서가 섞여 오고 한 층이 여러 줄로 올 수 있다 → 층별로 묶고 위층부터 정렬
@@ -5594,6 +5594,101 @@ function renderBuildingCard(t) {
   </div>`;
 }
 
+// 입력하는 동안 주소 후보를 검색창 아래 드롭다운으로 (세움터처럼).
+// renderBuilding이 화면을 통째로 다시 그리면 입력 포커스가 날아가므로 드롭다운만 따로 그린다.
+const buildingSuggestCache = new Map();
+let buildingSuggestSeq = 0;
+
+function bindBuildingSuggest(root) {
+  const input = root.querySelector("#building-search-input");
+  const box = root.querySelector("#building-suggest");
+  if (!input || !box) return;
+  let timer = null;
+  let items = [];
+  let active = -1;
+
+  const hide = () => { box.hidden = true; box.innerHTML = ""; items = []; active = -1; };
+  const setActive = (i) => {
+    active = i;
+    box.querySelectorAll(".bs-item").forEach((el, k) => el.classList.toggle("is-active", k === i));
+  };
+  const pick = (item) => {
+    const q = input.value.trim();
+    hide();
+    buildingState.query = q;
+    buildingPick(item);
+  };
+  const show = (q, list) => {
+    items = list.slice(0, 8);
+    active = -1;
+    box.innerHTML = items.length
+      ? items.map((it, i) => `
+        <button class="bs-item" type="button" data-bs-idx="${i}">
+          <span class="bs-row"><span class="bs-tag road">도로명</span><span class="bs-addr">${escapeHtml(it.roadAddr)}</span></span>
+          <span class="bs-row"><span class="bs-tag jibun">지번</span><span class="bs-addr">${escapeHtml(it.jibunAddr)}</span></span>
+        </button>`).join("")
+      : `<p class="bs-msg">일치하는 주소가 없습니다. 주소가 정확한지 확인하거나, 건물명 대신 도로명이나 지번으로 입력해보세요.</p>`;
+    box.hidden = false;
+    box.querySelectorAll("[data-bs-idx]").forEach((btn) => {
+      // 누르는 순간 입력창 blur로 드롭다운이 닫히지 않게
+      btn.addEventListener("mousedown", (e) => e.preventDefault());
+      btn.addEventListener("click", () => pick(items[Number(btn.dataset.bsIdx)]));
+    });
+  };
+  const lookup = async (q) => {
+    const seq = ++buildingSuggestSeq;
+    if (buildingSuggestCache.has(q)) { show(q, buildingSuggestCache.get(q)); return; }
+    box.innerHTML = `<p class="bs-msg">찾는 중…</p>`;
+    box.hidden = false;
+    try {
+      const data = await buildingFetch("/search?q=" + encodeURIComponent(q));
+      const list = data.items || [];
+      buildingSuggestCache.set(q, list);
+      // 늦게 도착한 이전 글자의 응답은 버림
+      if (seq === buildingSuggestSeq && document.activeElement === input) show(q, list);
+    } catch (e) {
+      if (seq === buildingSuggestSeq) {
+        box.innerHTML = `<p class="bs-msg">주소 후보를 불러오지 못했습니다. 검색 버튼을 눌러 다시 시도해주세요.</p>`;
+        box.hidden = false;
+      }
+    }
+  };
+
+  // 아직 두 글자가 안 되면 무엇을 넣으면 되는지 안내 (세움터 검색창처럼)
+  const showGuide = () => {
+    items = [];
+    active = -1;
+    box.innerHTML = `<p class="bs-msg">도로명(예: 학산로 75), 지번(예: 상인동 797-1), 건물명 모두 됩니다. 두 글자부터 아래에 주소 후보가 나옵니다.</p>`;
+    box.hidden = false;
+  };
+
+  input.addEventListener("focus", () => {
+    const q = input.value.trim();
+    if (q.length < 2) showGuide();
+    else if (buildingSuggestCache.has(q)) show(q, buildingSuggestCache.get(q));
+  });
+  input.addEventListener("input", () => {
+    clearTimeout(timer);
+    const q = input.value.trim();
+    if (q.length < 2) { buildingSuggestSeq++; showGuide(); return; }
+    if (!items.length) { box.innerHTML = `<p class="bs-msg">찾는 중…</p>`; box.hidden = false; }
+    timer = setTimeout(() => lookup(q), 300);
+  });
+  input.addEventListener("keydown", (e) => {
+    if (box.hidden || !items.length) {
+      if (e.key === "Escape") hide();
+      return;
+    }
+    if (e.key === "ArrowDown") { e.preventDefault(); setActive((active + 1) % items.length); }
+    else if (e.key === "ArrowUp") { e.preventDefault(); setActive((active - 1 + items.length) % items.length); }
+    else if (e.key === "Enter" && active >= 0) { e.preventDefault(); pick(items[active]); }
+    else if (e.key === "Escape") hide();
+  });
+  input.addEventListener("blur", () => { setTimeout(hide, 150); });
+  // 검색 버튼·엔터로 목록 검색을 하면 드롭다운은 닫는다
+  root.querySelector("#building-search-form").addEventListener("submit", () => { clearTimeout(timer); buildingSuggestSeq++; hide(); });
+}
+
 function renderBuilding() {
   const root = document.getElementById("building-content");
   const s = buildingState;
@@ -5603,16 +5698,20 @@ function renderBuilding() {
 
   // 검색창은 결과 화면에서도 위에 둔다 (결과가 없을 때 막힌 느낌이 안 들게)
   const form = `
-    <form class="br-search" id="building-search-form">
-      <input type="search" id="building-search-input" placeholder="예: 학산로 75" autocomplete="off" value="${escapeHtml(s.query)}">
-      <button type="submit">검색</button>
-    </form>`;
+    <div class="br-search-wrap">
+      <form class="br-search" id="building-search-form">
+        <input type="search" id="building-search-input" placeholder="예: 학산로 75" autocomplete="off" value="${escapeHtml(s.query)}">
+        <button type="submit">검색</button>
+      </form>
+      <div class="br-suggest" id="building-suggest" hidden></div>
+    </div>`;
   const bindForm = () => {
     root.querySelector("#building-search-form").addEventListener("submit", (e) => {
       e.preventDefault();
       const q = root.querySelector("#building-search-input").value.trim();
       if (q.length >= 2) buildingSearch(q);
     });
+    bindBuildingSuggest(root);
   };
 
   // 결과 화면
@@ -5657,7 +5756,7 @@ function renderBuilding() {
           <div class="road">${escapeHtml(it.roadAddr)}</div>
           <div class="jibun">[지번] ${escapeHtml(it.jibunAddr)}</div>
         </button>`).join("")
-      : `<p class="br-hint">검색 결과가 없습니다.</p>`;
+      : `<div class="info-box amber">검색 결과가 없습니다. 주소가 정확한지 확인해주세요. 건물명으로 안 나오면 도로명(예: 학산로 75)이나 지번(예: 상인동 797-1)으로 다시 검색해보세요. 실제 건물이 있는데도 계속 안 나오면 세움터에서 직접 확인해주세요.</div>`;
   }
   // 검색 전에는 최근 조회(있으면) 아래로 안내 카드를 밀어낸다
   const recent = loadBuildingRecent();
