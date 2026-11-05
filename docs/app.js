@@ -1093,9 +1093,9 @@ const PHASE_USE_KEYS = new Set([
   // 자세한(연도별)버전
   "yEraChoice", "yPermitDate", "yOccupancyType", "yApartmentSubtype",
   "yFacilitySubtype", "yBefore2004FacilitySubtype",
-  "yLodgingIsTouristHotel", "yBefore2004LodgingIsTouristHotel", "yLodgingIsLiving",
+  "yLodgingKind", "yLodgingIsTouristHotel", "yBefore2004LodgingIsTouristHotel", "yLodgingIsLiving",
   "yElderlySubtype", "yMedicalSubtype", "yBefore2004MedicalSubtype",
-  "ySalesIsTraditionalMarket", "ySalesIsLargeStore",
+  "ySalesKindSet", "ySalesIsTraditionalMarket", "ySalesIsLargeStore",
   "yReligiousIsSacrificialBuilding",
   "yOfficeIsOfficetel",
 ]);
@@ -5914,6 +5914,7 @@ const yearState = {
     yMultiuseHasEvacuationRoute: "no",
     // 숙박시설 전용
     yLodgingArea: "1500",
+    yLodgingKind: "general",
     yLodgingIsLiving: "no",
     yLodgingIsTouristHotel: "no",
     yLodgingHasLargeFloorFor1000: "no",
@@ -6113,6 +6114,8 @@ const yearState = {
     yBefore2004AptDetFloor600: "no",      // 자탐(1992 이전): 지하·무창·3층↑ 600㎡↑ 층
   },
 };
+// 처음 상태 그대로 보관 → 탐색기 진입·다시하기·용도 변경 시 이 값으로 통째로 되돌린다(초기화 목록 누락 방지).
+const YEAR_DEFAULT_ANSWERS = JSON.parse(JSON.stringify(yearState.answers));
 
 function yPermitDateInt() {
   const d = yearState.answers.yPermitDate;
@@ -6291,7 +6294,7 @@ const yearSteps = [
     key: "yPermitDate",
     type: "ydate",
     title: "건축허가일자를 입력하세요",
-    help: "건축허가일 기준으로 당시 시행 중이던 소방시설 설치 기준을 적용합니다.",
+    help: "건축허가일 기준으로 당시 시행 중이던 소방시설 설치 기준을 적용합니다. 1981년 11월 6일 이후 허가분부터 확인할 수 있습니다.",
   },
   {
     key: "yTotalArea",
@@ -6374,10 +6377,10 @@ const yearSteps = [
   {
     key: "yIsPostpartum",
     type: "ychoice",
-    title: "해당 근린생활시설이 조산원 또는 산후조리원입니까?",
+    title: "건물 안에 조산원 또는 산후조리원이 있습니까?",
     help: "2022년 2월 25일 이후부터 조산원·산후조리원에 별도 설치 기준이 신설됩니다.",
     options: [
-      { value: "yes", label: "예", description: "조산원 또는 산후조리원에 해당함" },
+      { value: "yes", label: "예", description: "건물 일부라도 조산원·산후조리원으로 쓰는 곳이 있음" },
       { value: "no", label: "아니오", description: "해당 없음" },
     ],
     condition: (ya, pd) => ya.yOccupancyType === "neighborhood" && pd >= YD.D20220225,
@@ -6385,7 +6388,7 @@ const yearSteps = [
   {
     key: "yPostpartumAreaRange",
     type: "ychoice",
-    title: "조산원·산후조리원의 바닥면적 합계는 얼마입니까?",
+    title: "조산원·산후조리원으로 쓰는 부분의 바닥면적 합계는 얼마입니까?",
     help: "600㎡를 기준으로 스프링클러 또는 간이스프링클러 대상이 달라집니다.",
     options: [
       { value: "under600", label: "600㎡ 미만", description: "소규모 산후조리원" },
@@ -6396,10 +6399,10 @@ const yearSteps = [
   {
     key: "yIsClinicWithInpatient",
     type: "ychoice",
-    title: "입원실이 있는 의원·치과의원·한의원입니까?",
+    title: "건물 안에 입원실이 있는 의원·치과의원·한의원이 있습니까?",
     help: "2018년 6월 27일 이후부터 입원실 있는 의원급은 면적 불문 간이스프링클러 설치 대상입니다.",
     options: [
-      { value: "yes", label: "예", description: "입원실이 있는 의원급" },
+      { value: "yes", label: "예", description: "입원실이 있는 의원급이 입점해 있음" },
       { value: "no", label: "아니오", description: "해당 없음" },
     ],
     condition: (ya, pd) => ya.yOccupancyType === "neighborhood" && pd >= YD.D20190806 && ya.yIsPostpartum !== "yes",
@@ -6407,10 +6410,10 @@ const yearSteps = [
   {
     key: "yHasHemodialysis",
     type: "ychoice",
-    title: "인공신장실(혈액투석실)이 있는 의원·치과의원·한의원입니까?",
+    title: "건물 안에 인공신장실(혈액투석실)이 있는 의원·치과의원·한의원이 있습니까?",
     help: "2024년 12월 31일 이후부터 인공신장실 있는 의원급도 면적 불문 간이스프링클러 대상입니다.",
     options: [
-      { value: "yes", label: "예", description: "인공신장실이 있는 의원급" },
+      { value: "yes", label: "예", description: "인공신장실이 있는 의원급이 입점해 있음" },
       { value: "no", label: "아니오", description: "해당 없음" },
     ],
     condition: (ya, pd) => ya.yOccupancyType === "neighborhood" && pd >= YD.D20241231 && ya.yIsClinicWithInpatient === "no" && ya.yIsPostpartum !== "yes",
@@ -6551,6 +6554,25 @@ const yearSteps = [
     condition: (ya) => ya.yOccupancyType === "lodging" && !yearIsAutoAreaMode(),
   },
   {
+    // 생활형 숙박 + 관광호텔을 한 질문으로 합침. 선택 시 yLodgingIsLiving·yLodgingIsTouristHotel을 함께 설정한다(yearRenderChoiceStep 클릭 핸들러).
+    key: "yLodgingKind",
+    type: "ychoice",
+    title: "어떤 숙박시설입니까?",
+    help: (ya) => {
+      const pd = yPermitDateInt();
+      const tourist = "지하층을 포함한 층수가 7층 이상인 관광호텔이면 인명구조기구(방열복·공기호흡기 등)를 설치해야 합니다.";
+      return pd >= YD.D20130210 && pd < YD.D20221201
+        ? tourist + " 2013년 2월 10일부터 2022년 11월 30일까지는 생활형 숙박시설로서 바닥면적 합계가 600㎡ 이상인 경우에만 간이스프링클러설비 설치 대상입니다."
+        : tourist;
+    },
+    options: [
+      { value: "general", label: "일반 숙박시설", description: "모텔·여관·펜션 등" },
+      { value: "tourist", label: "관광호텔", description: "관광진흥법에 따른 관광호텔업 등록 시설" },
+      { value: "living", label: "생활형 숙박시설", description: "레지던스·생활숙박시설 등 숙박 목적의 주거형 시설", condition: (ya, pd) => pd >= YD.D20130210 && pd < YD.D20221201 },
+    ],
+    condition: (ya) => ya.yOccupancyType === "lodging",
+  },
+  {
     key: "yLodgingIsLiving",
     type: "ychoice",
     title: "생활형 숙박시설(레지던스 등)입니까?",
@@ -6559,7 +6581,8 @@ const yearSteps = [
       { value: "yes", label: "생활형 숙박시설", description: "레지던스·생활숙박시설 등 숙박 목적의 주거형 시설" },
       { value: "no", label: "일반 숙박시설", description: "호텔·모텔·여관·펜션 등" },
     ],
-    condition: (ya, pd) => ya.yOccupancyType === "lodging" && pd >= YD.D20130210 && pd < YD.D20221201,
+    // yLodgingKind로 흡수됨. 판정용 값은 그대로 쓰지만 단독 질문으로는 노출하지 않는다.
+    condition: () => false,
   },
   {
     key: "yLodgingHasLargeFloorFor1000",
@@ -6592,7 +6615,8 @@ const yearSteps = [
       { value: "no", label: "일반 숙박시설", description: "모텔·여관·펜션 등 관광호텔이 아닌 숙박시설" },
       { value: "yes", label: "관광호텔", description: "관광진흥법에 따른 관광호텔업 등록 시설" },
     ],
-    condition: (ya) => ya.yOccupancyType === "lodging",
+    // yLodgingKind로 흡수됨.
+    condition: () => false,
   },
   // 숙박시설 세부 조건 (뒤쪽)
   {
@@ -6725,8 +6749,8 @@ const yearSteps = [
     title: "지하층·무창층·4층 이상 층 중 바닥면적 450㎡ 이상인 층이 있습니까?",
     help: "1992년 7월 28일 이전 옥내소화전설비 설치 조건입니다. (1984년 이전에는 해당 층, 이후에는 전 층 설치)",
     options: [
-      { value: "yes", label: "있음", description: "해당 조건의 층이 하나라도 있음" },
-      { value: "no", label: "없음", description: "조건에 맞는 층이 없음" },
+      { value: "yes", label: "예", description: "해당 조건의 층이 하나라도 있음" },
+      { value: "no", label: "아니오", description: "조건에 맞는 층이 없음" },
     ],
     condition: (ya) => ya.yEraChoice === "before2004" && ya.yOccupancyType === "lodging",
   },
@@ -6736,8 +6760,8 @@ const yearSteps = [
     title: "지하층·무창층 또는 4층 이상 10층 이하의 층 중 해당 면적 이상인 층이 있습니까?",
     help: "1981~1984년에는 1,500㎡ 이상, 1984~1992년에는 1,000㎡ 이상인 층이 있으면 해당 층에 스프링클러설비를 설치합니다. (11층 이상이면 자동으로 전 층 설치)",
     options: [
-      { value: "yes", label: "있음", description: "해당 면적 이상인 층이 하나라도 있음" },
-      { value: "no", label: "없음", description: "조건에 맞는 층이 없음" },
+      { value: "yes", label: "예", description: "해당 면적 이상인 층이 하나라도 있음" },
+      { value: "no", label: "아니오", description: "조건에 맞는 층이 없음" },
     ],
     condition: (ya) => ya.yEraChoice === "before2004" && ya.yOccupancyType === "lodging",
   },
@@ -6747,8 +6771,8 @@ const yearSteps = [
     title: "지하층·무창층·3층 이상 층 중 바닥면적 300㎡ 이상인 층이 있습니까?",
     help: "1992년 이전 자동화재탐지설비 설치 조건입니다. (1984년 이전에는 해당 층만, 이후에는 전 층 설치)",
     options: [
-      { value: "yes", label: "있음", description: "해당 층이 하나라도 있음" },
-      { value: "no", label: "없음", description: "조건에 맞는 층이 없음" },
+      { value: "yes", label: "예", description: "해당 층이 하나라도 있음" },
+      { value: "no", label: "아니오", description: "조건에 맞는 층이 없음" },
     ],
     condition: (ya) => ya.yEraChoice === "before2004" && ya.yOccupancyType === "lodging",
   },
@@ -6758,8 +6782,8 @@ const yearSteps = [
     title: "지하층·무창층·4층 이상 층 중 바닥면적 300㎡ 이상인 층이 있습니까?",
     help: "1992년 7월 28일 이후 옥내소화전설비 설치 조건입니다.",
     options: [
-      { value: "yes", label: "있음", description: "해당 층이 하나라도 있음" },
-      { value: "no", label: "없음", description: "조건에 맞는 층이 없음" },
+      { value: "yes", label: "예", description: "해당 층이 하나라도 있음" },
+      { value: "no", label: "아니오", description: "조건에 맞는 층이 없음" },
     ],
     condition: (ya) => ya.yEraChoice === "before2004" && ya.yOccupancyType === "lodging",
   },
@@ -6769,8 +6793,8 @@ const yearSteps = [
     title: "지하층·무창층·4층 이상 층 중 바닥면적 1,000㎡ 이상인 층이 있습니까?",
     help: "1992년 이후 스프링클러설비(해당 층) 설치 조건입니다.",
     options: [
-      { value: "yes", label: "있음", description: "해당 조건의 층이 하나라도 있음" },
-      { value: "no", label: "없음", description: "조건에 맞는 층이 없음" },
+      { value: "yes", label: "예", description: "해당 조건의 층이 하나라도 있음" },
+      { value: "no", label: "아니오", description: "조건에 맞는 층이 없음" },
     ],
     condition: (ya) => ya.yEraChoice === "before2004" && ya.yOccupancyType === "lodging",
   },
@@ -6780,8 +6804,8 @@ const yearSteps = [
     title: "건물 내 바닥면적이 1,500㎡ 이상인 층이 있습니까?",
     help: "1992년 이후 자동화재속보설비 설치 조건입니다. (1992년 이전에는 연면적으로 판단)",
     options: [
-      { value: "yes", label: "있음", description: "1,500㎡ 이상인 층이 하나라도 있음" },
-      { value: "no", label: "없음", description: "모든 층이 1,500㎡ 미만" },
+      { value: "yes", label: "예", description: "1,500㎡ 이상인 층이 하나라도 있음" },
+      { value: "no", label: "아니오", description: "모든 층이 1,500㎡ 미만" },
     ],
     condition: (ya) => ya.yEraChoice === "before2004" && ya.yOccupancyType === "lodging",
   },
@@ -6832,8 +6856,8 @@ const yearSteps = [
     title: "화재 시 자동으로 열리지 않는 창살이 설치돼 있습니까?",
     help: "추락 방지 목적의 창살이 있으면 300㎡ 미만이어도 간이스프링클러 대상이 됩니다. (2008년 2월 29일 이후 적용)",
     options: [
-      { value: "yes", label: "있음", description: "자동 개방 구조가 아닌 창살이 설치돼 있음" },
-      { value: "no", label: "없음", description: "창살이 없거나 화재 시 자동으로 열리는 구조" },
+      { value: "yes", label: "예", description: "자동 개방 구조가 아닌 창살이 설치돼 있음" },
+      { value: "no", label: "아니오", description: "창살이 없거나 화재 시 자동으로 열리는 구조" },
     ],
     condition: (ya, pd) => ya.yOccupancyType === "elderly" && ya.yElderlySubtype === "general" && pd >= YD.D20080229,
   },
@@ -6855,8 +6879,8 @@ const yearSteps = [
     title: "바닥면적이 500㎡ 이상인 층이 있습니까?",
     help: "일반 노유자시설의 자동화재속보설비 설치 여부를 판단합니다.",
     options: [
-      { value: "yes", label: "있음", description: "500㎡ 이상인 층이 하나라도 있음" },
-      { value: "no", label: "없음", description: "모든 층이 500㎡ 미만" },
+      { value: "yes", label: "예", description: "500㎡ 이상인 층이 하나라도 있음" },
+      { value: "no", label: "아니오", description: "모든 층이 500㎡ 미만" },
     ],
     condition: (ya) => ya.yOccupancyType === "elderly" && ya.yElderlySubtype === "general" && !yearIsAutoAreaMode(),
   },
@@ -6866,8 +6890,8 @@ const yearSteps = [
     title: "24시간 상주 근무자가 있습니까?",
     help: "방재실 등에 24시간 상주하면 자동화재속보설비를 설치하지 않을 수 있습니다.",
     options: [
-      { value: "yes", label: "있음", description: "24시간 화재 감시 가능한 근무자가 상주함" },
-      { value: "no", label: "없음", description: "24시간 상주 근무자가 없음" },
+      { value: "yes", label: "예", description: "24시간 화재 감시 가능한 근무자가 상주함" },
+      { value: "no", label: "아니오", description: "24시간 상주 근무자가 없음" },
     ],
     condition: (ya, pd) => ya.yOccupancyType === "elderly" && (
       (ya.yElderlySubtype === "general" && pd >= YD.D20140708) ||
@@ -6944,8 +6968,8 @@ const yearSteps = [
     title: "사람의 탈출을 막기 위한 고정식 창살이 설치돼 있습니까?",
     help: "정신의료기관·의료재활시설에서 바닥면적 300㎡ 미만이어도 간이스프링클러설비 및 자동화재탐지설비 설치 여부를 판단합니다.",
     options: [
-      { value: "yes", label: "있음", description: "탈출 방지 목적의 고정식 창살이 설치돼 있음" },
-      { value: "no", label: "없음", description: "창살이 없음" },
+      { value: "yes", label: "예", description: "탈출 방지 목적의 고정식 창살이 설치돼 있음" },
+      { value: "no", label: "아니오", description: "창살이 없음" },
     ],
     condition: (ya, pd) => ya.yOccupancyType === "medical" &&
       (ya.yMedicalSubtype === "psychiatricHospital" || ya.yMedicalSubtype === "rehabilitationFacility") &&
@@ -6969,8 +6993,8 @@ const yearSteps = [
     title: "바닥면적이 500㎡ 이상인 층이 있습니까?",
     help: "정신의료기관·의료재활시설의 자동화재속보설비 설치 여부를 판단합니다.",
     options: [
-      { value: "yes", label: "있음", description: "500㎡ 이상인 층이 하나라도 있음" },
-      { value: "no", label: "없음", description: "모든 층이 500㎡ 미만" },
+      { value: "yes", label: "예", description: "500㎡ 이상인 층이 하나라도 있음" },
+      { value: "no", label: "아니오", description: "모든 층이 500㎡ 미만" },
     ],
     condition: (ya, pd) => ya.yOccupancyType === "medical" &&
       (ya.yMedicalSubtype === "psychiatricHospital" || ya.yMedicalSubtype === "rehabilitationFacility") &&
@@ -7064,8 +7088,8 @@ const yearSteps = [
     title: "사찰·제실·사당에 해당합니까?",
     help: "2004~2017년 1월 27일까지는 사찰·제실·사당은 규모에 관계없이 스프링클러설비 설치 대상에서 제외됩니다.",
     options: [
-      { value: "yes", label: "예 (사찰·제실·사당)", description: "사찰, 제실, 사당에 해당하는 시설" },
-      { value: "no", label: "아니오", description: "교회·성당·기도원 등 그 외 종교시설" },
+      { value: "yes", label: "사찰·제실·사당", description: "사찰, 제실, 사당에 해당하는 시설" },
+      { value: "no", label: "그 외 종교시설", description: "교회·성당·기도원 등" },
     ],
     condition: (ya, pd) => ya.yOccupancyType === "religious" && ya.yReligiousOccupancy100Plus === "yes" && pd >= YD.D20040530 && pd < YD.D20170128,
   },
@@ -7075,8 +7099,8 @@ const yearSteps = [
     title: "무대부가 있습니까?",
     help: "2011년 7월 7일 이후부터 무대부 바닥면적이 200㎡ 이상이면 해당 무대부에 제연설비를 설치해야 합니다.",
     options: [
-      { value: "yes", label: "있음", description: "무대장치를 갖춘 무대부가 있음" },
-      { value: "no", label: "없음", description: "무대부가 없음" },
+      { value: "yes", label: "예", description: "무대장치를 갖춘 무대부가 있음" },
+      { value: "no", label: "아니오", description: "무대부가 없음" },
     ],
     condition: (ya, pd) => ya.yOccupancyType === "religious" && pd >= YD.D20110707,
   },
@@ -7121,15 +7145,25 @@ const yearSteps = [
     },
   },
   {
+    // 전통시장·대규모점포는 둘 다 해당할 수 있어(대규모점포로 등록된 전통시장) 중복 선택 화면으로 합침.
+    // 선택 결과는 ySalesIsTraditionalMarket·ySalesIsLargeStore에 그대로 저장한다(yearRenderCompoundStep).
+    key: "ySalesKindSet",
+    type: "ycompound",
+    title: "어떤 판매시설입니까?",
+    help: "해당하는 것을 모두 고르세요. 둘 다 아니면 '일반 판매시설'을 고르면 됩니다.",
+    condition: (ya) => ya.yOccupancyType === "sales",
+  },
+  {
     key: "ySalesIsTraditionalMarket",
     type: "ychoice",
     title: "전통시장에 해당합니까?",
     help: "전통시장은 면적과 무관하게 자동화재속보설비(2017.1.28~)·자동화재탐지설비(2019.8.6~)·화재알림설비(2022.12.1~) 설치 대상입니다.",
     options: [
-      { value: "yes", label: "예 (전통시장)", description: "「전통시장 및 상점가 육성을 위한 특별법」상 전통시장" },
-      { value: "no", label: "아니오", description: "전통시장이 아닌 일반 판매시설" },
+      { value: "yes", label: "전통시장", description: "「전통시장 및 상점가 육성을 위한 특별법」상 전통시장" },
+      { value: "no", label: "일반 판매시설", description: "전통시장이 아닌 판매시설" },
     ],
-    condition: (ya) => ya.yOccupancyType === "sales",
+    // ySalesKindSet으로 흡수됨.
+    condition: () => false,
   },
   {
     key: "ySalesIsLargeStore",
@@ -7137,10 +7171,11 @@ const yearSteps = [
     title: "대규모점포에 해당합니까?",
     help: "「유통산업발전법」상 대규모점포(백화점·대형마트·쇼핑센터 등)는 인명구조기구·휴대용비상조명등·상업용 주방자동소화장치 판단에 사용됩니다.",
     options: [
-      { value: "yes", label: "예 (대규모점포)", description: "백화점·대형마트·쇼핑센터·전문점·할인점 등" },
-      { value: "no", label: "아니오", description: "대규모점포가 아닌 일반 판매시설" },
+      { value: "yes", label: "대규모점포", description: "백화점·대형마트·쇼핑센터·전문점·할인점 등" },
+      { value: "no", label: "일반 판매시설", description: "대규모점포가 아닌 판매시설" },
     ],
-    condition: (ya) => ya.yOccupancyType === "sales",
+    // ySalesKindSet으로 흡수됨.
+    condition: () => false,
   },
   {
     key: "ySalesOccupancy500Plus",
@@ -7176,8 +7211,8 @@ const yearSteps = [
     title: "대규모점포에 입점한 일반음식점의 주방이 있습니까?",
     help: "2023년 12월 1일 이후 대규모점포에 입점한 일반음식점 주방에는 상업용 주방자동소화장치를 설치해야 합니다.",
     options: [
-      { value: "yes", label: "있음", description: "대규모점포 입점 일반음식점 주방이 있음" },
-      { value: "no", label: "없음", description: "해당 주방이 없음" },
+      { value: "yes", label: "예", description: "대규모점포 입점 일반음식점 주방이 있음" },
+      { value: "no", label: "아니오", description: "해당 주방이 없음" },
     ],
     condition: (ya, pd) => ya.yOccupancyType === "sales" && ya.ySalesIsLargeStore === "yes" && pd >= YD.D20231201,
   },
@@ -7239,8 +7274,8 @@ const yearSteps = [
     title: "오피스텔에 해당합니까?",
     help: "오피스텔은 주방자동소화장치 판단 기준이 일반 업무시설과 다릅니다.",
     options: [
-      { value: "yes", label: "예 (오피스텔)", description: "준주택인 오피스텔" },
-      { value: "no", label: "아니오", description: "사무소·금융업소·관공서 등 일반 업무시설" },
+      { value: "yes", label: "오피스텔", description: "준주택인 오피스텔" },
+      { value: "no", label: "일반 업무시설", description: "사무소·금융업소·관공서 등" },
     ],
     condition: (ya) => ya.yOccupancyType === "office",
   },
@@ -7250,8 +7285,8 @@ const yearSteps = [
     title: "후드·덕트를 설치한 주방이 있습니까?",
     help: "2022년 12월 1일 이후 후드·덕트가 있는 주방이 있는 오피스텔은 전 층에 주거용 주방자동소화장치를 설치해야 합니다.",
     options: [
-      { value: "yes", label: "있음", description: "후드·덕트를 갖춘 주방이 있음" },
-      { value: "no", label: "없음", description: "해당 주방이 없음" },
+      { value: "yes", label: "예", description: "후드·덕트를 갖춘 주방이 있음" },
+      { value: "no", label: "아니오", description: "해당 주방이 없음" },
     ],
     condition: (ya, pd) => ya.yOccupancyType === "office" && ya.yOfficeIsOfficetel === "yes" && pd >= YD.D20221201,
   },
@@ -7261,8 +7296,8 @@ const yearSteps = [
     title: "집단급식소(구내식당 등) 또는 대규모점포 내 일반음식점 주방이 있습니까?",
     help: "2022년 12월 1일 이후 일반 업무시설의 집단급식소·대규모점포 입점 일반음식점 주방에는 상업용 주방자동소화장치를 설치해야 합니다.",
     options: [
-      { value: "yes", label: "있음", description: "집단급식소 또는 대규모점포 입점 음식점 주방이 있음" },
-      { value: "no", label: "없음", description: "해당 주방이 없음" },
+      { value: "yes", label: "예", description: "집단급식소 또는 대규모점포 입점 음식점 주방이 있음" },
+      { value: "no", label: "아니오", description: "해당 주방이 없음" },
     ],
     condition: (ya, pd) => ya.yOccupancyType === "office" && ya.yOfficeIsOfficetel !== "yes" && pd >= YD.D20221201,
   },
@@ -7272,8 +7307,8 @@ const yearSteps = [
     title: "건물 내에 「출입국관리법」상 보호장소(보호시설)로 사용하는 부분이 있습니까?",
     help: "2007년 3월 25일 이후 출입국관리법상 보호장소로 사용하는 부분에는 간이스프링클러설비를 설치해야 합니다.",
     options: [
-      { value: "yes", label: "있음", description: "보호장소(보호시설)로 사용하는 부분이 있음" },
-      { value: "no", label: "없음", description: "해당 부분이 없음" },
+      { value: "yes", label: "예", description: "보호장소(보호시설)로 사용하는 부분이 있음" },
+      { value: "no", label: "아니오", description: "해당 부분이 없음" },
     ],
     condition: (ya, pd) => ya.yOccupancyType === "office" && pd >= YD.D20070325 && !yearIsAutoAreaMode(),
   },
@@ -7843,8 +7878,8 @@ const yearSteps = [
     title: "바닥면적이 500㎡ 이상인 층이 있습니까?",
     help: "1999년 8월 6일 이후 노유자시설 자동화재속보설비 설치 조건입니다.",
     options: [
-      { value: "yes", label: "있음", description: "500㎡ 이상인 층이 하나라도 있음" },
-      { value: "no", label: "없음", description: "모든 층이 500㎡ 미만" },
+      { value: "yes", label: "예", description: "500㎡ 이상인 층이 하나라도 있음" },
+      { value: "no", label: "아니오", description: "모든 층이 500㎡ 미만" },
     ],
     condition: (ya) => ya.yEraChoice === "before2004" && ya.yOccupancyType === "elderly",
   },
@@ -7863,8 +7898,8 @@ const yearSteps = [
     title: "지하층·무창층·4층 이상 층 중 바닥면적 600㎡ 이상인 층이 있습니까?",
     help: "옥내소화전설비 설치 여부를 판단하는 조건입니다. 교회·사찰은 연면적 3,000㎡ 이상 또는 이 조건 충족 시 설치합니다.",
     options: [
-      { value: "yes", label: "있음", description: "해당 조건의 층이 하나라도 있음" },
-      { value: "no", label: "없음", description: "조건에 맞는 층이 없음" },
+      { value: "yes", label: "예", description: "해당 조건의 층이 하나라도 있음" },
+      { value: "no", label: "아니오", description: "조건에 맞는 층이 없음" },
     ],
     condition: (ya) => ya.yEraChoice === "before2004" && ya.yOccupancyType === "religious",
   },
@@ -7990,6 +8025,7 @@ const yearStepOrder = new Map([
   "yIsClinicWithInpatient",
   "yHasHemodialysis",
   "yHas24HourStaff",
+  "yLodgingKind",
   "yLodgingIsLiving",
   "yLodgingIsTouristHotel",
   "yBefore2004LodgingIsTouristHotel",
@@ -8004,6 +8040,7 @@ const yearStepOrder = new Map([
   "yReligiousIsSacrificialBuilding",
   "yReligiousHasStage",
   "yReligiousStageArea",
+  "ySalesKindSet",
   "ySalesIsTraditionalMarket",
   "ySalesIsLargeStore",
   "ySalesOccupancy500Plus",
@@ -8236,8 +8273,9 @@ function yearGetActiveSteps() {
     "yLodgingMultiuseHasEvacuationRoute",
   ];
   const activeSteps = yearSteps.filter((step) => {
-    if (step.key === "yEraChoice") return true;
-    if (["yPermitDate", "yOccupancyType"].includes(step.key)) return !!ya.yEraChoice;
+    // 분법 이전/이후는 허가일로 자동 판별(yearSyncEraFromPermitDate) → 질문 자체는 숨김
+    if (step.key === "yEraChoice") return false;
+    if (["yPermitDate", "yOccupancyType"].includes(step.key)) return true;
     if (YEAR_EXPLORER_MULTIUSE_KEYS.includes(step.key) && ya.yEraChoice !== "before2004") return false;
 
     // ── 분법 이전 근린생활시설 ──
@@ -8958,12 +8996,27 @@ function yearRenderChoiceStep(step) {
     const optionDesc = typeof option.description === "function" ? option.description(yearState.answers, pd) : option.description;
     btn.innerHTML = `<strong>${option.label}</strong><span>${optionDesc}</span>`;
     btn.addEventListener("click", () => {
+      // 다른 용도로 바꾸면 앞서 입력한 면적·층수 등은 기본값으로 되돌린다(허가일·면적 자동산정 설정은 유지).
+      if (step.key === "yOccupancyType" && yearState.answers.yOccupancyType !== option.value) {
+        const keep = {
+          yPermitDate: yearState.answers.yPermitDate,
+          yEraChoice: yearState.answers.yEraChoice,
+          yAutoCalcAreas: yearState.answers.yAutoCalcAreas,
+        };
+        yearResetAnswersToDefault();
+        Object.assign(yearState.answers, keep);
+      }
       yearState.answers[step.key] = option.value;
       // 분법 이전/이후 선택 시 허가일 기본값 자동 전환
       if (step.key === "yEraChoice") {
         yearState.answers.yPermitDate = option.value === "before2004" ? "1992-07-28" : "2019-02-18";
       }
       // 공동주택은 아파트등만 지원 → 세부분류 자동 고정(숨긴 질문 대체, stale row/dorm 방지)
+      // 숙박시설 종류(합친 질문) → 판정용 두 값 동기화
+      if (step.key === "yLodgingKind") {
+        yearState.answers.yLodgingIsTouristHotel = option.value === "tourist" ? "yes" : "no";
+        yearState.answers.yLodgingIsLiving = option.value === "living" ? "yes" : "no";
+      }
       if (step.key === "yOccupancyType" && option.value === "apartment") {
         yearState.answers.yApartmentSubtype = "apt";
         // 아파트등은 5층 이상부터 성립하므로, 기본값 4층은 무의미 → 5층으로 보정
@@ -9073,6 +9126,13 @@ function yearRenderNumberStep(step) {
   return input;
 }
 
+// 허가일(yPermitDate)에서 분법 이전/이후(yEraChoice)를 결정한다. 날짜가 불완전하면 기존 값 유지.
+function yearSyncEraFromPermitDate() {
+  const pd = yPermitDateInt();
+  if (!(pd > 0)) return;
+  yearState.answers.yEraChoice = pd < YD.D20040530 ? "before2004" : "after2004";
+}
+
 function yearRenderDateStep() {
   const wrapper = document.createElement("div");
   wrapper.style.cssText = "display:flex;gap:8px;align-items:center;";
@@ -9092,24 +9152,19 @@ function yearRenderDateStep() {
     } else {
       yearState.answers.yPermitDate = "";
     }
-    // 분법 이전/이후에 따라 날짜 유효성 경고 표시
+    // 허가일로 분법 이전/이후 자동 판별
+    yearSyncEraFromPermitDate();
     const pd = yPermitDateInt();
-    const isBefore2004Era = yearState.answers.yEraChoice === "before2004";
     let warn = wrapper.parentNode && wrapper.parentNode.querySelector(".year-date-warn");
-    const tooEarly = isBefore2004Era ? (pd > 0 && pd < YD.D19811106) : (pd > 0 && pd < YD.D20040530);
-    const tooLate  = isBefore2004Era && pd >= YD.D20040530;
-    if (tooEarly || tooLate) {
+    const tooEarly = pd > 0 && pd < YD.D19811106;
+    if (tooEarly) {
       if (!warn) {
         warn = document.createElement("div");
         warn.className = "year-date-warn info-box amber";
         warn.style.marginTop = "10px";
         wrapper.insertAdjacentElement("afterend", warn);
       }
-      if (isBefore2004Era) {
-        warn.innerHTML = "<div class=\"ib-title\">범위 외 날짜</div>소방법 분법 이전 구간은 <strong>1981년 11월 6일 ~ 2004년 5월 29일</strong>입니다. 허가일을 다시 확인해 주세요.";
-      } else {
-        warn.innerHTML = "<div class=\"ib-title\">분석 불가 날짜</div>이 도구는 <strong>2004년 5월 30일 이후</strong> 건축허가 건물만 분석할 수 있습니다. 허가일을 다시 확인해 주세요.";
-      }
+      warn.innerHTML = "<div class=\"ib-title\">분석 불가 날짜</div>이 도구는 <strong>1981년 11월 6일 이후</strong> 건축허가 건물만 분석할 수 있습니다. 허가일을 다시 확인해 주세요.";
     } else {
       if (warn) warn.remove();
     }
@@ -9391,6 +9446,21 @@ function yearRenderCompoundStep(step) {
     });
   }
 
+  if (step.key === "ySalesKindSet") {
+    const kindKeys = ["ySalesIsTraditionalMarket", "ySalesIsLargeStore"];
+    const optionList = document.createElement("div");
+    optionList.className = "choice-list";
+    [
+      { name: "ySalesIsTraditionalMarket", label: "전통시장", description: "「전통시장 및 상점가 육성을 위한 특별법」상 전통시장" },
+      { name: "ySalesIsLargeStore", label: "대규모점포", description: "「유통산업발전법」상 백화점·대형마트·쇼핑센터·전문점·할인점 등" },
+    ].forEach((option) => {
+      optionList.appendChild(makeToggleChoiceButton({ label: option.label, description: option.description, selected: ya[option.name] === "yes", onClick: () => { yearState.answers[option.name] = ya[option.name] === "yes" ? "no" : "yes"; yearRenderCurrentStep(); } }));
+    });
+    const noneSelected = kindKeys.every((name) => ya[name] !== "yes");
+    optionList.appendChild(makeToggleChoiceButton({ label: "일반 판매시설", description: "전통시장·대규모점포가 아닌 상점 등", selected: noneSelected, onClick: () => { kindKeys.forEach((name) => { yearState.answers[name] = "no"; }); yearRenderCurrentStep(); } }));
+    wrapper.appendChild(optionList);
+  }
+
   if (step.key === "yMultiuseSimpleSprinklerCheck") {
     const selectedKeys = ["yMultiuseInBasement", "yMultiuseIsSealed", "yMultiuseIsPostpartum", "yMultiuseIsGosiwon", "yMultiuseIsGunRange"];
     const toggleOption = (name) => { yearState.answers[name] = yearState.answers[name] === "yes" ? "no" : "yes"; yearRenderCurrentStep(); };
@@ -9496,11 +9566,7 @@ function yearCurrentStepIsValid() {
   }
   if (step.type === "ydate") {
     if (!yearState.answers.yPermitDate) return false;
-    const pd = yPermitDateInt();
-    if (yearState.answers.yEraChoice === "before2004") {
-      return pd >= YD.D19811106 && pd < YD.D20040530;
-    }
-    return pd >= YD.D20040530;
+    return yPermitDateInt() >= YD.D19811106;
   }
   return true;
 }
@@ -9530,11 +9596,7 @@ function yearMoveStep(direction) {
   if (direction > 0 && !yearCurrentStepIsValid()) {
     const step = yearGetActiveSteps()[yearState.currentStep];
     if (step.type === "ydate") {
-      if (yearState.answers.yEraChoice === "before2004") {
-        showToast("1981년 11월 6일 ~ 2004년 5월 29일 사이의 허가일을 입력해 주세요.");
-      } else {
-        showToast("2004년 5월 30일 이후의 허가일을 입력해 주세요.");
-      }
+      showToast("1981년 11월 6일 이후의 허가일을 입력해 주세요.");
     } else {
       showToast("현재 질문의 값을 먼저 입력해 주세요.");
     }
@@ -16373,7 +16435,19 @@ function yearShowResults() {
 
 function yearWizardRestart() {
   yearState.currentStep = 0;
+  yearResetAnswersToDefault();
+  document.getElementById("year-question-card").classList.remove("hidden");
+  document.getElementById("year-result-card").classList.add("hidden");
+  document.getElementById("year-multiuse-safety-card").classList.add("hidden");
+  document.getElementById("year-prog-wrap").classList.remove("hidden");
+  yearRenderCurrentStep();
+}
+
+// 입력값 전부를 기본값으로 되돌린다. 처음 상태(YEAR_DEFAULT_ANSWERS)로 통째로 바꾼 뒤 아래 값들을 덮어쓴다.
+function yearResetAnswersToDefault() {
   const ya = yearState.answers;
+  Object.keys(ya).forEach((k) => { delete ya[k]; });
+  Object.assign(ya, JSON.parse(JSON.stringify(YEAR_DEFAULT_ANSWERS)));
   ya.yEraChoice = "after2004";
   ya.yOccupancyType = "neighborhood";
   ya.yPermitDate = "2019-02-18";
@@ -16421,7 +16495,11 @@ function yearWizardRestart() {
   ya.yMultiuseHasEvacuationRoute = "no";
   // 숙박시설 전용
   ya.yLodgingArea = "1500";
+  ya.yLodgingKind = "general";
   ya.yLodgingIsTouristHotel = "no";
+  ya.yLodgingIsLiving = "no";
+  ya.ySalesIsTraditionalMarket = "no";
+  ya.ySalesIsLargeStore = "no";
   ya.yLodgingHasLargeFloorFor1000 = "no";
   ya.yLodgingHasGasFacility = "no";
   ya.yLodgingFirstSecondFloorArea = "750";
@@ -16510,12 +16588,6 @@ function yearWizardRestart() {
   ya.yAptIndoorParkingArea = "0";
   ya.yAptMechanicalParkingCapacity = "0";
   ya.yAptElectricalRoomArea = "0";
-
-  document.getElementById("year-question-card").classList.remove("hidden");
-  document.getElementById("year-result-card").classList.add("hidden");
-  document.getElementById("year-multiuse-safety-card").classList.add("hidden");
-  document.getElementById("year-prog-wrap").classList.remove("hidden");
-  yearRenderCurrentStep();
 }
 
 document.getElementById("back-from-explorer-year").addEventListener("click", () => showScreen("home"));
