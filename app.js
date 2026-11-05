@@ -17378,13 +17378,33 @@ history.replaceState({ screen: 'home' }, '');
 
   let deferredPrompt = null;
 
+  // PC 크롬은 getInstalledRelatedApps가 설치돼 있어도 빈 값을 줘서(2026-11 실측) 직접 기록한다.
+  // 앱 창(standalone)과 같은 사이트 브라우저 탭은 localStorage를 공유하므로,
+  // 앱으로 한 번이라도 실행됐거나 설치 이벤트가 오면 '설치됨'으로 표시.
+  // 앱을 지우면 탭에서 beforeinstallprompt가 다시 오므로 그때 표시를 지운다.
+  const INSTALLED_KEY = 'pwaInstalled';
+  function setInstalledFlag(on) {
+    try {
+      if (on) localStorage.setItem(INSTALLED_KEY, '1');
+      else localStorage.removeItem(INSTALLED_KEY);
+    } catch (e) {}
+  }
+  function hasInstalledFlag() {
+    try { return localStorage.getItem(INSTALLED_KEY) === '1'; } catch (e) { return false; }
+  }
+  if (isStandalone) setInstalledFlag(true);
+
   // Android / PC Chrome: 설치 프롬프트 대기
   window.addEventListener('beforeinstallprompt', function (e) {
     e.preventDefault();
     deferredPrompt = e;
+    setInstalledFlag(false);   // 설치 가능하다고 함 = 지금은 설치 안 된 상태
+    const btn = document.getElementById('open-install-guide');
+    if (btn && !isStandalone) btn.style.display = '';
   });
   window.addEventListener('appinstalled', function () {
     deferredPrompt = null;
+    setInstalledFlag(true);
   });
 
   // ── 메인 바로가기 버튼: 앱으로 실행 중이거나 이미 설치돼 있으면 숨김 ──
@@ -17407,6 +17427,10 @@ history.replaceState({ screen: 'home' }, '');
       // manifest.json 의 related_applications(platform:webapp) 등록이 있어야 동작함.
       async function refreshInstallBtn() {
         // 실행 중 standalone 전환 등은 재확인, iOS 등 미지원 환경은 그대로 노출
+        if (hasInstalledFlag()) {
+          cardBtn.style.display = 'none';
+          return;
+        }
         if (!navigator.getInstalledRelatedApps) return;
         try {
           const apps = await navigator.getInstalledRelatedApps();
