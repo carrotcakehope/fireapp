@@ -60,10 +60,6 @@
   <script>
     if ('serviceWorker' in navigator) {
       var _reloading = false;
-      // 로드 시점에 이미 SW가 제어 중이었나? 첫 방문이면 null이라 false.
-      // 첫 설치(activate)에서도 controllerchange/CACHE_UPDATED가 터지므로,
-      // 재방문자(이미 제어 중)일 때만 새로고침해야 인트로 영상이 안 끊김.
-      var _wasControlled = !!navigator.serviceWorker.controller;
       // 업데이트 새로고침 직전에 띄우는 안내 오버레이 (스피너 + 텍스트).
       // 디버그용으로 app.js의 알림판 5연타에서도 호출함.
       window.showUpdateOverlay = function() {
@@ -87,47 +83,113 @@
         document.body.appendChild(o);
         return o;
       };
-      var _pendingReload = false;
+      // 새 버전이 대기 중이면 바로 새로고침하지 않고 아래쪽에 안내 띠를 띄운다.
+      // 사용자가 [새로고침]을 누를 때만 대기 중인 SW에 SKIP_WAITING을 보내 교체하고,
+      // controllerchange가 오면 그때 새로고침한다. 무시하면 앱을 다시 켤 때 자동 적용.
+      var _userRequestedUpdate = false;
+      var _waitingWorker = null;
       function _doReload() {
         if (_reloading) return;
         _reloading = true;
         window.showUpdateOverlay();
-        setTimeout(function(){ window.location.reload(); }, 1500);
+        setTimeout(function(){ window.location.reload(); }, 300);
       }
-      function _forceReload() {
-        if (_reloading) return;
-        // 인트로 영상 재생 중이면 끝날 때까지 새로고침 보류 (영상 끊김 방지)
+      function _applyUpdate() {
+        _userRequestedUpdate = true;
+        window.showUpdateOverlay();
+        if (_waitingWorker) {
+          _waitingWorker.postMessage({ type: 'SKIP_WAITING' });
+          // 이전 SW가 처리 중인 요청이 있으면 교체가 몇 초 늦어질 수 있다.
+          // 그 전에 새로고침되면 다음 화면에서 띠를 다시 띄우지 않고 조용히 마저 교체하도록 표시해 둔다.
+          try { sessionStorage.setItem('swUpdateRequested', '1'); } catch (_) {}
+          setTimeout(_doReload, 8000);
+        } else {
+          _doReload();
+        }
+      }
+      function _showUpdateBar() {
+        if (document.getElementById('update-bar')) return;
+        // 인트로 영상 재생 중이면 끝난 뒤에 띄움
         if (document.documentElement.getAttribute('data-intro-active') === 'true') {
-          if (!_pendingReload) {
-            _pendingReload = true;
-            var mo = new MutationObserver(function() {
-              if (document.documentElement.getAttribute('data-intro-active') !== 'true') {
-                mo.disconnect();
-                _doReload();
-              }
-            });
-            mo.observe(document.documentElement, { attributes: true, attributeFilter: ['data-intro-active'] });
-          }
+          var mo = new MutationObserver(function() {
+            if (document.documentElement.getAttribute('data-intro-active') !== 'true') {
+              mo.disconnect();
+              _showUpdateBar();
+            }
+          });
+          mo.observe(document.documentElement, { attributes: true, attributeFilter: ['data-intro-active'] });
           return;
         }
-        _doReload();
+        // 테마별 색은 styles.css 변수를 그대로 사용
+        var bg = 'var(--surface2, #1f1f1f)';
+        var fg = 'var(--text, #ececec)';
+        var line = 'var(--border2, #3a3a3a)';
+        var accent = 'var(--red, #d93025)';
+        var b = document.createElement('div');
+        b.id = 'update-bar';
+        b.setAttribute('role', 'status');
+        b.style.cssText = 'position:fixed;left:50%;transform:translateX(-50%);'
+          + 'bottom:max(16px, env(safe-area-inset-bottom));z-index:9500;'
+          + 'width:min(420px, calc(100vw - 32px));box-sizing:border-box;'
+          + 'display:flex;align-items:center;gap:10px;padding:10px 10px 10px 16px;'
+          + 'background:' + bg + ';color:' + fg + ';border:1px solid ' + line + ';border-radius:12px;'
+          + 'box-shadow:0 6px 20px rgba(0,0,0,.35);'
+          + 'font-family:"Malgun Gothic","Apple SD Gothic Neo",sans-serif;font-size:14px';
+        b.innerHTML = '<span style="flex:1;line-height:1.4">새 버전이 있습니다.</span>'
+          + '<button type="button" data-act="later" style="border:0;background:transparent;color:' + fg + ';'
+          + 'opacity:.7;font:inherit;padding:8px 10px;cursor:pointer">나중에</button>'
+          + '<button type="button" data-act="apply" style="border:0;border-radius:8px;background:' + accent + ';'
+          + 'color:#fff;font:inherit;font-weight:600;padding:8px 14px;cursor:pointer">새로고침</button>';
+        b.addEventListener('click', function(e) {
+          var act = e.target && e.target.getAttribute('data-act');
+          if (act === 'apply') { b.remove(); _applyUpdate(); }
+          else if (act === 'later') { b.remove(); }
+        });
+        document.body.appendChild(b);
+      }
+      function _trackWaiting(reg) {
+        if (reg.waiting && navigator.serviceWorker.controller) {
+          _waitingWorker = reg.waiting;
+          var requested = false;
+          try { requested = sessionStorage.getItem('swUpdateRequested') === '1'; } catch (_) {}
+          if (requested) {
+            // 이미 [새로고침]을 누른 뒤라 화면 코드는 최신(네트워크 우선)이다. 교체만 마저 진행.
+            reg.waiting.postMessage({ type: 'SKIP_WAITING' });
+          } else {
+            _showUpdateBar();
+          }
+        }
+      }
+      function _hideUpdateBar() {
+        var b = document.getElementById('update-bar');
+        if (b) b.remove();
       }
       window.addEventListener('load', function() {
         navigator.serviceWorker.register('./sw.js?v=306', { updateViaCache: 'none' })
           .then(function(reg) {
+            _trackWaiting(reg);
+            reg.addEventListener('updatefound', function() {
+              var nw = reg.installing;
+              if (!nw) return;
+              nw.addEventListener('statechange', function() {
+                if (nw.state === 'installed') _trackWaiting(reg);
+              });
+            });
             reg.update();
             document.addEventListener('visibilitychange', function() {
               if (document.visibilityState === 'visible') reg.update();
             });
           });
-        // SW activate 후 postMessage 수신 (iOS 홈화면 앱 대응)
-        navigator.serviceWorker.addEventListener('message', function(e) {
-          if (e.data && e.data.type === 'CACHE_UPDATED' && _wasControlled) _forceReload();
+        // 사용자가 [새로고침]을 눌러 교체된 경우에만 새로고침 (첫 설치·자동 교체 때는 안 함)
+        navigator.serviceWorker.addEventListener('controllerchange', function() {
+          try { sessionStorage.removeItem('swUpdateRequested'); } catch (_) {}
+          // 교체가 끝났으니 남아 있는 띠는 치운다
+          _hideUpdateBar();
+          if (_userRequestedUpdate) _doReload();
         });
-        // controllerchange fallback (PC/Android) — 재방문자만
-        if (_wasControlled) {
-          navigator.serviceWorker.addEventListener('controllerchange', _forceReload);
-        }
+        navigator.serviceWorker.addEventListener('message', function(e) {
+          if (e.data && e.data.type === 'CACHE_UPDATED' && _userRequestedUpdate) _doReload();
+        });
       });
     }
   </script>
