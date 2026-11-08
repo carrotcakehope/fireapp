@@ -45,7 +45,7 @@ function trackMenuClick(menuName) {
 // ── 패치노트 설정 (여기만 수정하면 됩니다) ──────────────────────────────
 const PATCH_NOTES = {
   version: "v1.1.2",
-  date: "2026-11-05",
+  date: "2026-11-08",
   items: [
     { type: "notice",  text: "이걸 배포한지 벌써 3개월이 됐네요. 사용하면서 불편한게 있으시면 편하게 연락주세요!" },
     { type: "new",     text: "메인화면 7번째 기능 「건축물대장 조회」 추가"},
@@ -5868,7 +5868,7 @@ const yearState = {
     yEraChoice: "after2004",
     yOccupancyType: "neighborhood",
     yAutoCalcAreas: "yes",
-    yPermitdate: "2026-11-05",
+    yPermitdate: "2026-11-08",
     yTotalArea: "1500",
     yAboveGroundFloors: "4",
     yBasementFloors: "0",
@@ -6405,7 +6405,8 @@ const yearSteps = [
       { value: "yes", label: "예", description: "입원실이 있는 의원급이 입점해 있음" },
       { value: "no", label: "아니오", description: "해당 없음" },
     ],
-    condition: (ya, pd) => ya.yOccupancyType === "neighborhood" && pd >= YD.D20190806 && ya.yIsPostpartum !== "yes",
+    // 한 건물에 산후조리원과 의원이 함께 있을 수 있으므로 산후조리원 여부와 관계없이 묻는다.
+    condition: (ya, pd) => ya.yOccupancyType === "neighborhood" && pd >= YD.D20190806,
   },
   {
     key: "yHasHemodialysis",
@@ -6416,7 +6417,7 @@ const yearSteps = [
       { value: "yes", label: "예", description: "인공신장실이 있는 의원급이 입점해 있음" },
       { value: "no", label: "아니오", description: "해당 없음" },
     ],
-    condition: (ya, pd) => ya.yOccupancyType === "neighborhood" && pd >= YD.D20241231 && ya.yIsClinicWithInpatient === "no" && ya.yIsPostpartum !== "yes",
+    condition: (ya, pd) => ya.yOccupancyType === "neighborhood" && pd >= YD.D20241231 && ya.yIsClinicWithInpatient === "no",
   },
   {
     key: "yHas24HourStaff",
