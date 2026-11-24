@@ -9730,8 +9730,9 @@ html.fac-review .nf-unv { background: rgba(255, 196, 0, 0.18); border-bottom: 2p
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  max-width: 100%;
-  margin-top: 8px;
+  max-width: calc(100% + 9px);
+  /* 둥근 칩이라 안쪽 아이콘이 윗줄 글자보다 들어가 보임 → 테두리+왼쪽여백만큼 왼쪽으로 빼서 아이콘을 윗줄 글자 시작선에 맞춤 */
+  margin: 14px 0 0 -9px;
   padding: 5px 12px 5px 8px;
   border: 1px solid var(--border);
   border-radius: 999px;
@@ -9752,8 +9753,17 @@ html.fac-review .nf-unv { background: rgba(255, 196, 0, 0.18); border-bottom: 2p
 .home-weather-region { color: var(--amber); font-weight: 600; }
 @keyframes homeWeatherIn { from { opacity: 0; transform: translateY(-3px); } to { opacity: 1; transform: none; } }
 @media (max-width: 480px) {
-  .home-weather { gap: 6px; padding: 4px 10px 4px 6px; font-size: 10px; }
+  .home-weather { gap: 6px; margin: 12px 0 0 -7px; max-width: calc(100% + 7px); padding: 4px 10px 4px 6px; font-size: 10px; }
   .home-weather-icon { font-size: 17px; }
   .home-weather-temp { font-size: 13px; }
   .home-weather-sub { gap: 6px; }
+}
+/* 모바일 홈 헤더 순서: 제목 → 버전 → 소개문구 → 날씨(맨 아래) */
+@media (max-width: 540px) {
+  .home-header-left { display: contents; }
+  .home-weather { order: 1; }
+  .home-header-right { align-items: flex-start; }
+  /* 테마 버튼은 오른쪽 위 제목 옆으로 띄워서 소개문구가 버전 줄 바로 아래 오게 */
+  .home-header-actions { position: absolute; top: 36px; right: 20px; }
+  .home-desc { padding-left: 0; margin-top: 4px; }
 }

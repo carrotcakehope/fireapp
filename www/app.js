@@ -19347,7 +19347,7 @@ renderHomeMeta();
         var sub = span('home-weather-sub', '');
         sub.appendChild(span('home-weather-region', w.region || '달서구'));
         if (w.humidity != null) sub.appendChild(span('', '💧' + w.humidity + '%'));
-        if (w.wind != null) sub.appendChild(span('', '🌬️' + w.wind + 'm/s'));
+        if (w.wind != null) sub.appendChild(span('', '💨' + w.wind + 'm/s'));
         if (w.rain1h) sub.appendChild(span('', '☔' + w.rain1h + 'mm'));
         el.textContent = '';
         el.appendChild(span('home-weather-icon', icon));
