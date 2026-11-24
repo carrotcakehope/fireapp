@@ -9724,3 +9724,36 @@ html.fac-review .nf-unv { background: rgba(255, 196, 0, 0.18); border-bottom: 2p
   .nf-type { flex-direction: column; gap: 2px; }
   .nf-type b { width: auto; }
 }
+
+/* 홈 달서구 날씨 한 줄 */
+.home-weather {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 100%;
+  margin-top: 8px;
+  padding: 5px 12px 5px 8px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--surface2);
+  font-size: 11px;
+  color: var(--text-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  animation: homeWeatherIn 0.35s ease-out;
+}
+.home-weather:empty { display: none; }
+.home-weather-icon { font-size: 20px; line-height: 1; }
+.home-weather-main { display: flex; align-items: baseline; gap: 5px; }
+.home-weather-temp { font-size: 15px; font-weight: 700; color: var(--text); letter-spacing: -0.3px; }
+.home-weather-sky { font-size: 11px; font-weight: 600; color: var(--text-muted); }
+.home-weather-sep { width: 1px; align-self: stretch; margin: 2px 0; background: var(--border); }
+.home-weather-sub { display: flex; gap: 8px; overflow: hidden; text-overflow: ellipsis; }
+.home-weather-region { color: var(--amber); font-weight: 600; }
+@keyframes homeWeatherIn { from { opacity: 0; transform: translateY(-3px); } to { opacity: 1; transform: none; } }
+@media (max-width: 480px) {
+  .home-weather { gap: 6px; padding: 4px 10px 4px 6px; font-size: 10px; }
+  .home-weather-icon { font-size: 17px; }
+  .home-weather-temp { font-size: 13px; }
+  .home-weather-sub { gap: 6px; }
+}

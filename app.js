@@ -45,7 +45,7 @@ function trackMenuClick(menuName) {
 // ── 패치노트 설정 (여기만 수정하면 됩니다) ──────────────────────────────
 const PATCH_NOTES = {
   version: "v1.1.2",
-  date: "2026-11-08",
+  date: "2026-11-24",
   items: [
     { type: "notice",  text: "이걸 배포한지 벌써 3개월이 됐네요. 사용하면서 불편한게 있으시면 편하게 연락주세요!" },
     { type: "new",     text: "메인화면 7번째 기능 「건축물대장 조회」 추가"},
@@ -5868,7 +5868,7 @@ const yearState = {
     yEraChoice: "after2004",
     yOccupancyType: "neighborhood",
     yAutoCalcAreas: "yes",
-    yPermitdate: "2026-11-08",
+    yPermitdate: "2026-11-24",
     yTotalArea: "1500",
     yAboveGroundFloors: "4",
     yBasementFloors: "0",
@@ -19322,6 +19322,46 @@ function renderHomeMeta() {
     (on ? ' <span class="home-meta-dev">DEV MODE</span>' : '');
 }
 renderHomeMeta();
+
+// 홈 제목 아래 달서구 현재 날씨 (기상청 실황, Worker /weather 경유). 실패하면 직전 값 유지, 처음부터 실패면 줄 숨김.
+(function () {
+  var el = document.getElementById('home-weather');
+  if (!el) return;
+  var lastAt = 0;
+  function load() {
+    if (Date.now() - lastAt < 60 * 1000) return;
+    lastAt = Date.now();
+    fetch(BUILDING_API + '/weather')
+      .then(function (res) { return res.ok ? res.json() : null; })
+      .then(function (w) {
+        if (!w || typeof w.temp !== 'number') return;
+        var hour = parseInt(w.baseTime, 10);
+        var night = !isNaN(hour) && (hour >= 19 || hour < 6);
+        var sky = w.sky || '';
+        var icon = /눈/.test(sky) ? '🌨️' : /비|빗/.test(sky) ? '🌧️' : sky === '흐림' ? '☁️' :
+          sky === '구름많음' ? (night ? '☁️' : '⛅') : (night ? '🌙' : '☀️');
+        function span(cls, text) { var s = document.createElement('span'); s.className = cls; s.textContent = text; return s; }
+        var main = span('home-weather-main', '');
+        main.appendChild(span('home-weather-temp', w.temp.toFixed(1) + '°'));
+        if (sky) main.appendChild(span('home-weather-sky', sky));
+        var sub = span('home-weather-sub', '');
+        sub.appendChild(span('home-weather-region', w.region || '달서구'));
+        if (w.humidity != null) sub.appendChild(span('', '💧' + w.humidity + '%'));
+        if (w.wind != null) sub.appendChild(span('', '🌬️' + w.wind + 'm/s'));
+        if (w.rain1h) sub.appendChild(span('', '☔' + w.rain1h + 'mm'));
+        el.textContent = '';
+        el.appendChild(span('home-weather-icon', icon));
+        el.appendChild(main);
+        el.appendChild(span('home-weather-sep', ''));
+        el.appendChild(sub);
+        el.title = (w.baseTime ? w.baseTime + ' 기준 ' : '') + '기상청 초단기실황';
+      })
+      .catch(function (e) { console.warn('[날씨]', e); });
+  }
+  load();
+  setInterval(load, 10 * 60 * 1000);
+  document.addEventListener('visibilitychange', function () { if (!document.hidden) load(); });
+})();
 
 // ── 개발자 모드 숨겨진 토글 (버전 5번 탭) ────────────────────────────────
 function applyDevMode() {
